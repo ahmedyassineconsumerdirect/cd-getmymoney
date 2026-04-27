@@ -1,0 +1,10 @@
+.worktrees/
+.superpowers/
+.venv/
+__pycache__/
+*.pyc
+data/
+.pytest_cache/
+.DS_Store
+*.duckdb
+*.duckdb.wal
