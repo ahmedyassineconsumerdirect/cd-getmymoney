@@ -1,6 +1,5 @@
 """DuckDB connection lifecycle and schema bootstrap."""
 from pathlib import Path
-from typing import Union
 import duckdb
 
 DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent / "data" / "ca_unclaimed.duckdb"
@@ -39,7 +38,7 @@ CREATE TABLE IF NOT EXISTS ingest_runs (
 """
 
 
-def get_connection(db_path: Union[str, Path] = DEFAULT_DB_PATH) -> duckdb.DuckDBPyConnection:
+def get_connection(db_path: str | Path = DEFAULT_DB_PATH) -> duckdb.DuckDBPyConnection:
     db_path = Path(db_path)
     db_path.parent.mkdir(parents=True, exist_ok=True)
     return duckdb.connect(str(db_path))
