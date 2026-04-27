@@ -58,10 +58,13 @@ def parse_reported_date(value: str | None) -> date | None:
 
 
 def download_tier(tier_filename: str, dest_dir: Path) -> tuple[Path, str]:
-    """Download a tier zip; returns (local_path, etag)."""
+    """Download a tier zip; returns (local_path, etag). Skips download if file exists."""
     url = CA_BASE_URL + tier_filename
     dest_dir.mkdir(parents=True, exist_ok=True)
     local_path = dest_dir / tier_filename
+    if local_path.exists():
+        log.info(f"Using cached {local_path} ({local_path.stat().st_size:,} bytes)")
+        return local_path, ""
     log.info(f"Downloading {url}")
     with httpx.stream("GET", url, follow_redirects=True, timeout=300.0) as resp:
         resp.raise_for_status()
@@ -73,16 +76,30 @@ def download_tier(tier_filename: str, dest_dir: Path) -> tuple[Path, str]:
     return local_path, etag
 
 
-def iter_csv_rows(zip_path: Path) -> Iterable[dict]:
-    """Yield rows from the (single) CSV inside the zip as dicts keyed by header."""
+def iter_csv_rows_from_zip(zip_path: Path) -> Iterable[dict]:
+    """Yield rows from ALL CSVs inside the zip, sorted for determinism."""
     with zipfile.ZipFile(zip_path) as zf:
-        csv_names = [n for n in zf.namelist() if n.lower().endswith(".csv")]
+        csv_names = sorted(n for n in zf.namelist() if n.lower().endswith(".csv"))
         if not csv_names:
             raise RuntimeError(f"No CSV inside {zip_path}")
-        csv_name = csv_names[0]
-        log.info(f"Reading {csv_name} from {zip_path.name}")
-        with zf.open(csv_name) as raw:
-            text = io.TextIOWrapper(raw, encoding="utf-8", errors="replace", newline="")
+        log.info(f"{zip_path.name}: {len(csv_names)} CSV file(s) inside")
+        for csv_name in csv_names:
+            log.info(f"  reading {csv_name}")
+            with zf.open(csv_name) as raw:
+                text = io.TextIOWrapper(raw, encoding="utf-8", errors="replace", newline="")
+                reader = csv.DictReader(text)
+                yield from reader
+
+
+def iter_csv_rows_from_dir(dir_path: Path) -> Iterable[dict]:
+    """Yield rows from ALL CSVs in a directory, sorted for determinism."""
+    csv_paths = sorted(dir_path.glob("*.csv"))
+    if not csv_paths:
+        raise RuntimeError(f"No CSVs in {dir_path}")
+    log.info(f"{dir_path}: {len(csv_paths)} CSV file(s)")
+    for csv_path in csv_paths:
+        log.info(f"  reading {csv_path.name}")
+        with open(csv_path, "r", encoding="utf-8", errors="replace", newline="") as text:
             reader = csv.DictReader(text)
             yield from reader
 
@@ -142,11 +159,18 @@ def map_row(raw: dict) -> dict:
 
 def load_tier_into_duckdb(
     conn: duckdb.DuckDBPyConnection,
-    zip_path: Path,
+    source: Path,
     source_file: str,
     batch_size: int = 50_000,
 ) -> int:
-    """Stream rows from zip_path into ca_unclaimed. Returns rows loaded."""
+    """Stream rows from source (zip file OR directory of CSVs) into ca_unclaimed."""
+    if source.is_dir():
+        row_iter = iter_csv_rows_from_dir(source)
+    elif source.suffix.lower() == ".zip":
+        row_iter = iter_csv_rows_from_zip(source)
+    else:
+        raise ValueError(f"Unsupported source (must be .zip or directory): {source}")
+
     inserted = 0
     next_id_row = conn.execute("SELECT COALESCE(MAX(record_id), 0) FROM ca_unclaimed").fetchone()
     next_id = (next_id_row[0] if next_id_row else 0) + 1
@@ -158,7 +182,7 @@ def load_tier_into_duckdb(
         )
     """
 
-    for raw in iter_csv_rows(zip_path):
+    for raw in row_iter:
         m = map_row(raw)
         batch.append((
             next_id,
