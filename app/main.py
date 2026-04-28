@@ -6,9 +6,18 @@ from fastapi.staticfiles import StaticFiles
 
 from app.db import get_connection, ensure_schema
 from app.match import DemoExactMatcher
+from app import presentation
 
 BASE = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE / "templates"))
+
+# Presentation filters — decode raw NAUPA codes / ALL-CAPS strings into
+# member-facing labels. Used heavily in _results.html.
+templates.env.filters["friendly_property"] = presentation.friendly_property
+templates.env.filters["pretty_holder"] = presentation.pretty_holder
+templates.env.filters["pretty_name"] = presentation.pretty_name
+templates.env.filters["pretty_city"] = presentation.pretty_city
+templates.env.globals["render_icon"] = presentation.render_icon
 
 app = FastAPI(title="CD Funds Finder")
 app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
