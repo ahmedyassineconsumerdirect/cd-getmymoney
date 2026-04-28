@@ -8,3 +8,6 @@ data/
 .DS_Store
 *.duckdb
 *.duckdb.wal
+~$*.pptx
+~$*.docx
+~$*.xlsx
