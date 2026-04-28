@@ -6,7 +6,7 @@ import logging
 import re
 import uuid
 import zipfile
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
@@ -16,7 +16,15 @@ import httpx
 from app.db import ensure_schema, get_connection
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
+
+def _setup_logging() -> None:
+    """Configure root logging only when ingest is invoked as a script."""
+    if not logging.getLogger().handlers:
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s %(levelname)s %(message)s",
+        )
 
 CA_BASE_URL = "https://claimit.ca.gov/upd-property-records/"
 TIERS = [
@@ -209,26 +217,32 @@ def load_tier_into_duckdb(
     return inserted
 
 
-def run(tiers: list[str] = None) -> None:
+def run(tiers: list[str] | None = None) -> None:
     """Entry point: download configured tiers and load them into DuckDB."""
+    _setup_logging()
     tiers = tiers or TIERS
     conn = get_connection()
     ensure_schema(conn)
 
     for tier in tiers:
         run_id = str(uuid.uuid4())
-        started = datetime.utcnow()
+        started = datetime.now(timezone.utc)
         try:
             zip_path, etag = download_tier(tier, DATA_DIR)
             rows = load_tier_into_duckdb(conn, zip_path, source_file=tier)
-            conn.execute("""
-                INSERT INTO ingest_runs VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, [run_id, started, datetime.utcnow(), tier, etag, rows, "completed"])
+            conn.execute(
+                "INSERT INTO ingest_runs VALUES (?, ?, ?, ?, ?, ?, ?)",
+                [run_id, started, datetime.now(timezone.utc), tier, etag, rows, "completed"],
+            )
         except Exception as e:
             log.exception(f"Failed to ingest {tier}")
-            conn.execute("""
-                INSERT INTO ingest_runs VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, [run_id, started, datetime.utcnow(), tier, "", 0, f"failed: {e}"])
+            try:
+                conn.execute(
+                    "INSERT INTO ingest_runs VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    [run_id, started, datetime.now(timezone.utc), tier, "", 0, f"failed: {e}"],
+                )
+            except Exception:
+                log.exception("Also failed to record ingest failure")
             raise
 
     conn.close()
