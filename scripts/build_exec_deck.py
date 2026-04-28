@@ -124,11 +124,9 @@ def add_arrow_right(slide, x, y, w, h, color):
 def add_chrome(slide, n, total, footer_text="myReclaim · Confidential — Consumer Direct, Inc."):
     """Top thin bar + brand wordmark + slide number. Same on every content slide."""
     add_rect(slide, 0, 0, 13.33, 0.06, SC_BLUE)
-    # smartcredit BETA wordmark
-    add_textbox(slide, 0.5, 0.18, 2.0, 0.36,
+    # smartcredit wordmark
+    add_textbox(slide, 0.5, 0.18, 2.5, 0.36,
                 "smartcredit", font_size=16, bold=True, color=SC_INK)
-    add_textbox(slide, 1.85, 0.22, 0.9, 0.3,
-                "BETA", font_size=11, bold=True, color=SC_BLUE)
     # Slide number bottom-right
     add_textbox(slide, 12.4, 7.05, 0.8, 0.3,
                 f"{n} / {total}", font_size=9, color=SC_INK_MUTED, align=PP_ALIGN.RIGHT)
@@ -159,11 +157,9 @@ def slide_01_title(prs, n, total):
     add_rect(s, 0, 0, 13.33, 7.5, WHITE)
     add_rect(s, 0, 0, 13.33, 4.6, SC_BG_SUBTLE)
     add_rect(s, 0, 0, 0.7, 7.5, SC_BLUE)
-    # smartcredit BETA mark
-    add_textbox(s, 1.0, 0.5, 3.0, 0.45,
+    # smartcredit wordmark
+    add_textbox(s, 1.0, 0.5, 4.0, 0.45,
                 "smartcredit", font_size=22, bold=True, color=SC_INK)
-    add_textbox(s, 2.85, 0.55, 1.0, 0.4,
-                "BETA", font_size=14, bold=True, color=SC_BLUE)
     # Eyebrow
     add_textbox(s, 1.0, 1.7, 11, 0.4,
                 "PRODUCT PROPOSAL · MONEY",
@@ -763,7 +759,7 @@ def slide_10_built(prs, n, total):
     add_textbox(s, 0.5, y2, 12.5, 0.4,
                 "WHAT'S RUNNING TODAY", font_size=11, bold=True, color=SC_BLUE)
     items = [
-        "Web app — SmartCredit-themed search UI with the new BETA visual language",
+        "Web app — SmartCredit-themed search UI matching the production visual language",
         "Data — California State Controller bulk CSVs in DuckDB (Snowflake-shaped SQL)",
         "Match service — pluggable Protocol; production swaps in Privacy Master matcher",
         "Admin page — real ingestion stats, file load history, row counts",
