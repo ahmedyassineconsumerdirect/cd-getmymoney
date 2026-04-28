@@ -5,11 +5,12 @@ Local prototype: unclaimed-property search for SmartCredit members against Calif
 ## Quick start
 
 ```bash
-# 1. Install
-python3.13 -m venv .venv && source .venv/bin/activate
+# 1. Install (Python 3.11+ required; 3.13 recommended)
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# 2. Load California data (one-time, takes 20–40 minutes; downloads ~1 GB and indexes ~4M+ rows)
+# 2. Load California data (one-time)
+#    Takes 20–40 minutes; downloads ~1 GB; final DuckDB file is ~3-5 GB after all tiers load
 python -m app.ingest
 
 # 3. Run the app + deck
