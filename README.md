@@ -17,14 +17,14 @@ python -m app.ingest
 python -m app.main
 ```
 
-- App: http://127.0.0.1:8000/
-- Deck: http://127.0.0.1:8000/deck/
-- Admin: http://127.0.0.1:8000/admin
+- App: http://127.0.0.1:8000  (override with `--port 8088` if 8000 is busy)/
+- Deck: http://127.0.0.1:8000  (override with `--port 8088` if 8000 is busy)/deck/
+- Admin: http://127.0.0.1:8000  (override with `--port 8088` if 8000 is busy)/admin
 
 ## Demoing to execs
 
 1. `python -m app.main` (leave it running in another terminal)
-2. Open `http://127.0.0.1:8000/deck/` — full-screen
+2. Open `http://127.0.0.1:8000  (override with `--port 8088` if 8000 is busy)/deck/` — full-screen
 3. Slide 4 (Live Demo) embeds the search UI; type any name and run a search
 4. Press `S` for speaker notes
 
