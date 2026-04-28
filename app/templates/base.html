@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SmartCredit Funds Finder{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#2863C5',  // SmartCredit primary blue
+              dark: '#1f4f9e',
+              light: '#E6EFFA',
+            },
+            cta: {
+              DEFAULT: '#FC4C0B',  // SmartCredit CTA orange
+              dark: '#d83e07',
+            },
+            accent: {
+              DEFAULT: '#FFB352',
+            },
+            ink: {
+              heading: '#23262F',
+              body: '#4A4A4A',
+              muted: '#4A5568',
+            },
+            surface: {
+              DEFAULT: '#FFFFFF',
+              subtle: '#FBFBFB',
+              footer: '#F7FAFC',
+            },
+          },
+          fontFamily: {
+            sans: ['"Open Sans"', 'system-ui', 'sans-serif'],
+          },
+          borderRadius: {
+            card: '20px',
+          },
+          boxShadow: {
+            card: '0px 16px 48px rgba(0, 0, 0, 0.10)',
+          },
+        },
+      },
+    };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-surface font-sans text-ink-body antialiased">
+  <header class="bg-white border-b border-gray-100">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-brand rounded"></div>
+        <span class="font-bold text-xl text-ink-heading">SmartCredit</span>
+      </div>
+      <nav class="flex items-center gap-6 text-sm font-medium">
+        <a href="#" class="text-ink-body hover:text-brand">Dashboard</a>
+        <a href="#" class="text-ink-body hover:text-brand">Score</a>
+        <a href="/" class="text-brand border-b-2 border-brand pb-1">Funds Finder</a>
+        <a href="/admin" class="text-gray-400 hover:text-brand text-xs">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-10">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="max-w-6xl mx-auto px-6 py-8 text-xs text-gray-400 border-t border-gray-200 mt-20">
+    Prototype — data sourced from California State Controller's Office.
+    Claims must be filed at <a href="https://claimit.ca.gov" class="underline">claimit.ca.gov</a>.
+  </footer>
+</body>
+</html>
