@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Admin — Funds Finder{% endblock %}
+{% block content %}
+
+<h1 class="text-2xl font-bold text-ink-heading mb-6">California unclaimed property pipeline</h1>
+
+<div class="bg-white rounded-card shadow-card border border-gray-100 p-6 max-w-3xl">
+  <dl class="grid grid-cols-2 gap-y-3 text-sm">
+    <dt class="text-ink-muted">Records loaded</dt>
+    <dd class="font-mono text-right">{{ "{:,}".format(total_rows) }}</dd>
+
+    <dt class="text-ink-muted">Total value indexed</dt>
+    <dd class="font-mono text-right">${{ "{:,.0f}".format(total_value) }}</dd>
+
+    <dt class="text-ink-muted">Last refresh</dt>
+    <dd class="font-mono text-right">{{ last_refresh or "(never)" }}</dd>
+  </dl>
+</div>
+
+<h2 class="text-lg font-semibold text-ink-heading mt-10 mb-3">Source files</h2>
+<table class="w-full max-w-3xl text-sm bg-white rounded-card border border-gray-100 overflow-hidden">
+  <thead class="bg-gray-50 text-left">
+    <tr>
+      <th class="px-4 py-2">File</th>
+      <th class="px-4 py-2 text-right">Rows</th>
+      <th class="px-4 py-2 text-right">Loaded at</th>
+      <th class="px-4 py-2">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for run in runs %}
+    <tr class="border-t border-gray-100">
+      <td class="px-4 py-2 font-mono text-xs">{{ run.file_name }}</td>
+      <td class="px-4 py-2 text-right font-mono">{{ "{:,}".format(run.rows_loaded or 0) }}</td>
+      <td class="px-4 py-2 text-right text-ink-muted">{{ run.completed_at }}</td>
+      <td class="px-4 py-2">
+        {% if run.status == 'completed' %}
+          <span class="text-green-700">✓ {{ run.status }}</span>
+        {% else %}
+          <span class="text-red-700">✗ {{ run.status }}</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<p class="mt-6 text-xs text-gray-400">
+  Source: <a href="https://www.sco.ca.gov/upd_download_property_records.html" rel="noopener" class="underline">California State Controller's Office</a> · Refresh: weekly (Thursdays)
+</p>
+
+{% endblock %}
