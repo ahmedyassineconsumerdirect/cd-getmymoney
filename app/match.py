@@ -26,6 +26,16 @@ class Match:
     amount_max: float | None
     property_type: str | None
     reported_date: date | None
+    # Display fields populated by the matcher post-construction. They are
+    # the template-ready strings derived from raw columns above. See
+    # docs/handoff/2026-04-28-match-result-row.md §11.
+    icon_key: str = "file-text"
+    property_type_display: str = ""
+    source_display: str = ""
+    address_display: str = ""
+    amount_display: str = ""
+    has_range: bool = False
+    claim_url: str = ""
 
 
 class MatchService(Protocol):
@@ -105,7 +115,22 @@ class DemoFuzzyMatcher:
         params = [full, f"{first_tok}%", *like_params]
         rows = self.conn.execute(sql, params).fetchall()
         # Strip the match_tier column before constructing Match
-        return [Match(*r[:-1]) for r in rows]
+        from app import presentation as _p
+        results: list[Match] = []
+        for r in rows:
+            m = Match(*r[:-1])
+            disp = _p.property_type_display(m.property_type)
+            m.icon_key = disp["icon_key"]
+            m.property_type_display = disp["label"]
+            m.source_display = _p.source_display(m.last_known_state)
+            m.address_display = _p.address_display(
+                m.last_known_address, m.last_known_city,
+                m.last_known_state, m.last_known_zip,
+            )
+            m.amount_display, m.has_range = _p.amount_display(m.amount_min, m.amount_max)
+            m.claim_url = _p.claim_url(m.last_known_state)
+            results.append(m)
+        return results
 
 
 # Backward-compat alias kept so legacy imports don't break.

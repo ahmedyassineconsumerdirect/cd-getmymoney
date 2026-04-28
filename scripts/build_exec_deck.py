@@ -505,6 +505,77 @@ def slide_07_match_reuse(prs, n, total):
                 font_size=14, bold=True, color=SC_INK_MUTED, align=PP_ALIGN.CENTER)
 
 
+def slide_claim_integration(prs, n, total):
+    """4-tier integration plan for actually filing claims with each state."""
+    s = blank_slide(prs)
+    add_chrome(s, n, total)
+    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
+                "FILING THE CLAIM",
+                font_size=12, bold=True, color=SC_BLUE)
+    add_textbox(s, 0.5, 1.25, 12.5, 1.0,
+                "Four ways we can deliver the money — pick the highest tier each state allows.",
+                font_size=22, bold=True, color=SC_INK)
+
+    tiers = [
+        ("TIER 1",
+         "Deep-link to state portal",
+         "Member clicks Claim → state's official site opens with property pre-selected.",
+         ["All states with online claims",
+          "Zero regulatory exposure",
+          "Ships with Sprint 1"],
+         SC_GREEN, "SHIP NOW"),
+        ("TIER 2",
+         "Browser-extension form-fill",
+         "A SmartCredit extension auto-fills the state's claim form from the member's profile. Member still clicks Submit.",
+         ["CA · TX · NY · IL · OH · PA · NJ",
+          "FL excluded (ToS forbids automation)",
+          "Member-driven, no auto-submit"],
+         SC_BLUE, "SPRINT 4-5"),
+        ("TIER 3",
+         "We file the claim for them",
+         "SmartCredit registers as a claimant representative and submits paperwork on the member's behalf — high-value claims only.",
+         ["GA · OH · MI (registered finder regimes)",
+          "Background-check + legal-review gated",
+          "$500+ records only initially"],
+         SC_AMBER, "Q4 2026"),
+        ("TIER 4",
+         "Direct API submission",
+         "If a state ever exposes a claim-submission API, we wire it up.",
+         ["No state offers this today",
+          "Watch NAUPA / Kelmar evolution",
+          "Opportunistic — not on roadmap"],
+         SC_INK_MUTED, "WATCH"),
+    ]
+    y = 2.5
+    row_h = 1.05
+    for tier, title, desc, bullets, color, badge in tiers:
+        # row card
+        add_round_rect(s, 0.5, y, 12.3, row_h - 0.08, WHITE, line=SC_BORDER, radius=0.03)
+        add_rect(s, 0.5, y, 0.22, row_h - 0.08, color)
+        # tier label
+        add_textbox(s, 0.85, y + 0.1, 1.4, 0.32,
+                    tier, font_size=11, bold=True, color=color)
+        add_textbox(s, 0.85, y + 0.4, 2.6, 0.42,
+                    title, font_size=14, bold=True, color=SC_INK)
+        # description
+        add_textbox(s, 3.55, y + 0.13, 5.8, 0.85,
+                    desc, font_size=11, color=SC_INK_BODY)
+        # bullets (right block)
+        bullets_text = "  ·  ".join(bullets)
+        add_textbox(s, 3.55, y + 0.65, 5.8, 0.4,
+                    bullets_text, font_size=9, color=SC_INK_MUTED)
+        # status badge
+        add_pill(s, 9.6, y + 0.32, 1.7, 0.4,
+                 badge, color, WHITE, font_size=10)
+        y += row_h
+
+    # Bottom callout
+    add_filled = add_round_rect(s, 0.5, 6.85, 12.3, 0.45, SC_BLUE, radius=0.1)
+    add_textbox(s, 0.7, 6.9, 12, 0.4,
+                "Tier 2 is the breakthrough — \"we found money\" → \"we filled the form\" is what nobody else can ship.",
+                font_size=11, bold=True, color=WHITE)
+
+
 def slide_08_roadmap(prs, n, total):
     s = blank_slide(prs)
     add_chrome(s, n, total)
@@ -737,6 +808,7 @@ def main():
         slide_05_data_strategy,
         slide_06_architecture,
         slide_07_match_reuse,
+        slide_claim_integration,   # NEW: 4-tier claim-filing strategy
         slide_08_roadmap,
         slide_09_compliance,
         slide_10_built,

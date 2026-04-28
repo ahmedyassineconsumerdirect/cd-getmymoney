@@ -198,3 +198,166 @@ def render_icon(icon_key: str, color: str = "blue") -> str:
     bg = TINT_BG.get(color, "bg-brand-light")
     fg = TINT_FG.get(color, "text-brand")
     return f'<div class="w-12 h-12 rounded-full {bg} {fg} flex items-center justify-center shrink-0">{svg}</div>'
+
+
+# =========================================================================
+# Handoff-spec helpers (docs/handoff/2026-04-28-match-result-row.md)
+# =========================================================================
+
+# Maps NAUPA-ish code prefix → handoff-spec icon key (file-text default).
+# Spec §3.2 defines these icon files in app/templates/icons/.
+_SPEC_ICON_BY_PREFIX: dict[str, str] = {
+    "MS": "credit-card",   # default for MS family — overridden per code below
+    "UT": "rotate-ccw",    # utility refunds
+    "AC": "wallet",
+    "CK": "wallet",
+    "SV": "wallet",
+    "IN": "shield",
+    "SC": "credit-card",
+    "TR": "shield",
+    "WG": "briefcase",
+    "ED": "shield",
+}
+_SPEC_ICON_BY_CODE: dict[str, str] = {
+    "MS01": "briefcase",   # wages/payroll
+    "MS02": "briefcase",
+    "MS03": "shield",      # pension/retirement
+    "MS09": "credit-card", # credit balance / accts receivable
+}
+
+
+def property_type_display(value: str | None) -> dict:
+    """Decode a CA SCO property_type into {icon_key, label}.
+
+    Returns the handoff-spec icon key (one of credit-card / briefcase /
+    wallet / rotate-ccw / shield / file-text) plus a friendly label.
+    """
+    if not value:
+        return {"icon_key": "file-text", "label": "Unclaimed property"}
+
+    fp = friendly_property(value)
+    # Find icon key — the existing CATEGORY_BY_CODE used different keys
+    # ("wallet", "briefcase", etc.); spec's set is a superset / aliasing.
+    m = re.match(r"^([A-Z]{2})(\d{1,2})?", value.strip())
+    if m:
+        prefix = m.group(1)
+        code = (prefix + (m.group(2) or "")).upper()
+        if code in _SPEC_ICON_BY_CODE:
+            icon_key = _SPEC_ICON_BY_CODE[code]
+        elif prefix in _SPEC_ICON_BY_PREFIX:
+            icon_key = _SPEC_ICON_BY_PREFIX[prefix]
+        else:
+            icon_key = "file-text"
+    else:
+        icon_key = "file-text"
+    return {"icon_key": icon_key, "label": fp["label"]}
+
+
+# Source display per state — handoff §6.3 says
+# "{State name} State Records" with the shield as the trust mark.
+_STATE_NAMES: dict[str, str] = {
+    "CA": "California",
+    "TX": "Texas",
+    "NY": "New York",
+    "FL": "Florida",
+    "GA": "Georgia",
+    "IL": "Illinois",
+    "OH": "Ohio",
+    "PA": "Pennsylvania",
+    "NJ": "New Jersey",
+    "MA": "Massachusetts",
+    "AZ": "Arizona",
+    "MI": "Michigan",
+    "MD": "Maryland",
+    "TN": "Tennessee",
+    "VA": "Virginia",
+    "NC": "North Carolina",
+    "SC": "South Carolina",
+    "AL": "Alabama",
+    "LA": "Louisiana",
+    "MS": "Mississippi",
+    "MO": "Missouri",
+    "WA": "Washington",
+}
+
+
+def source_display(state_code: str | None) -> str:
+    """Per handoff §6.3 — formats as '{State} State Records'."""
+    code = (state_code or "CA").upper()
+    name = _STATE_NAMES.get(code, code)
+    return f"{name} State Records"
+
+
+# Per-state claim portal URLs. The first version uses landing pages
+# only; future iteration can add property-detail deep links per state.
+_STATE_CLAIM_URLS: dict[str, str] = {
+    "CA": "https://claimit.ca.gov/",
+    "TX": "https://www.claimittexas.gov/",
+    "NY": "https://www.osc.ny.gov/unclaimed-funds",
+    "FL": "https://www.fltreasurehunt.gov/",
+    "GA": "https://gaclaims.unclaimedproperty.com/",
+    "IL": "https://icash.illinoistreasurer.gov/",
+    "OH": "https://unclaimedfunds.ohio.gov/",
+    "PA": "https://unclaimedproperty.patreasury.gov/",
+    "NJ": "https://unclaimedfunds.nj.gov/",
+    "AZ": "https://azdor.gov/unclaimed-property",
+    "MI": "https://unclaimedproperty.michigan.gov/",
+    "MD": "https://www.claimitmd.gov/",
+    "TN": "https://unclaimedproperty.tn.gov/",
+    "VA": "https://www.vamoneysearch.gov/",
+    "NC": "https://www.nccash.com/",
+    "SC": "https://southcarolina.findyourunclaimedproperty.com/",
+    "AL": "https://treasury.alabama.gov/unclaimed-property/",
+    "LA": "https://unclaimedproperty.la.gov/",
+    "MS": "https://treasury.ms.gov/for-governments/unclaimed-property/",
+    "MO": "https://treasurer.mo.gov/UCP/",
+    "WA": "https://ucp.dor.wa.gov/",
+    "MA": "https://findmassmoney.com/",
+}
+
+
+def claim_url(state_code: str | None, property_id: str | None = None) -> str:
+    """Return the official state portal URL for filing a claim.
+
+    The handoff spec §4.2 calls this a "deep-link" — for the prototype
+    we link to each state's claim landing page. Property-detail deep
+    links (where supported) are a follow-up.
+    """
+    code = (state_code or "CA").upper()
+    return _STATE_CLAIM_URLS.get(code, "https://unclaimed.org/search/")
+
+
+def amount_display(amount_min: float | None, amount_max: float | None) -> tuple[str, bool]:
+    """Return (display_str, has_range) per handoff §3.6."""
+    lo = amount_min if amount_min is not None else None
+    hi = amount_max if amount_max is not None else None
+    if lo is None and hi is None:
+        return ("Undisclosed", False)
+    if lo is None:
+        return (f"${hi:,.2f}", False)
+    if hi is None:
+        return (f"${lo:,.2f}", False)
+    if abs(lo - hi) < 0.005:
+        return (f"${hi:,.2f}", False)
+    return (f"${lo:,.2f}–${hi:,.2f}", True)
+
+
+def address_display(addr: str | None, city: str | None,
+                    state: str | None, zip_: str | None) -> str:
+    """Compose a one-line address string with proper case.
+
+    Returns empty string if all parts missing — caller hides the row.
+    """
+    parts: list[str] = []
+    if addr:
+        parts.append(_title_case_keep_short(addr))
+    locality_bits: list[str] = []
+    if city:
+        locality_bits.append(_title_case_keep_short(city))
+    if state:
+        locality_bits.append(state.upper())
+    if zip_:
+        locality_bits.append(zip_.strip())
+    if locality_bits:
+        parts.append(" ".join(locality_bits) if state else ", ".join(locality_bits))
+    return ", ".join(parts) if parts else ""
