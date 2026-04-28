@@ -13,6 +13,9 @@ templates = Jinja2Templates(directory=str(BASE / "templates"))
 app = FastAPI(title="CD Funds Finder")
 app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
 
+DECK_DIR = BASE.parent / "deck"
+app.mount("/deck", StaticFiles(directory=str(DECK_DIR), html=True), name="deck")
+
 
 _conn = None
 def _get_match_service():

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SmartCredit Funds Finder — Executive Pitch</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+  <style>
+    :root {
+      --r-main-color: #23262F;
+      --r-heading-color: #23262F;
+      --r-link-color: #2863C5;
+      --r-main-font: 'Open Sans', system-ui, sans-serif;
+      --r-heading-font: 'Open Sans', system-ui, sans-serif;
+    }
+    .reveal h1, .reveal h2, .reveal h3 { font-weight: 700; }
+    .reveal .big-number { font-size: 7rem; font-weight: 800; color: #2863C5; }
+    .reveal .accent { color: #FC4C0B; }
+    .reveal .brand { color: #2863C5; }
+    .reveal .muted { color: #64748B; }
+    .reveal table { width: 100%; font-size: 0.7em; }
+    .reveal table th, .reveal table td { padding: 8px 12px; border-bottom: 1px solid #E2E8F0; text-align: left; }
+    .reveal .demo-frame { width: 100%; height: 70vh; border: 1px solid #E2E8F0; border-radius: 12px; }
+    .reveal blockquote.callout { border-left: 4px solid #2863C5; padding: 0.5em 1em; background: #F1F5F9; font-style: normal; }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="reveal"><div class="slides">
+
+  <!-- 1. Title -->
+  <section>
+    <h1>Found Funds for SmartCredit Members</h1>
+    <p class="muted">A new free feature that finds money the state owes them.</p>
+    <aside class="notes">Open with a hook: "On average, every American household has $200+ they don't know about. Today I'll show you why we're uniquely positioned to give it back to them — and what it costs us to build."</aside>
+  </section>
+
+  <!-- 2. The problem -->
+  <section>
+    <h2>The problem</h2>
+    <p class="big-number">$70B</p>
+    <p>in unclaimed property sits with U.S. states.</p>
+    <p class="muted">The average American household has ~$200 in unclaimed funds they don't know about. SmartCredit members trust us with their financial picture — they expect us to find this.</p>
+    <aside class="notes">$70B is the official NAUPA-cited figure. Average $200 per household is a conservative estimate from state-level data.</aside>
+  </section>
+
+  <!-- 3. The opportunity -->
+  <section>
+    <h2>What's available today</h2>
+    <table>
+      <thead><tr><th></th><th>MissingMoney.com</th><th>BlueNavy</th><th class="brand">SmartCredit (us)</th></tr></thead>
+      <tbody>
+        <tr><td>Coverage</td><td>49 states (search only)</td><td>2 states</td><td class="brand">All 50 + federal (planned)</td></tr>
+        <tr><td>Knows the user?</td><td>No</td><td>No (skip-trace required)</td><td class="brand">Yes — they're members</td></tr>
+        <tr><td>User effort</td><td>Manual search</td><td>Sales outreach</td><td class="brand">Automatic</td></tr>
+        <tr><td>Cost to user</td><td>Free</td><td>10–25% of recovered</td><td class="brand">Free</td></tr>
+      </tbody>
+    </table>
+    <aside class="notes">We're not competing with MissingMoney's coverage on day 1; we're competing on user experience: MissingMoney makes you search, BlueNavy charges 10-25%, we just tell our members.</aside>
+  </section>
+
+  <!-- 4. Live demo -->
+  <section>
+    <h2>Live demo</h2>
+    <iframe class="demo-frame" src="http://127.0.0.1:8000/"></iframe>
+    <p class="muted" style="font-size:0.6em">Real California data — millions of records loaded from sco.ca.gov.</p>
+    <aside class="notes">Walk through: enter a name, show the result list, click a claim link to claimit.ca.gov. If you have time, open /admin to show real ingestion stats.</aside>
+  </section>
+
+  <!-- 5. How it works -->
+  <section>
+    <h2>How it works</h2>
+    <pre style="background:#F8FAFC; padding:1em; border-radius:8px; font-size:0.8em; line-height:1.6">
+State data sources (CA, TX, NY, FL, …)
+        │
+        ▼
+   Snowflake ingestion (weekly)
+        │
+        ▼
+   Match against SmartCredit member roster
+        │
+        ▼
+   Notify member in dashboard
+        │
+        ▼
+   Deep-link to state claim portal
+    </pre>
+    <p class="muted">We don't handle claims — the state does. We surface the match.</p>
+    <aside class="notes">Critical line: "we don't handle claims, the state does." That's what keeps us out of finder-service regulation.</aside>
+  </section>
+
+  <!-- 6. Why hard for others -->
+  <section>
+    <h2>Why this is hard for everyone else</h2>
+    <blockquote class="callout">There is no MissingMoney API.</blockquote>
+    <ul>
+      <li>NAUPA is a government association, not a data vendor</li>
+      <li>Kelmar Associates runs MissingMoney for the states — they don't license the data</li>
+      <li>Only path: ingest state-by-state. ~50 distinct integrations.</li>
+    </ul>
+    <p class="brand">We already have the warehouse (Snowflake). We already have the user (members). The infrastructure cost is incremental, not greenfield.</p>
+    <aside class="notes">This is the moat slide. Anyone could try to build this; we're advantaged because we already have the two hardest parts.</aside>
+  </section>
+
+  <!-- 7. Compliance moat -->
+  <section>
+    <h2>Compliance posture</h2>
+    <ul style="font-size: 0.85em">
+      <li>✓ <strong>FCRA-safe</strong> — unclaimed property search is not a credit-reporting activity</li>
+      <li>✓ <strong>No finder license needed</strong> — we don't take a fee on claims (~30 states cap finder fees at 10%)</li>
+      <li>✓ <strong>No new PII surface</strong> — reuses SmartCredit member identity controls</li>
+      <li>✓ <strong>State data ToS</strong> — bulk file is publicly published by sco.ca.gov; we link claims back to the state portal</li>
+    </ul>
+    <p class="brand" style="margin-top: 1em">Free + deep-link = no new regulatory exposure.</p>
+    <aside class="notes">Pre-empt the legal question. Free + deep-link is the structural choice that keeps this clean.</aside>
+  </section>
+
+  <!-- 8. Roadmap -->
+  <section>
+    <h2>Roadmap</h2>
+    <table>
+      <tbody>
+        <tr><td><strong>Q3 2026</strong></td><td>CA + TX live (~25% of US population)</td></tr>
+        <tr><td><strong>Q4 2026</strong></td><td>Top 10 states by population (~70% coverage)</td></tr>
+        <tr><td><strong>Q1 2027</strong></td><td>Federal sources: Treasury, PBGC, FDIC, HUD, DOL</td></tr>
+        <tr><td><strong>Q2 2027</strong></td><td>50-state coverage + member notification engine</td></tr>
+      </tbody>
+    </table>
+    <aside class="notes">Each milestone gates the next. Q3 proves the pipeline; Q4 scales it; 2027 is breadth + activation.</aside>
+  </section>
+
+  <!-- 9. The ask -->
+  <section>
+    <h2>The ask</h2>
+    <p style="font-size:1.2em; margin-bottom:1em">
+      <span class="brand">1 data engineer</span> + <span class="brand">1 product engineer</span> · <span class="brand">~6 months to first live state</span>
+    </p>
+    <p><strong>Outcomes</strong></p>
+    <ul>
+      <li>A feature unique in the credit-monitoring market</li>
+      <li>Measurable retention lift (every found-money notification is a "wow" moment)</li>
+      <li>A reason for non-members to sign up</li>
+    </ul>
+    <aside class="notes">Land on the ask. Be specific: 2 engineers, 6 months, this is what we get. Don't end on hand-waving.</aside>
+  </section>
+
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    transition: 'slide',
+    plugins: [ RevealNotes ],
+  });
+</script>
+</body>
+</html>
