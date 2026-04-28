@@ -1,20 +1,57 @@
 # CD Funds Finder
 
-Local prototype: unclaimed-property search for SmartCredit members against California State Controller data + a 9-slide executive deck.
+Local prototype: unclaimed-property search for SmartCredit members against California State Controller data, plus a 9-slide reveal.js executive deck with embedded live demo.
 
 ## Quick start
 
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
+# 1. Install
+python3.13 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-python -m app.ingest          # one-time, ~2-5 min
-python -m app.main            # serves at http://127.0.0.1:8000
+
+# 2. Load California data (one-time, takes 20–40 minutes; downloads ~1 GB and indexes ~4M+ rows)
+python -m app.ingest
+
+# 3. Run the app + deck
+python -m app.main
 ```
 
-- App: http://127.0.0.1:8000
-- Deck: http://127.0.0.1:8000/deck
+- App: http://127.0.0.1:8000/
+- Deck: http://127.0.0.1:8000/deck/
 - Admin: http://127.0.0.1:8000/admin
+
+## Demoing to execs
+
+1. `python -m app.main` (leave it running in another terminal)
+2. Open `http://127.0.0.1:8000/deck/` — full-screen
+3. Slide 4 (Live Demo) embeds the search UI; type any name and run a search
+4. Press `S` for speaker notes
+
+## Refresh data
+
+```bash
+python scripts/refresh_data.py
+# Or, just one tier:
+python scripts/refresh_data.py --tier 04_From_500_To_Beyond.zip
+```
+
+## Architecture
+
+- **App**: FastAPI + Jinja2 + htmx + Tailwind (Play CDN)
+- **Data**: DuckDB local file at `data/ca_unclaimed.duckdb` (Snowflake-shaped SQL)
+- **Source**: California SCO bulk CSVs from <https://www.sco.ca.gov/upd_download_property_records.html>
+- **Match**: `app/match.py` exposes a `MatchService` interface. Production swaps in Consumer Direct's existing matcher.
 
 ## Design
 
-See [`docs/superpowers/specs/2026-04-27-cd-funds-finder-design.md`](docs/superpowers/specs/2026-04-27-cd-funds-finder-design.md).
+[`docs/superpowers/specs/2026-04-27-cd-funds-finder-design.md`](docs/superpowers/specs/2026-04-27-cd-funds-finder-design.md)
+
+## Tests
+
+```bash
+pytest -v
+```
+
+## License
+
+Internal — Consumer Direct.
