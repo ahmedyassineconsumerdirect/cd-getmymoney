@@ -1,45 +1,55 @@
 {% extends "base.html" %}
 {% block content %}
 
-<section class="text-center py-10">
-  <h1 class="text-4xl font-bold text-ink-heading">Find money the state owes you.</h1>
-  <p class="mt-3 text-lg text-ink-muted max-w-2xl mx-auto">
-    We check California's unclaimed property database for funds in your name.
-    Free. Takes 10 seconds.
+<section class="mb-8">
+  <p class="text-xs font-bold text-brand tracking-widest uppercase mb-2">Money · Funds Finder</p>
+  <h1 class="text-4xl md:text-5xl font-extrabold text-ink-heading leading-tight">
+    Find money reported in your name.
+  </h1>
+  <p class="mt-3 text-lg text-ink-muted max-w-2xl">
+    We check unclaimed-property records across U.S. states for funds reported in your name. Free for SmartCredit members. Every field is optional — enter only what you know.
   </p>
 </section>
 
-<section class="bg-white rounded-card shadow-card border border-gray-100 p-8 max-w-2xl mx-auto">
+<section class="bg-white rounded-card shadow-card border border-gray-100 p-6 mb-8">
   <form
     hx-post="/search"
     hx-target="#results"
     hx-swap="innerHTML"
+    hx-indicator="#search-spinner"
     class="grid grid-cols-2 gap-4"
   >
     <div>
-      <label class="block text-sm font-medium text-ink-heading mb-1">First name</label>
-      <input name="first_name" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent">
+      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1">First name</label>
+      <input name="first_name" placeholder="Optional" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent">
     </div>
     <div>
-      <label class="block text-sm font-medium text-ink-heading mb-1">Last name</label>
-      <input name="last_name" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent">
+      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1">Last name</label>
+      <input name="last_name" placeholder="Optional" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent">
     </div>
     <div>
-      <label class="block text-sm font-medium text-ink-heading mb-1">Date of birth</label>
+      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1">Date of birth</label>
       <input name="dob" type="date" class="w-full border border-gray-300 rounded-md px-3 py-2">
     </div>
     <div>
-      <label class="block text-sm font-medium text-ink-heading mb-1">Current ZIP</label>
-      <input name="zip" class="w-full border border-gray-300 rounded-md px-3 py-2">
+      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1">Current ZIP</label>
+      <input name="zip" placeholder="Optional" class="w-full border border-gray-300 rounded-md px-3 py-2">
     </div>
-    <div class="col-span-2">
-      <button type="submit" class="w-full bg-cta text-white font-semibold py-3 rounded-full hover:bg-cta-dark transition">
-        Search California records
+    <div class="col-span-2 flex items-center gap-3">
+      <button type="submit" class="bg-cta text-white font-semibold py-2.5 px-8 rounded-pill hover:bg-cta-dark transition">
+        Search records
       </button>
+      <span id="search-spinner" class="htmx-indicator text-sm text-ink-muted">Searching…</span>
     </div>
   </form>
 </section>
 
-<section id="results" class="mt-10"></section>
+<style>
+  .htmx-indicator { opacity: 0; transition: opacity 200ms ease-in; }
+  .htmx-request .htmx-indicator { opacity: 1; }
+  .htmx-request.htmx-indicator { opacity: 1; }
+</style>
+
+<section id="results"></section>
 
 {% endblock %}

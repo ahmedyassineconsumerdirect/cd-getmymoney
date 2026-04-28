@@ -34,17 +34,23 @@ def home(request: Request):
 @app.post("/search", response_class=HTMLResponse)
 def search(
     request: Request,
-    first_name: str = Form(...),
-    last_name: str = Form(...),
+    first_name: str = Form(""),
+    last_name: str = Form(""),
     dob: str = Form(""),
     zip: str = Form(""),
 ):
     matcher = _get_match_service()
     matches = matcher.find_matches(first_name=first_name, last_name=last_name)
     total = sum((m.amount_max or 0) for m in matches)
+    has_input = any(v.strip() for v in (first_name, last_name, dob, zip))
     return templates.TemplateResponse(
         "_results.html",
-        {"request": request, "matches": matches, "total": total},
+        {
+            "request": request,
+            "matches": matches,
+            "total": total,
+            "has_input": has_input,
+        },
     )
 
 
