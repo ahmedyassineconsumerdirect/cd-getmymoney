@@ -1,45 +1,90 @@
 {% extends "base.html" %}
 {% block content %}
 
-<section class="mb-8">
-  <p class="text-xs font-bold text-brand tracking-widest uppercase mb-2">Money · Funds Finder</p>
-  <h1 class="text-4xl md:text-5xl font-extrabold text-ink-heading leading-tight">
-    Find money reported in your name.
-  </h1>
-  <p class="mt-3 text-lg text-ink-muted max-w-2xl">
-    We check unclaimed-property records across U.S. states for funds reported in your name. Free for SmartCredit members. Every field is optional — enter only what you know.
-  </p>
+<section class="relative mb-8 overflow-hidden">
+  <div class="grid md:grid-cols-5 gap-8 items-center">
+    <div class="md:col-span-3">
+      <p class="text-xs font-bold text-brand tracking-widest uppercase mb-3">Money · Funds Finder</p>
+      <h1 class="text-5xl md:text-6xl font-extrabold text-ink-heading leading-[1.05] tracking-tight">
+        You may already be<br>
+        <span class="text-brand">owed money.</span>
+      </h1>
+      <p class="mt-5 text-lg text-ink-body max-w-xl leading-relaxed">
+        Banks, employers, and insurers report unclaimed funds to state treasuries every year. We cross-check those records against your SmartCredit identity and surface anything in your name — automatically, free.
+      </p>
+      <div class="mt-6 flex items-center gap-6">
+        <div>
+          <div class="text-3xl font-extrabold text-ink-heading">$11B+</div>
+          <div class="text-xs text-ink-muted uppercase tracking-wide">indexed in our search</div>
+        </div>
+        <div class="h-10 w-px bg-gray-200"></div>
+        <div>
+          <div class="text-3xl font-extrabold text-ink-heading">38M+</div>
+          <div class="text-xs text-ink-muted uppercase tracking-wide">records scanned</div>
+        </div>
+        <div class="h-10 w-px bg-gray-200"></div>
+        <div>
+          <div class="text-3xl font-extrabold text-cta">~$200</div>
+          <div class="text-xs text-ink-muted uppercase tracking-wide">avg. household balance</div>
+        </div>
+      </div>
+    </div>
+    <div class="md:col-span-2 flex justify-center">
+      <div class="relative">
+        <div class="absolute -inset-4 bg-brand-light rounded-full blur-2xl opacity-70"></div>
+        <div class="relative bg-white rounded-card shadow-card border border-gray-100 p-6 w-72">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-2 h-2 rounded-full bg-cta"></div>
+            <span class="text-xs font-bold text-cta uppercase tracking-widest">Match found</span>
+          </div>
+          <div class="text-3xl font-extrabold text-ink-heading">$83.19</div>
+          <div class="text-xs uppercase tracking-wide text-ink-muted mt-1">CITIBANK N.A.</div>
+          <div class="text-xs text-ink-muted mt-2">Credit balance · IRVINE, CA</div>
+          <div class="mt-4">
+            <span class="inline-block bg-cta text-white text-xs font-bold px-4 py-1.5 rounded-pill">Claim →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="bg-white rounded-card shadow-card border border-gray-100 p-6 mb-8">
+<section class="bg-white rounded-card shadow-card border border-gray-100 p-7 mb-8">
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h2 class="text-xl font-extrabold text-ink-heading">Run your search</h2>
+      <p class="text-sm text-ink-muted mt-1">A name is the fastest way in. Add details for sharper matches.</p>
+    </div>
+  </div>
   <form
     hx-post="/search"
     hx-target="#results"
     hx-swap="innerHTML"
     hx-indicator="#search-spinner"
-    class="grid grid-cols-2 gap-4"
+    class="grid grid-cols-2 gap-5"
   >
     <div>
-      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1">First name</label>
-      <input name="first_name" placeholder="Optional" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent">
+      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1.5">First name</label>
+      <input name="first_name" placeholder="e.g. Ahmed" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent">
     </div>
     <div>
-      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1">Last name</label>
-      <input name="last_name" placeholder="Optional" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent">
+      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1.5">Last name</label>
+      <input name="last_name" placeholder="e.g. Yassine" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent">
     </div>
     <div>
-      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1">Date of birth</label>
-      <input name="dob" type="date" class="w-full border border-gray-300 rounded-md px-3 py-2">
+      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1.5">Date of birth</label>
+      <input name="dob" type="date" class="w-full border border-gray-300 rounded-md px-3 py-2.5">
     </div>
     <div>
-      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1">Current ZIP</label>
-      <input name="zip" placeholder="Optional" class="w-full border border-gray-300 rounded-md px-3 py-2">
+      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1.5">Current ZIP</label>
+      <input name="zip" placeholder="e.g. 92604" class="w-full border border-gray-300 rounded-md px-3 py-2.5">
     </div>
-    <div class="col-span-2 flex items-center gap-3">
-      <button type="submit" class="bg-cta text-white font-semibold py-2.5 px-8 rounded-pill hover:bg-cta-dark transition">
-        Search records
+    <div class="col-span-2 flex items-center gap-4 pt-2">
+      <button type="submit" class="bg-cta text-white font-semibold py-3 px-9 rounded-pill hover:bg-cta-dark transition shadow-sm">
+        Search records →
       </button>
-      <span id="search-spinner" class="htmx-indicator text-sm text-ink-muted">Searching…</span>
+      <span id="search-spinner" class="htmx-indicator text-sm text-ink-muted">Searching 38M+ records…</span>
+      <span class="ml-auto text-xs text-ink-muted">Takes about 1 second.</span>
     </div>
   </form>
 </section>
