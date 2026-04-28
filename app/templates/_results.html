@@ -1,0 +1,43 @@
+{% if matches %}
+  <div class="text-center mb-6">
+    <p class="text-2xl font-bold text-ink-heading">
+      We found {{ matches|length }} match{{ "es" if matches|length != 1 else "" }}
+      totaling ${{ "{:,.2f}".format(total) }} in your name.
+    </p>
+    <p class="text-sm text-ink-muted mt-1">All amounts are estimates from the California State Controller.</p>
+  </div>
+
+  <div class="space-y-3 max-w-3xl mx-auto">
+    {% for m in matches %}
+    <div class="bg-white rounded-card shadow-card border border-gray-100 p-5 flex items-start justify-between">
+      <div class="flex-1">
+        <div class="flex items-baseline gap-3">
+          <span class="text-2xl font-bold text-brand">${{ "{:,.2f}".format(m.amount_max or 0) }}</span>
+          <span class="text-sm text-ink-muted uppercase tracking-wide">{{ m.holder_name or "Unknown holder" }}</span>
+        </div>
+        <p class="mt-1 text-sm text-ink-body">
+          <strong>{{ m.property_type or "Unclaimed property" }}</strong>
+          {% if m.reported_date %} · Reported {{ m.reported_date }}{% endif %}
+        </p>
+        {% if m.last_known_address %}
+        <p class="mt-1 text-xs text-ink-muted">
+          Last known address: {{ m.last_known_address }}{% if m.last_known_city %}, {{ m.last_known_city }}{% endif %}{% if m.last_known_state %} {{ m.last_known_state }}{% endif %}{% if m.last_known_zip %} {{ m.last_known_zip }}{% endif %}
+        </p>
+        {% endif %}
+      </div>
+      <a href="https://claimit.ca.gov" target="_blank" class="ml-4 text-sm bg-cta text-white px-4 py-2 rounded-full font-semibold hover:bg-cta-dark whitespace-nowrap">
+        Claim at claimit.ca.gov →
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-center py-10 max-w-xl mx-auto">
+    <p class="text-lg font-semibold text-ink-heading">No matches found in California.</p>
+    <p class="mt-2 text-ink-body">
+      We're expanding to all 50 states soon — we'll notify you when there's a match in another state.
+      In the meantime, you can also search directly at
+      <a href="https://claimit.ca.gov" class="text-brand underline">claimit.ca.gov</a>.
+    </p>
+  </div>
+{% endif %}
