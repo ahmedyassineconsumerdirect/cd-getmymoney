@@ -45,31 +45,48 @@ def search(
     )
 
 
+def _fmt_dt(dt) -> str | None:
+    if dt is None:
+        return None
+    try:
+        return dt.strftime("%Y-%m-%d %H:%M UTC")
+    except AttributeError:
+        return str(dt)
+
+
 @app.get("/admin", response_class=HTMLResponse)
 def admin(request: Request):
     conn = get_connection()
-    ensure_schema(conn)
-    total_rows = conn.execute("SELECT COUNT(*) FROM ca_unclaimed").fetchone()[0]
-    total_value_row = conn.execute(
-        "SELECT COALESCE(SUM(amount_max), 0) FROM ca_unclaimed"
-    ).fetchone()
-    total_value = float(total_value_row[0]) if total_value_row else 0.0
-    last_refresh_row = conn.execute(
-        "SELECT MAX(completed_at) FROM ingest_runs WHERE status = 'completed'"
-    ).fetchone()
-    last_refresh = last_refresh_row[0] if last_refresh_row else None
-    runs = conn.execute(
-        """
-        SELECT file_name, rows_loaded, completed_at, status
-        FROM ingest_runs
-        ORDER BY started_at DESC
-        LIMIT 20
-        """
-    ).fetchall()
-    runs_dicts = [
-        {"file_name": r[0], "rows_loaded": r[1], "completed_at": r[2], "status": r[3]}
-        for r in runs
-    ]
+    try:
+        ensure_schema(conn)
+        total_rows = conn.execute("SELECT COUNT(*) FROM ca_unclaimed").fetchone()[0]
+        total_value_row = conn.execute(
+            "SELECT COALESCE(SUM(amount_max), 0) FROM ca_unclaimed"
+        ).fetchone()
+        total_value = float(total_value_row[0]) if total_value_row else 0.0
+        last_refresh_row = conn.execute(
+            "SELECT MAX(completed_at) FROM ingest_runs WHERE status = 'completed'"
+        ).fetchone()
+        last_refresh = _fmt_dt(last_refresh_row[0]) if last_refresh_row else None
+        runs = conn.execute(
+            """
+            SELECT file_name, rows_loaded, completed_at, status
+            FROM ingest_runs
+            ORDER BY started_at DESC
+            LIMIT 20
+            """
+        ).fetchall()
+        runs_dicts = [
+            {
+                "file_name": r[0],
+                "rows_loaded": r[1],
+                "completed_at": _fmt_dt(r[2]),
+                "status": r[3],
+            }
+            for r in runs
+        ]
+    finally:
+        conn.close()
     return templates.TemplateResponse(
         "admin.html",
         {
