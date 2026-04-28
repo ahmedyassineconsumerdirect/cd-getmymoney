@@ -43,6 +43,7 @@ class MatchService(Protocol):
         self,
         first_name: str = "",
         last_name: str = "",
+        state: str | None = None,
         dob: date | None = None,
         addresses: list[str] | None = None,
     ) -> list[Match]: ...
@@ -79,6 +80,7 @@ class DemoFuzzyMatcher:
         self,
         first_name: str = "",
         last_name: str = "",
+        state: str | None = None,
         dob: date | None = None,
         addresses: list[str] | None = None,
     ) -> list[Match]:
@@ -89,6 +91,13 @@ class DemoFuzzyMatcher:
         # Each token must appear as a substring (case-insensitive after normalize).
         where_clauses = " AND ".join(["owner_name_normalized LIKE ?"] * len(tokens))
         like_params = [f"%{t}%" for t in tokens]
+
+        # Optional state filter — restrict to the chosen state (e.g. "CA")
+        state_clause = ""
+        params_extra: list = []
+        if state:
+            state_clause = " AND last_known_state = ?"
+            params_extra.append(state.upper())
 
         # Tier 1: exact full-name match
         # Tier 2: starts-with for the first token
@@ -108,11 +117,11 @@ class DemoFuzzyMatcher:
                        ELSE 3
                    END AS match_tier
             FROM ca_unclaimed
-            WHERE {where_clauses}
+            WHERE {where_clauses}{state_clause}
             ORDER BY match_tier ASC, COALESCE(amount_max, 0) DESC
             LIMIT 100
         """
-        params = [full, f"{first_tok}%", *like_params]
+        params = [full, f"{first_tok}%", *like_params, *params_extra]
         rows = self.conn.execute(sql, params).fetchall()
         # Strip the match_tier column before constructing Match
         from app import presentation as _p

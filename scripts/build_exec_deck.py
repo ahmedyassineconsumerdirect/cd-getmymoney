@@ -248,7 +248,7 @@ def slide_03_what_it_is(prs, n, total):
                     body, font_size=11, color=SC_INK_BODY)
         yy += 1.05
 
-    # Right: example match card (mocked UI)
+    # Right: schematic of a result card (no real PII)
     add_textbox(s, 7.0, y, 5.8, 0.4,
                 "WHAT IT FEELS LIKE",
                 font_size=11, bold=True, color=SC_INK_MUTED)
@@ -257,18 +257,18 @@ def slide_03_what_it_is(prs, n, total):
     add_textbox(s, 7.25, y + 0.7, 4.0, 0.4,
                 "MATCH FOUND", font_size=10, bold=True, color=SC_ORANGE)
     add_textbox(s, 7.25, y + 1.05, 5.4, 0.7,
-                "Credit Balance — Accts Rec",
+                "Credit Balance",
                 font_size=18, bold=True, color=SC_INK)
     add_textbox(s, 7.25, y + 1.55, 4.0, 0.4,
-                "CITIBANK N.A.", font_size=11, bold=True, color=SC_INK_MUTED)
+                "Holder financial institution", font_size=11, bold=True, color=SC_INK_MUTED)
     add_pill(s, 11.4, y + 1.05, 1.1, 0.32,
-             "CA RECORD", SC_BLUE_LIGHT, SC_BLUE, font_size=9)
+             "STATE", SC_BLUE_LIGHT, SC_BLUE, font_size=9)
     # Big amount
     add_textbox(s, 7.25, y + 2.05, 5.4, 0.9,
-                "$83.19",
+                "$ —",
                 font_size=44, bold=True, color=SC_ORANGE)
     add_textbox(s, 7.25, y + 2.95, 5.4, 0.4,
-                "Reported in name: YASSINE AHMED · Irvine, CA",
+                "Reported in member's name · last known city",
                 font_size=10, color=SC_INK_MUTED)
     # CTA
     add_pill(s, 7.25, y + 3.35, 1.7, 0.4,
@@ -289,16 +289,16 @@ def slide_04_why_we_win(prs, n, total):
 
     pieces = [
         ("01",
-         "The member's identity",
-         "We already know who they are — name, addresses, DOB. Verified, consented, in our system today.",
+         "Verified member identity",
+         "We already know who they are — name, addresses, DOB, verified at signup and consented for monitoring. No re-collection. No new PII surface.",
          SC_BLUE),
         ("02",
-         "The matching engine",
-         "Privacy Master already runs fuzzy + phonetic name matching at production scale. Same engine, new corpus.",
+         "PrivacyMaster® matching engine",
+         "Already in production scanning data brokers for member info. Fuzzy + phonetic name matching at scale. Same engine — myReclaim points it at a new corpus.",
          SC_ORANGE),
         ("03",
-         "The data warehouse",
-         "Snowflake is paid for, secured, audited. Adding myReclaim is a new schema — not new infrastructure.",
+         "Snowflake warehouse",
+         "Paid for, secured, audited, dbt-modeled. Adding myReclaim is a new schema — not new infrastructure or new vendor risk.",
          SC_BLUE_DARK),
     ]
     y = 3.0; gap = 0.25
@@ -438,14 +438,75 @@ def slide_06_architecture(prs, n, total):
                 font_size=12, color=SC_INK_BODY)
 
 
+def slide_privacy_master(prs, n, total):
+    """Background on PrivacyMaster — the trust precedent for myReclaim."""
+    s = blank_slide(prs)
+    add_chrome(s, n, total)
+    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
+                "THE TRUST PRECEDENT",
+                font_size=12, bold=True, color=SC_BLUE)
+    add_textbox(s, 0.5, 1.25, 12.5, 1.0,
+                "We already do this — for a different problem.",
+                font_size=30, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 2.15, 12.5, 0.5,
+                "PrivacyMaster® is a SmartCredit member feature that auto-scans data brokers, businesses, and government sites for member information. When found, the member chooses Remove or Keep. We monitor compliance until the data is gone.",
+                font_size=12, color=SC_INK_MUTED)
+
+    # Three-column anatomy
+    cols = [
+        ("WHAT IT DOES TODAY",
+         [("Auto-scan", "Hundreds of broker, business, and govt sources, on a schedule"),
+          ("Alert", "Member gets notified inside SmartCredit when a match appears"),
+          ("Choice", "Member instructs Remove or Keep on each finding"),
+          ("Compliance", "We track the broker's removal timeline, 1–45 days")],
+         SC_BLUE),
+        ("WHAT MEMBERS TRUST US WITH",
+         [("Identity", "Name, addresses, DOB, family — already in their SmartCredit profile"),
+          ("Auto-monitoring", "Scanning happens whether or not they activate the feature"),
+          ("Acting on findings", "Authorized to send Remove requests on their behalf"),
+          ("Value", "Equivalent standalone services charge $15–$20 / month")],
+         SC_ORANGE),
+        ("WHAT myRECLAIM REUSES",
+         [("Identity", "Same profile — no re-collection"),
+          ("Auto-scan model", "Same scheduled scan, just a different corpus"),
+          ("Alert pattern", "Same in-product notification UX"),
+          ("Member choice", "Remove / Keep becomes Claim / Not me")],
+         SC_BLUE_DARK),
+    ]
+    y = 2.8
+    box_w = (13.33 - 1.0 - 2 * 0.2) / 3
+    for i, (head, rows, color) in enumerate(cols):
+        x = 0.5 + i * (box_w + 0.2)
+        add_round_rect(s, x, y, box_w, 3.4, WHITE, line=SC_BORDER, radius=0.03)
+        add_rect(s, x, y, box_w, 0.18, color)
+        add_textbox(s, x + 0.25, y + 0.35, box_w - 0.5, 0.4,
+                    head, font_size=11, bold=True, color=color)
+        yy = y + 0.85
+        for label, body in rows:
+            add_textbox(s, x + 0.25, yy, 1.3, 0.3,
+                        label, font_size=10, bold=True, color=SC_INK)
+            add_textbox(s, x + 0.25, yy + 0.28, box_w - 0.5, 0.45,
+                        body, font_size=9.5, color=SC_INK_BODY)
+            yy += 0.62
+
+    # Bottom callout
+    add_round_rect(s, 0.5, 6.4, 12.3, 0.65, SC_BG_CARD, line=SC_BLUE, radius=0.03)
+    add_textbox(s, 0.7, 6.5, 12, 0.32,
+                "myReclaim is not a new product surface.",
+                font_size=14, bold=True, color=SC_BLUE)
+    add_textbox(s, 0.7, 6.78, 12, 0.3,
+                "It's a different outcome from the same security envelope members have already opted into. Same engine, same alert pattern, new corpus, new value.",
+                font_size=11, color=SC_INK_BODY)
+
+
 def slide_07_match_reuse(prs, n, total):
     s = blank_slide(prs)
     add_chrome(s, n, total)
     add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "REUSING WHAT WE ALREADY BUILT",
+                "PRIVACYMASTER ↔ myRECLAIM",
                 font_size=12, bold=True, color=SC_BLUE)
     add_textbox(s, 0.5, 1.25, 12.5, 1.0,
-                "Our Privacy Master engine becomes the heart of myReclaim.",
+                "Same engine. Same UX pattern. Inverted purpose.",
                 font_size=28, bold=True, color=SC_INK)
 
     # Two cards: today / tomorrow with arrow between
@@ -454,7 +515,7 @@ def slide_07_match_reuse(prs, n, total):
     add_round_rect(s, 0.5, y, col_w, 3.7, WHITE, line=SC_BORDER, radius=0.03)
     add_rect(s, 0.5, y, col_w, 0.18, SC_INK_MUTED)
     add_textbox(s, 0.7, y + 0.35, col_w - 0.4, 0.45,
-                "TODAY · Privacy Master",
+                "TODAY · PrivacyMaster®",
                 font_size=12, bold=True, color=SC_INK_MUTED)
     add_textbox(s, 0.7, y + 0.85, col_w - 0.4, 0.7,
                 "Find data brokers exposing the member",
@@ -463,7 +524,7 @@ def slide_07_match_reuse(prs, n, total):
         ("Input",  "SmartCredit member identity"),
         ("Engine", "Fuzzy + phonetic name match"),
         ("Corpus", "Data-broker exposure database"),
-        ("Output", "\"X brokers expose your info — Remove\""),
+        ("Member action", "Remove  /  Keep"),
     ]
     yy = y + 1.7
     for label, body in rows_today:
@@ -489,9 +550,9 @@ def slide_07_match_reuse(prs, n, total):
                 font_size=18, bold=True, color=SC_INK)
     rows_tomorrow = [
         ("Input",  "Same SmartCredit member identity"),
-        ("Engine", "Same Privacy Master matcher"),
+        ("Engine", "Same PrivacyMaster matcher"),
         ("Corpus", "State unclaimed-property records"),
-        ("Output", "\"You may have $X waiting — Claim\""),
+        ("Member action", "Claim  /  Not me"),
     ]
     yy = y + 1.7
     for label, body in rows_tomorrow:
@@ -685,7 +746,7 @@ def slide_10_built(prs, n, total):
         ("38M+",  "records indexed", SC_BLUE),
         ("$11B",  "in unclaimed property", SC_ORANGE),
         ("113s",  "to bulk-load 34M rows", SC_BLUE_DARK),
-        ("3",     "of Ahmed's records found", SC_AMBER),
+        ("<1s",   "to match a member by name", SC_AMBER),
     ]
     y0 = 2.7; box_w = 2.95; margin = 0.5; gap = 0.2
     for i, (big, small, color) in enumerate(metrics):
@@ -805,10 +866,11 @@ def main():
         slide_02_hook,
         slide_03_what_it_is,
         slide_04_why_we_win,
+        slide_privacy_master,      # NEW: PrivacyMaster trust precedent
+        slide_07_match_reuse,      # PrivacyMaster ↔ myReclaim side-by-side
         slide_05_data_strategy,
         slide_06_architecture,
-        slide_07_match_reuse,
-        slide_claim_integration,   # NEW: 4-tier claim-filing strategy
+        slide_claim_integration,   # 4-tier claim-filing strategy
         slide_08_roadmap,
         slide_09_compliance,
         slide_10_built,
