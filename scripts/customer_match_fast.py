@@ -59,27 +59,17 @@ def main() -> None:
     print(f"[{time.strftime('%H:%M:%S')}] Running exact normalized-name match...")
     t0 = time.time()
     conn.execute("DROP TABLE IF EXISTS exact_matches")
+    # CA stores names as LAST FIRST (e.g., "YASSINE AHMED" not "AHMED YASSINE"),
+    # so match LAST FIRST only. Including FIRST LAST as a hedge produces
+    # name-reversed false positives (matches strangers with reversed name).
     conn.execute("""
         CREATE TABLE exact_matches AS
-        WITH cust_keys AS (
-            -- Build both possible orderings: "FIRST LAST" and "LAST FIRST"
-            SELECT first_norm, last_norm,
-                   first_norm || ' ' || last_norm AS key_fl,
-                   last_norm  || ' ' || first_norm AS key_lf
-            FROM sc_customers_ca
-        ),
-        all_keys AS (
-            -- UNION (not UNION ALL) eliminates the 321 duplicate hits
-            -- when first_norm == last_norm
-            SELECT first_norm, last_norm, key_fl AS k FROM cust_keys
-            UNION
-            SELECT first_norm, last_norm, key_lf AS k FROM cust_keys
-        )
         SELECT
-            ak.first_norm, ak.last_norm,
+            c.first_norm, c.last_norm,
             u.record_id, u.amount_max, u.source_file
-        FROM all_keys ak
-        JOIN ca_unclaimed u ON u.owner_name_normalized = ak.k
+        FROM sc_customers_ca c
+        JOIN ca_unclaimed u
+          ON u.owner_name_normalized = c.last_norm || ' ' || c.first_norm
     """)
     elapsed = time.time() - t0
     print(f"[{time.strftime('%H:%M:%S')}] Exact match done in {elapsed:.1f}s.")
