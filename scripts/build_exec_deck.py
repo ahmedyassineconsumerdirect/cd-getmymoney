@@ -188,16 +188,16 @@ def slide_02_hook(prs, n, total):
                 font_size=12, bold=True, color=SC_BLUE)
     # Big stat
     add_textbox(s, 0.5, 1.4, 12.5, 2.5,
-                "$70 billion",
+                "$70B+",
                 font_size=160, bold=True, color=SC_BLUE)
     add_textbox(s, 0.5, 4.0, 12.5, 0.7,
-                "is sitting in U.S. state treasuries — money our members are owed.",
-                font_size=28, bold=True, color=SC_INK)
-    # 3 mini facts (verified against NAUPA + CNBC, Apr 2026)
+                "estimated in unclaimed property nationwide. Some of it is reported in our members' names.",
+                font_size=24, bold=True, color=SC_INK)
+    # 3 mini facts — sourced from NAUPA FY2024 release (Oct 2024)
     facts = [
-        ("1 in 7", "Americans has unclaimed property — about 33 million people"),
-        ("~$2,080", "average claim value (median $100, mean ~$2,000)"),
-        ("0", "credit-monitoring competitors offer this today"),
+        ("~33M", "people may have property waiting to be claimed (NAUPA)"),
+        ("$2,080", "average claim paid through MissingMoney.com (median $100, FY2024)"),
+        ("Unique", "combination of verified-identity matching + alerts + free claim guidance"),
     ]
     box_w = 4.0; gap = 0.15; y0 = 5.3
     for i, (big, small) in enumerate(facts):
@@ -228,11 +228,11 @@ def slide_03_what_it_is(prs, n, total):
 
     steps = [
         ("1", "We notify them inside SmartCredit",
-         "\"You may have $X waiting. We found it for you.\""),
-        ("2", "They review the matches",
-         "Holder, amount, type — laid out as cards."),
-        ("3", "They claim with the state",
-         "One click → official state claim portal."),
+         "\"Possible match found. The state may be holding property in your name.\""),
+        ("2", "They review the possible matches",
+         "Holder, type, amount range — laid out as cards. The state determines eligibility."),
+        ("3", "We help them file with the state",
+         "Prepare claim packet · route to official state portal · track status."),
     ]
     yy = y + 0.55
     for num, title, body in steps:
@@ -251,26 +251,30 @@ def slide_03_what_it_is(prs, n, total):
     # Card
     add_round_rect(s, 7.0, y + 0.55, 5.8, 3.3, WHITE, line=SC_BORDER, radius=0.04)
     add_textbox(s, 7.25, y + 0.7, 4.0, 0.4,
-                "MATCH FOUND", font_size=10, bold=True, color=SC_ORANGE)
+                "POSSIBLE MATCH", font_size=10, bold=True, color=SC_ORANGE)
     add_textbox(s, 7.25, y + 1.05, 5.4, 0.7,
                 "Credit Balance",
                 font_size=18, bold=True, color=SC_INK)
     add_textbox(s, 7.25, y + 1.55, 4.0, 0.4,
-                "Holder financial institution", font_size=11, bold=True, color=SC_INK_MUTED)
+                "Reported by financial institution", font_size=11, bold=True, color=SC_INK_MUTED)
     add_pill(s, 11.4, y + 1.05, 1.1, 0.32,
              "STATE", SC_BLUE_LIGHT, SC_BLUE, font_size=9)
-    # Big amount
+    # Amount (range — reflects actual data ingest model where amount may be range/undisclosed)
     add_textbox(s, 7.25, y + 2.05, 5.4, 0.9,
-                "$ —",
-                font_size=44, bold=True, color=SC_ORANGE)
+                "$100 – $499",
+                font_size=36, bold=True, color=SC_ORANGE)
     add_textbox(s, 7.25, y + 2.95, 5.4, 0.4,
-                "Reported in member's name · last known city",
+                "Matched on name + prior city / address",
                 font_size=10, color=SC_INK_MUTED)
     # CTA
-    add_pill(s, 7.25, y + 3.35, 1.7, 0.4,
-             "Claim →", SC_ORANGE, WHITE, font_size=11)
-    add_textbox(s, 9.2, y + 3.4, 3.5, 0.4,
+    add_pill(s, 7.25, y + 3.35, 2.4, 0.4,
+             "Continue to official claim", SC_ORANGE, WHITE, font_size=10)
+    add_textbox(s, 9.85, y + 3.4, 2.9, 0.4,
                 "Not me", font_size=11, bold=True, color=SC_BLUE)
+    # Disclosure
+    add_textbox(s, 7.0, y + 4.0, 5.8, 0.5,
+                "The state determines eligibility. Official state claims are free. SmartCredit does not guarantee approval.",
+                font_size=8, color=SC_INK_MUTED)
 
 
 def slide_04_why_we_win(prs, n, total):
@@ -338,16 +342,16 @@ def slide_05_data_strategy(prs, n, total):
 
     # Top-10 table from Customers_by_State.csv + matrix posture
     rows = [
-        (1,  "FL", 65400,  "MANUAL",  SC_ORANGE,     "Registered FL rep (atty/CPA/PI per Ch. 717) — manual portal lookups, no automation"),
-        (2,  "TX", 61414,  "REQUEST", SC_AMBER,      "Written data request + caching agreement"),
-        (3,  "CA", 44222,  "BUILD",   SC_GREEN,      "Public CSV, weekly — 81M rows already loaded ✓"),
-        (4,  "GA", 29566,  "REQUEST", SC_AMBER,      "CDR registration → searchable data file (live Jul '24)"),
-        (5,  "NY", 22137,  "REQUEST", SC_AMBER,      "Secure-FTP owner-name file, quarterly"),
-        (6,  "IL", 16242,  "HANDOFF", SC_INK_MUTED,  "No bulk feed; assisted e-file via iCash"),
-        (7,  "NC", 14404,  "HANDOFF", SC_INK_MUTED,  "PDFs only; not a clean feed"),
-        (8,  "PA", 12290,  "HANDOFF", SC_INK_MUTED,  "No bulk; assisted e-file"),
-        (9,  "NJ", 11856,  "HANDOFF", SC_INK_MUTED,  "No bulk; assisted e-file"),
-        (10, "SC", 10534,  "HANDOFF", SC_INK_MUTED,  "No bulk; assisted e-file"),
+        (1,  "FL", 65400,  "MANUAL",  SC_ORANGE,     "Registered FL rep path (atty/CPA/PI, Ch. 717). No cacheable bulk dataset confirmed."),
+        (2,  "TX", 61414,  "REQUEST", SC_AMBER,      "Request-based dataset; enable only after written caching/redisplay approval."),
+        (3,  "CA", 44222,  "BUILD",   SC_GREEN,      "Public CSV, updated Thursdays — prototype loaded 81M rows ✓"),
+        (4,  "GA", 29566,  "REQUEST", SC_AMBER,      "CDR registration + background checks → weekly delimited file (>1 GB)"),
+        (5,  "NY", 22137,  "REQUEST", SC_AMBER,      "Secure-FTP owner-name file, quarterly. Excludes amounts and tax IDs."),
+        (6,  "IL", 16242,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed. Assisted e-file via iCash."),
+        (7,  "NC", 14404,  "HANDOFF", SC_INK_MUTED,  "No clean bulk feed confirmed; annual public PDFs exist."),
+        (8,  "PA", 12290,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed."),
+        (9,  "NJ", 11856,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed."),
+        (10, "SC", 10534,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed."),
     ]
 
     # Header strip
@@ -393,10 +397,10 @@ def slide_05_data_strategy(prs, n, total):
     # Bottom callout — strategic insight
     add_round_rect(s, 0.5, 6.65, 12.3, 0.55, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 6.72, 12, 0.32,
-                "Top-10 states = 287,765 customers (~70% of base). CA is the only fully bulk-ingestable state today.",
+                "Top-10 states = 288,065 customers (~70% of base, pending base-size confirmation).",
                 font_size=12, bold=True, color=WHITE)
     add_textbox(s, 0.7, 7.0, 12, 0.22,
-                "Sprint 2 unlocks TX + NY + GA at bulk; FL needs a registered-rep partnership for manual access (no automation, but full data).",
+                "CA is the only top-10 state with a confirmed public bulk feed. Sprint 2 begins TX + NY data requests and GA CDR registration; bulk availability depends on state approval, terms, and legal sign-off.",
                 font_size=10, color=RGBColor(0xCC, 0xDD, 0xFF))
 
 
@@ -610,7 +614,7 @@ def slide_claim_integration(prs, n, total):
                 "Three channels. E-file preferred. Mail when required. Rep when approved.",
                 font_size=22, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.15, 12.5, 0.5,
-                "Most states accept online claim filings — that's our v1 path. When a state requires a notarized paper packet, we ship it via ActionLetters (our existing letter-mailing service that already handles credit-dispute mailers). Filing on the member's behalf is a regulatory unlock per state, not a technical one.",
+                "Most states support online claim initiation, but some claims still require document upload, notarization, mailed forms, or manual review. v1 is assisted e-file. Mail packets via our ActionLetters service when states require physical paperwork. Filing on the member's behalf is a state-by-state regulatory unlock — not a technical one.",
                 font_size=11, color=SC_INK_MUTED)
 
     # Three columns: today (e-file), today (mail fallback), tomorrow (rep filing)
@@ -627,7 +631,7 @@ def slide_claim_integration(prs, n, total):
          "rows": [
              ("Who submits", "The member"),
              ("How",         "We prep the packet · user submits via state portal"),
-             ("We track",    "Claim ID + status sync back to SmartCredit"),
+             ("We track",    "Claim ID + status entered by member or updated manually until state APIs exist"),
              ("Status",      "Ships Sprint 1 · every state with online filing"),
          ]},
         # v1 — Mail-packet fallback (already have this rail)
@@ -635,8 +639,8 @@ def slide_claim_integration(prs, n, total):
          "subtitle": "Mail packet via ActionLetters",
          "color": SC_AMBER,
          "rows": [
-             ("Who submits", "Member submits; we generate the paper"),
-             ("How",         "Notarized packet → ActionLetters → state mail intake"),
+             ("Who submits", "Member; we generate the packet + mailing instructions"),
+             ("How",         "If ActionLetters mails directly, legal must confirm it isn't representative filing"),
              ("When",        "States requiring notarized physical paperwork"),
              ("Status",      "Available now · same rail as credit-dispute mailers"),
          ]},
@@ -671,8 +675,8 @@ def slide_claim_integration(prs, n, total):
     # Bottom callout
     add_round_rect(s, 0.5, 7.0, 12.3, 0.4, SC_BLUE, radius=0.1)
     add_textbox(s, 0.7, 7.05, 12, 0.32,
-                "Members never pay. We never take a cut. Free is the regulatory shield and the brand promise.",
-                font_size=12, bold=True, color=WHITE)
+                "Members never pay. We never take a cut. Free reduces finder-fee risk — but representative filing still requires state-by-state approval, registration, and legal sign-off.",
+                font_size=10, bold=True, color=WHITE)
 
 
 def slide_08_roadmap(prs, n, total):
@@ -869,6 +873,75 @@ def slide_11_ask(prs, n, total):
     add_rect(s, 0.5, 6.85, 12.3, 0.0, SC_INK)
 
 
+def slide_compliance_guardrails(prs, n, total):
+    """Compliance guardrails — explicit Will / Will Not commitments."""
+    s = blank_slide(prs)
+    add_chrome(s, n, total)
+    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
+                "COMPLIANCE GUARDRAILS",
+                font_size=12, bold=True, color=SC_BLUE)
+    add_textbox(s, 0.5, 1.25, 12.5, 0.95,
+                "Free for members. State-approved where required.",
+                font_size=26, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 2.15, 12.5, 0.45,
+                "Verified-identity matching, member consent, official state filing channels — and a clear list of things we will not do.",
+                font_size=12, color=SC_INK_MUTED)
+
+    # Two columns: WILL DO / WILL NOT DO
+    will = [
+        "Use official state files or state-approved data access only",
+        "Get explicit member consent before matching and claim prep",
+        "Route members to official state claim portals for v1",
+        "Track claim ID + status inside SmartCredit (manual entry)",
+        "File on members' behalf only where registered or approved",
+        "Source-by-source data-use permissions; legal review per state",
+    ]
+    will_not = [
+        "Scrape state portals or MissingMoney.com",
+        "Guarantee a claim belongs to the member",
+        "Charge a success fee or take a cut",
+        "Submit claims without fresh user authorization",
+        "Re-use credit-report-derived data without legal sign-off",
+        "Store sensitive claim documents unless required and approved",
+    ]
+
+    y0 = 2.85; col_w = 6.0; gap = 0.3
+    # Will-do card
+    add_round_rect(s, 0.5, y0, col_w, 4.05, WHITE, line=SC_BORDER, radius=0.03)
+    add_rect(s, 0.5, y0, col_w, 0.18, SC_GREEN)
+    add_textbox(s, 0.7, y0 + 0.32, col_w - 0.4, 0.4,
+                "WHAT WE WILL DO",
+                font_size=12, bold=True, color=SC_GREEN)
+    yy = y0 + 0.85
+    for item in will:
+        add_textbox(s, 0.85, yy, 0.3, 0.3, "✓",
+                    font_size=14, bold=True, color=SC_GREEN)
+        add_textbox(s, 1.2, yy + 0.02, col_w - 1.0, 0.5,
+                    item, font_size=11, color=SC_INK_BODY)
+        yy += 0.5
+
+    # Will-not-do card
+    x2 = 0.5 + col_w + gap
+    add_round_rect(s, x2, y0, col_w, 4.05, WHITE, line=SC_BORDER, radius=0.03)
+    add_rect(s, x2, y0, col_w, 0.18, SC_RED)
+    add_textbox(s, x2 + 0.2, y0 + 0.32, col_w - 0.4, 0.4,
+                "WHAT WE WILL NOT DO",
+                font_size=12, bold=True, color=SC_RED)
+    yy = y0 + 0.85
+    for item in will_not:
+        add_textbox(s, x2 + 0.15, yy, 0.3, 0.3, "✗",
+                    font_size=14, bold=True, color=SC_RED)
+        add_textbox(s, x2 + 0.5, yy + 0.02, col_w - 0.7, 0.5,
+                    item, font_size=11, color=SC_INK_BODY)
+        yy += 0.5
+
+    # Bottom callout
+    add_round_rect(s, 0.5, 7.05, 12.3, 0.4, SC_INK, radius=0.07)
+    add_textbox(s, 0.7, 7.10, 12, 0.32,
+                "Every state ingestion has a legal review gate. Every claim has a fresh consent. Every data source has documented terms.",
+                font_size=11, bold=True, color=WHITE)
+
+
 def slide_workflow_summary(prs, n, total):
     """Closing slide: the workflow that needs to happen, in order."""
     s = blank_slide(prs)
@@ -893,27 +966,27 @@ def slide_workflow_summary(prs, n, total):
          SC_BLUE),
         ("03",
          "Plug in the PII matching engine",
-         "Connect SmartCredit's existing identity matcher to the Snowflake corpus. Surface alerts in member dashboard.",
+         "Connect SmartCredit's existing identity matcher. Alert only on high-confidence matches (name + address/city/state). Suppress name-only matches.",
          "Sprint 1–2",
          SC_BLUE),
         ("04",
          "Assisted e-file + ActionLetters fallback shipped",
-         "Member confirms a match. We prep packet → user submits via state portal. Mail packet via ActionLetters when states require physical paperwork.",
+         "Member confirms a match. We prep packet → official state portal. Mail packet enabled only where legal approves the workflow.",
          "End of Sprint 2",
          SC_GREEN),
         ("05",
          "State outreach & registrations",
-         "Begin TX & NY data requests. File Georgia CDR registration (first rep path). Open FL Ch. 717 conversations.",
+         "Request written permission for caching, matching, redisplay, retention, commercial use. File GA CDR; open TX, NY, FL conversations.",
          "Parallel · Sprint 2+",
          SC_AMBER),
         ("06",
-         "Expand to top-5 states",
-         "TX + NY + GA online for data + claim filing. Member-driven submit via state portals. Quarterly state additions.",
+         "Expand to top-5 states (as approved)",
+         "TX + NY added pending data-request approval; GA pending CDR registration + legal sign-off. Member-driven submit via state portals.",
          "Q3–Q4 2026",
          SC_AMBER),
         ("07",
          "Tier 3 unlock — we file for the member",
-         "First state-approved representative submission. \"We found you money\" becomes \"we filed it for you.\"",
+         "First approved representative workflow. Show \"we filed for you\" only in states where SmartCredit (or partner) is authorized.",
          "Q4 2026 · Q1 2027",
          SC_ORANGE),
     ]
@@ -990,10 +1063,11 @@ def main():
         slide_01_title,
         slide_02_hook,
         slide_03_what_it_is,
-        slide_pii_matching,        # was slide_07_match_reuse + privacy_master
-        slide_05_data_strategy,    # now "Data Ingestion"
-        slide_claim_integration,   # redone with GA CDR / FL / OH facts
-        slide_workflow_summary,    # NEW closing slide
+        slide_pii_matching,         # was slide_07_match_reuse + privacy_master
+        slide_05_data_strategy,     # now "Data Ingestion"
+        slide_claim_integration,    # GA CDR / FL Ch. 717 / OH Finder
+        slide_compliance_guardrails, # NEW: Will / Will not (per Apr 29 review)
+        slide_workflow_summary,
     ]
     total = len(builders)
     for i, b in enumerate(builders, start=1):
