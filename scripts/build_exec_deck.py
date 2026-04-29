@@ -346,8 +346,8 @@ def slide_05_data_strategy(prs, n, total):
          "No public bulk feed. Surface the member's match — if any — by querying the state's public search and deep-linking to their claim portal.",
          SC_INK_MUTED),
         ("BLOCKED", "Do not ingest",
-         ["FL", "WA"],
-         "FL portal terms forbid automated access. WA statute prohibits commercial redistribution of the unclaimed-property owner list.",
+         ["FL", "WA", "UT"],
+         "FL portal terms forbid automated access (rep-only via FL atty/CPA/PI). WA + UT statute prohibits commercial redistribution of the owner list.",
          SC_RED),
     ]
     y = 2.85
@@ -584,11 +584,11 @@ def slide_claim_integration(prs, n, total):
                 "FILING THE CLAIM",
                 font_size=12, bold=True, color=SC_BLUE)
     add_textbox(s, 0.5, 1.25, 12.5, 0.95,
-                "The next unlock is regulatory, not technical.",
-                font_size=26, bold=True, color=SC_INK)
+                "Three channels. E-file preferred. Mail when required. Rep when approved.",
+                font_size=22, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.15, 12.5, 0.5,
-                "Every major state already accepts online claim filings. To file on the member's behalf — instead of handing them off — we need state-approved representative status. The code takes days. The state approval is the program.",
-                font_size=12, color=SC_INK_MUTED)
+                "Most states accept online claim filings — that's our v1 path. When a state requires a notarized paper packet, we ship it via Lob (already in production for our credit-dispute mailers). Filing on the member's behalf is a regulatory unlock per state, not a technical one.",
+                font_size=11, color=SC_INK_MUTED)
 
     # Three columns: How members file today, How we'd file for them, Where we register first
     box_w = 4.0
@@ -597,43 +597,43 @@ def slide_claim_integration(prs, n, total):
     box_h = 3.6
 
     cards = [
-        # Today — deep link
-        {"title": "TODAY",
-         "subtitle": "Deep-link to state portal",
+        # v1 — Assisted e-file
+        {"title": "v1 · DEFAULT",
+         "subtitle": "Assisted e-file",
          "color": SC_GREEN,
          "rows": [
-             ("Who files", "The member"),
-             ("How", "We surface the match → click → state's official portal"),
+             ("Who submits", "The member"),
+             ("How", "We prepare the packet → state's official portal → user submits"),
+             ("We track", "Claim ID + status updates back into SmartCredit"),
              ("Coverage", "Every state with online filing"),
-             ("Risk", "None — zero regulatory exposure"),
-             ("Status", "Ships with Sprint 1"),
+             ("Status", "Ships Sprint 1"),
          ]},
-        # Tomorrow — registered representative
-        {"title": "TOMORROW",
-         "subtitle": "Registered representative — we file for them",
+        # v2 — Mail packet (already have this rail)
+        {"title": "v1 · FALLBACK",
+         "subtitle": "Mail packet via Lob",
+         "color": SC_AMBER,
+         "rows": [
+             ("Who submits", "The member, but we generate + send the paper"),
+             ("How", "Notarized claim packet → Lob → state mail intake"),
+             ("Asset reused",
+              "Same Lob rail SmartCredit already uses for credit-bureau dispute letters"),
+             ("When", "States that require notarized physical paperwork"),
+             ("Status", "Available now — no new vendor"),
+         ]},
+        # v2 — Representative filing
+        {"title": "v2 · UNLOCK",
+         "subtitle": "Registered representative",
          "color": SC_BLUE,
          "rows": [
-             ("Who files", "SmartCredit, on the member's behalf"),
-             ("How", "Register under each state's claimant-rep regime"),
-             ("Coverage", "Per-state. Each registration is a deal of its own."),
-             ("Risk", "Regulated. Background checks. Annual renewals."),
-             ("Status", "Sprint 4+ once first state approves"),
-         ]},
-        # Where we start
-        {"title": "WHERE WE START",
-         "subtitle": "Three concrete state programs",
-         "color": SC_ORANGE,
-         "rows": [
+             ("Who submits", "SmartCredit, on the member's behalf"),
              ("Georgia",
-              "CDR program (live since Jul 2024). Registered reps get a "
-              "searchable data file and can file claims for the member."),
+              "CDR program (live Jul 2024). Searchable file + claim filing."),
              ("Florida",
-              "Reps must be FL attorney, CPA, or licensed PI registered "
-              "with the Department. Smaller pool, stricter."),
-             ("Ohio",
-              "Registered Professional Finder path. Regulator-administered."),
+              "FL attorney, CPA, or licensed PI registered with the Dept."),
+             ("Ohio · Michigan",
+              "Registered Finder / locator path."),
              ("Fee cap",
-              "GA caps third-party fees at 30% of recovery. We charge $0."),
+              "GA caps reps at 30%. We charge $0."),
          ]},
     ]
     for i, card in enumerate(cards):
@@ -653,8 +653,8 @@ def slide_claim_integration(prs, n, total):
             yy += 0.45
 
     # Bottom callout
-    add_round_rect(s, 0.5, 6.7, 12.3, 0.55, SC_BLUE, radius=0.07)
-    add_textbox(s, 0.7, 6.78, 12, 0.32,
+    add_round_rect(s, 0.5, 6.65, 12.3, 0.55, SC_BLUE, radius=0.07)
+    add_textbox(s, 0.7, 6.73, 12, 0.32,
                 "Members never pay. We never take a cut. Free is the regulatory shield and the brand promise.",
                 font_size=13, bold=True, color=WHITE)
 
@@ -881,8 +881,8 @@ def slide_workflow_summary(prs, n, total):
          "Sprint 1–2",
          SC_BLUE),
         ("04",
-         "Deep-link claim flow shipped",
-         "Member clicks Claim → state portal opens. Zero regulatory exposure. First retention signal lands.",
+         "Assisted e-file shipped (with mail-packet fallback via Lob)",
+         "Member confirms a match → SmartCredit preps the packet → user submits via state portal. Lob handles physical packets where states require it.",
          "End of Sprint 2",
          SC_GREEN),
         ("05",
