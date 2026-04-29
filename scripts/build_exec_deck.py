@@ -897,50 +897,54 @@ def slide_workflow_summary(prs, n, total):
          "Sprint 1–2",
          SC_BLUE),
         ("04",
-         "Assisted e-file shipped (with ActionLetters mail-packet fallback)",
-         "Member confirms a match → SmartCredit preps the packet → user submits via state portal. ActionLetters handles physical packets where states require it.",
+         "Assisted e-file + ActionLetters fallback shipped",
+         "Member confirms a match. We prep packet → user submits via state portal. Mail packet via ActionLetters when states require physical paperwork.",
          "End of Sprint 2",
          SC_GREEN),
         ("05",
          "State outreach & registrations",
-         "Begin TX & NY data requests. File Georgia CDR registration (first rep path). Open FL conversations.",
+         "Begin TX & NY data requests. File Georgia CDR registration (first rep path). Open FL Ch. 717 conversations.",
          "Parallel · Sprint 2+",
          SC_AMBER),
         ("06",
-         "Expand: more states, more states' worth of money",
-         "TX + NY + GA online (data + claim filing). Browser-extension form-fill for member-driven submit. Quarterly state additions.",
+         "Expand to top-5 states",
+         "TX + NY + GA online for data + claim filing. Member-driven submit via state portals. Quarterly state additions.",
          "Q3–Q4 2026",
          SC_AMBER),
         ("07",
          "Tier 3 unlock — we file for the member",
          "First state-approved representative submission. \"We found you money\" becomes \"we filed it for you.\"",
-         "Q4 2026 / Q1 2027",
+         "Q4 2026 · Q1 2027",
          SC_ORANGE),
     ]
-    y = 2.3
-    row_h = 0.65
+
+    # Layout: each row is 0.72in tall. Title and body are wide (8.7in) so
+    # long step titles don't wrap into the body band. Title at y+0.06 with
+    # height 0.28; body at y+0.36 with height 0.32 — ~0.04in gap, no overlap.
+    y = 2.2
+    row_h = 0.72
     for num, title, body, when, color in steps:
         add_round_rect(s, 0.5, y, 12.3, row_h - 0.06, WHITE, line=SC_BORDER, radius=0.03)
         add_rect(s, 0.5, y, 0.18, row_h - 0.06, color)
         # Number
-        add_textbox(s, 0.85, y + 0.13, 0.6, 0.36,
-                    num, font_size=15, bold=True, color=color)
-        # Title
-        add_textbox(s, 1.55, y + 0.08, 4.5, 0.28,
+        add_textbox(s, 0.85, y + 0.18, 0.65, 0.4,
+                    num, font_size=18, bold=True, color=color)
+        # Title — full content width so titles don't wrap
+        add_textbox(s, 1.65, y + 0.06, 8.6, 0.30,
                     title, font_size=12, bold=True, color=SC_INK)
-        # Body
-        add_textbox(s, 1.55, y + 0.32, 8.6, 0.3,
-                    body, font_size=10, color=SC_INK_BODY)
-        # When
-        add_pill(s, 10.5, y + 0.16, 1.7, 0.3,
+        # Body — same width as title, sits cleanly below
+        add_textbox(s, 1.65, y + 0.36, 8.6, 0.32,
+                    body, font_size=9.5, color=SC_INK_BODY)
+        # When pill, vertically centered
+        add_pill(s, 10.45, y + 0.22, 1.75, 0.30,
                  when, color, WHITE, font_size=9)
         y += row_h
 
-    # Bottom callout
-    add_round_rect(s, 0.5, 7.0, 12.3, 0.4, SC_INK, radius=0.07)
-    add_textbox(s, 0.7, 7.05, 12, 0.32,
+    # Bottom callout (positioned just below last step)
+    add_round_rect(s, 0.5, 7.27, 12.3, 0.20, SC_INK, radius=0.1)
+    add_textbox(s, 0.7, 7.30, 12, 0.16,
                 "First member alert in ~6 weeks. First \"we filed for you\" within ~9 months.",
-                font_size=12, bold=True, color=WHITE)
+                font_size=10, bold=True, color=WHITE)
 
 
 def slide_12_thanks(prs, n, total):
