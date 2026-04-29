@@ -620,27 +620,54 @@ def slide_customer_match_results(prs, n, total):
                 "Method: exact name match (FIRST LAST or LAST FIRST) — same matching logic the prototype uses, run via the indexed equality path. The state determines actual eligibility per record.",
                 font_size=11, color=SC_INK_MUTED)
 
-    # Headline metrics row
+    # Headline metrics row — slightly compressed to make room for methodology
     headlines = [
-        ("21,864",        "customers with at least one possible match", SC_BLUE),
-        ("70.8%",         "of the 30,862 active CA base",                SC_BLUE),
-        ("4.4M",          "matched property records across all tiers",   SC_ORANGE),
-        ("$324M",         "estimated value across all matches",          SC_ORANGE),
+        ("21,864",        "customers with ≥1 name match", SC_BLUE),
+        ("70.8%",         "upper bound (name-only)",       SC_BLUE),
+        ("9,054",         "high-confidence (1–5 records)", SC_GREEN),
+        ("$324M",         "max value across all matches",  SC_ORANGE),
     ]
-    box_w = 2.95; gap = 0.15; y0 = 2.85
+    box_w = 2.95; gap = 0.15; y0 = 2.7
     for i, (big, small, color) in enumerate(headlines):
         x = 0.5 + i * (box_w + gap)
-        add_round_rect(s, x, y0, box_w, 1.55, WHITE, line=SC_BORDER, radius=0.04)
-        add_rect(s, x, y0, box_w, 0.15, color)
-        add_textbox(s, x + 0.2, y0 + 0.3, box_w - 0.4, 0.85,
-                    big, font_size=36, bold=True, color=color)
-        add_textbox(s, x + 0.2, y0 + 1.1, box_w - 0.4, 0.4,
+        add_round_rect(s, x, y0, box_w, 1.20, WHITE, line=SC_BORDER, radius=0.04)
+        add_rect(s, x, y0, box_w, 0.13, color)
+        add_textbox(s, x + 0.2, y0 + 0.22, box_w - 0.4, 0.7,
+                    big, font_size=32, bold=True, color=color)
+        add_textbox(s, x + 0.2, y0 + 0.85, box_w - 0.4, 0.32,
                     small, font_size=10, color=SC_INK_BODY)
 
+    # Methodology row — how we matched + what production adds
+    add_textbox(s, 0.5, 4.05, 12.5, 0.32,
+                "HOW WE MATCHED · TRANSPARENCY", font_size=11, bold=True, color=SC_BLUE)
+    method_cols = [
+        ("Normalize",
+         "UPPER(TRIM(name)). Collapse internal whitespace. Both customer and unclaimed-record names go through identical normalization.",
+         SC_BLUE),
+        ("Build key",
+         "Per customer: \"FIRST LAST\" and \"LAST FIRST\". Both orderings tried — CA records use both styles.",
+         SC_BLUE),
+        ("Equality join",
+         "owner_name_normalized = key. Uses ix_owner_normalized — 0.7s for 30,862 × 92.4M rows.",
+         SC_GREEN),
+        ("Production adds",
+         "Phonetic (Soundex/Metaphone) · middle-name · last-4 SSN · DOB. Cuts false positives ~5×.",
+         SC_ORANGE),
+    ]
+    mw = 2.95; mg = 0.15; my = 4.4
+    for i, (label, body, color) in enumerate(method_cols):
+        x = 0.5 + i * (mw + mg)
+        add_round_rect(s, x, my, mw, 0.65, WHITE, line=SC_BORDER, radius=0.04)
+        add_rect(s, x, my, 0.10, 0.65, color)
+        add_textbox(s, x + 0.20, my + 0.05, mw - 0.3, 0.22,
+                    label, font_size=10, bold=True, color=color)
+        add_textbox(s, x + 0.20, my + 0.27, mw - 0.3, 0.36,
+                    body, font_size=8.5, color=SC_INK_BODY)
+
     # Distribution table — separates likely-true matches from common-name collisions
-    add_textbox(s, 0.5, 4.6, 6.0, 0.35,
+    add_textbox(s, 0.5, 5.2, 6.0, 0.32,
                 "MATCH DISTRIBUTION", font_size=11, bold=True, color=SC_BLUE)
-    add_textbox(s, 0.5, 4.92, 6.0, 0.3,
+    add_textbox(s, 0.5, 5.50, 6.0, 0.28,
                 "Distinct names cluster in the 1–5 record bucket — high-confidence matches.",
                 font_size=10, color=SC_INK_MUTED)
 
@@ -650,27 +677,27 @@ def slide_customer_match_results(prs, n, total):
         ("6–20 records",    "4,393",   "$3.50M", SC_AMBER, "Mixed — needs review"),
         ("20+ records",     "8,417",   "$319M",  SC_INK_MUTED, "Common-name collisions"),
     ]
-    y = 5.3
-    row_h = 0.33
+    y = 5.85
+    row_h = 0.27
     # Header row
-    add_rect(s, 0.5, y, 6.0, 0.26, SC_INK)
+    add_rect(s, 0.5, y, 6.0, 0.24, SC_INK)
     for label, x, w in [("Bucket", 0.6, 1.7), ("Customers", 2.4, 1.0), ("$ value", 3.55, 1.0), ("Note", 4.7, 1.7)]:
-        add_textbox(s, x, y + 0.04, w, 0.20, label, font_size=9, bold=True, color=WHITE)
-    y += 0.26
+        add_textbox(s, x, y + 0.04, w, 0.18, label, font_size=9, bold=True, color=WHITE)
+    y += 0.24
     for i, (bucket, custs, val, color, note) in enumerate(dist_rows):
         bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
         add_rect(s, 0.5, y, 6.0, row_h, bg)
-        add_textbox(s, 0.6, y + 0.06, 1.7, 0.22, bucket, font_size=10.5, bold=True, color=SC_INK)
-        add_textbox(s, 2.4, y + 0.06, 1.0, 0.22, custs, font_size=10.5, color=SC_INK_BODY)
-        add_textbox(s, 3.55, y + 0.06, 1.0, 0.22, val, font_size=10.5, bold=True, color=color)
-        add_textbox(s, 4.7, y + 0.06, 1.7, 0.22, note, font_size=9.5, color=SC_INK_MUTED)
+        add_textbox(s, 0.6, y + 0.04, 1.7, 0.20, bucket, font_size=10, bold=True, color=SC_INK)
+        add_textbox(s, 2.4, y + 0.04, 1.0, 0.20, custs, font_size=10, color=SC_INK_BODY)
+        add_textbox(s, 3.55, y + 0.04, 1.0, 0.20, val, font_size=10, bold=True, color=color)
+        add_textbox(s, 4.7, y + 0.04, 1.7, 0.20, note, font_size=9, color=SC_INK_MUTED)
         y += row_h
 
     # Per-tier breakdown
-    add_textbox(s, 6.8, 4.6, 6.0, 0.35,
+    add_textbox(s, 6.8, 5.2, 6.0, 0.32,
                 "MATCHES BY TIER", font_size=11, bold=True, color=SC_BLUE)
-    add_textbox(s, 6.8, 4.92, 6.0, 0.3,
-                "Tier 04 ($500+) = highest dollar value per record.",
+    add_textbox(s, 6.8, 5.50, 6.0, 0.28,
+                "Tier 04 ($500+) carries 53% of the value despite 2% of records.",
                 font_size=10, color=SC_INK_MUTED)
     tier_rows = [
         ("Tier 01",  "$0–$9.99",      "2,283,461", "$5.8M",   SC_INK_MUTED),
@@ -678,24 +705,24 @@ def slide_customer_match_results(prs, n, total):
         ("Tier 03",  "$100–$499.99",  "425,201",   "$87.5M",  SC_ORANGE),
         ("Tier 04",  "$500+",         "97,787",    "$173.1M", SC_BLUE),
     ]
-    y = 5.3
-    add_rect(s, 6.8, y, 6.0, 0.26, SC_INK)
+    y = 5.85
+    add_rect(s, 6.8, y, 6.0, 0.24, SC_INK)
     for label, x, w in [("Tier", 6.9, 1.0), ("Range", 7.95, 1.4), ("Records", 9.45, 1.5), ("$ value", 11.05, 1.5)]:
-        add_textbox(s, x, y + 0.04, w, 0.20, label, font_size=9, bold=True, color=WHITE)
-    y += 0.26
+        add_textbox(s, x, y + 0.04, w, 0.18, label, font_size=9, bold=True, color=WHITE)
+    y += 0.24
     for i, (tier, rng, recs, val, color) in enumerate(tier_rows):
         bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
         add_rect(s, 6.8, y, 6.0, row_h, bg)
-        add_textbox(s, 6.9, y + 0.06, 1.0, 0.22, tier, font_size=10.5, bold=True, color=color)
-        add_textbox(s, 7.95, y + 0.06, 1.4, 0.22, rng, font_size=9.5, color=SC_INK_BODY)
-        add_textbox(s, 9.45, y + 0.06, 1.5, 0.22, recs, font_size=10.5, color=SC_INK_BODY)
-        add_textbox(s, 11.05, y + 0.06, 1.5, 0.22, val, font_size=10.5, bold=True, color=color)
+        add_textbox(s, 6.9, y + 0.04, 1.0, 0.20, tier, font_size=10, bold=True, color=color)
+        add_textbox(s, 7.95, y + 0.04, 1.4, 0.20, rng, font_size=9, color=SC_INK_BODY)
+        add_textbox(s, 9.45, y + 0.04, 1.5, 0.20, recs, font_size=10, color=SC_INK_BODY)
+        add_textbox(s, 11.05, y + 0.04, 1.5, 0.20, val, font_size=10, bold=True, color=color)
         y += row_h
 
     # Bottom callout — the honest framing
-    add_round_rect(s, 0.5, 7.0, 12.3, 0.45, SC_BLUE, radius=0.07)
-    add_textbox(s, 0.7, 7.05, 12, 0.32,
-                "Even discounting common-name false positives, ~9,000 customers in the high-confidence bucket map to ~$1.5M of unclaimed property in CA alone.",
+    add_round_rect(s, 0.5, 7.10, 12.3, 0.36, SC_BLUE, radius=0.10)
+    add_textbox(s, 0.7, 7.15, 12, 0.28,
+                "70.8% is the upper bound. NAUPA baseline is ~14% of Americans. With the production PII matcher, expect 20–30% of our CA base.",
                 font_size=11, bold=True, color=WHITE)
 
 
