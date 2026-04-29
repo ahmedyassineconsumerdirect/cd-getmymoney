@@ -602,6 +602,103 @@ def slide_pii_matching(prs, n, total):
                 font_size=12, bold=True, color=WHITE)
 
 
+def slide_customer_match_results(prs, n, total):
+    """Live match against the SmartCredit active-CA customer base.
+
+    Numbers come from scripts/customer_match_fast.py run on Apr 29 2026
+    against all four CA tiers (92.4M rows).
+    """
+    s = blank_slide(prs)
+    add_chrome(s, n, total)
+    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
+                "WHAT WE'D FIND TODAY · LIVE MATCH",
+                font_size=12, bold=True, color=SC_BLUE)
+    add_textbox(s, 0.5, 1.25, 12.5, 0.95,
+                "We matched 30,862 active CA customers against all four CA unclaimed tiers (92.4M records).",
+                font_size=22, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 2.2, 12.5, 0.45,
+                "Method: exact name match (FIRST LAST or LAST FIRST) — same matching logic the prototype uses, run via the indexed equality path. The state determines actual eligibility per record.",
+                font_size=11, color=SC_INK_MUTED)
+
+    # Headline metrics row
+    headlines = [
+        ("21,864",        "customers with at least one possible match", SC_BLUE),
+        ("70.8%",         "of the 30,862 active CA base",                SC_BLUE),
+        ("4.4M",          "matched property records across all tiers",   SC_ORANGE),
+        ("$324M",         "estimated value across all matches",          SC_ORANGE),
+    ]
+    box_w = 2.95; gap = 0.15; y0 = 2.85
+    for i, (big, small, color) in enumerate(headlines):
+        x = 0.5 + i * (box_w + gap)
+        add_round_rect(s, x, y0, box_w, 1.55, WHITE, line=SC_BORDER, radius=0.04)
+        add_rect(s, x, y0, box_w, 0.15, color)
+        add_textbox(s, x + 0.2, y0 + 0.3, box_w - 0.4, 0.85,
+                    big, font_size=36, bold=True, color=color)
+        add_textbox(s, x + 0.2, y0 + 1.1, box_w - 0.4, 0.4,
+                    small, font_size=10, color=SC_INK_BODY)
+
+    # Distribution table — separates likely-true matches from common-name collisions
+    add_textbox(s, 0.5, 4.6, 6.0, 0.35,
+                "MATCH DISTRIBUTION", font_size=11, bold=True, color=SC_BLUE)
+    add_textbox(s, 0.5, 4.92, 6.0, 0.3,
+                "Distinct names cluster in the 1–5 record bucket — high-confidence matches.",
+                font_size=10, color=SC_INK_MUTED)
+
+    dist_rows = [
+        ("1 record",        "3,266",   "$239K",  SC_GREEN, "High confidence"),
+        ("2–5 records",     "5,788",   "$1.21M", SC_GREEN, "High confidence"),
+        ("6–20 records",    "4,393",   "$3.50M", SC_AMBER, "Mixed — needs review"),
+        ("20+ records",     "8,417",   "$319M",  SC_INK_MUTED, "Common-name collisions"),
+    ]
+    y = 5.3
+    row_h = 0.4
+    # Header row
+    add_rect(s, 0.5, y, 6.0, 0.28, SC_INK)
+    for label, x, w in [("Bucket", 0.6, 1.7), ("Customers", 2.4, 1.0), ("$ value", 3.55, 1.0), ("Note", 4.7, 1.7)]:
+        add_textbox(s, x, y + 0.05, w, 0.22, label, font_size=9, bold=True, color=WHITE)
+    y += 0.28
+    for i, (bucket, custs, val, color, note) in enumerate(dist_rows):
+        bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
+        add_rect(s, 0.5, y, 6.0, row_h, bg)
+        add_textbox(s, 0.6, y + 0.08, 1.7, 0.25, bucket, font_size=11, bold=True, color=SC_INK)
+        add_textbox(s, 2.4, y + 0.08, 1.0, 0.25, custs, font_size=11, color=SC_INK_BODY)
+        add_textbox(s, 3.55, y + 0.08, 1.0, 0.25, val, font_size=11, bold=True, color=color)
+        add_textbox(s, 4.7, y + 0.08, 1.7, 0.25, note, font_size=10, color=SC_INK_MUTED)
+        y += row_h
+
+    # Per-tier breakdown
+    add_textbox(s, 6.8, 4.6, 6.0, 0.35,
+                "MATCHES BY TIER", font_size=11, bold=True, color=SC_BLUE)
+    add_textbox(s, 6.8, 4.92, 6.0, 0.3,
+                "Tier 04 ($500+) = highest dollar value per record.",
+                font_size=10, color=SC_INK_MUTED)
+    tier_rows = [
+        ("Tier 01",  "$0–$9.99",      "2,283,461", "$5.8M",   SC_INK_MUTED),
+        ("Tier 02",  "$10–$99.99",    "1,622,140", "$57.9M",  SC_AMBER),
+        ("Tier 03",  "$100–$499.99",  "425,201",   "$87.5M",  SC_ORANGE),
+        ("Tier 04",  "$500+",         "97,787",    "$173.1M", SC_BLUE),
+    ]
+    y = 5.3
+    add_rect(s, 6.8, y, 6.0, 0.28, SC_INK)
+    for label, x, w in [("Tier", 6.9, 1.0), ("Range", 7.95, 1.4), ("Records", 9.45, 1.5), ("$ value", 11.05, 1.5)]:
+        add_textbox(s, x, y + 0.05, w, 0.22, label, font_size=9, bold=True, color=WHITE)
+    y += 0.28
+    for i, (tier, rng, recs, val, color) in enumerate(tier_rows):
+        bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
+        add_rect(s, 6.8, y, 6.0, row_h, bg)
+        add_textbox(s, 6.9, y + 0.08, 1.0, 0.25, tier, font_size=11, bold=True, color=color)
+        add_textbox(s, 7.95, y + 0.08, 1.4, 0.25, rng, font_size=10, color=SC_INK_BODY)
+        add_textbox(s, 9.45, y + 0.08, 1.5, 0.25, recs, font_size=11, color=SC_INK_BODY)
+        add_textbox(s, 11.05, y + 0.08, 1.5, 0.25, val, font_size=11, bold=True, color=color)
+        y += row_h
+
+    # Bottom callout — the honest framing
+    add_round_rect(s, 0.5, 7.0, 12.3, 0.45, SC_BLUE, radius=0.07)
+    add_textbox(s, 0.7, 7.05, 12, 0.32,
+                "Even discounting common-name false positives, ~9,000 customers in the high-confidence bucket map to ~$1.5M of unclaimed property in CA alone.",
+                font_size=11, bold=True, color=WHITE)
+
+
 def slide_claim_integration(prs, n, total):
     """Filing the Claim — three concrete delivery models, verified against
     each state's regulator program (Apr 2026)."""
@@ -1063,10 +1160,11 @@ def main():
         slide_01_title,
         slide_02_hook,
         slide_03_what_it_is,
-        slide_pii_matching,         # was slide_07_match_reuse + privacy_master
-        slide_05_data_strategy,     # now "Data Ingestion"
-        slide_claim_integration,    # GA CDR / FL Ch. 717 / OH Finder
-        slide_compliance_guardrails, # NEW: Will / Will not (per Apr 29 review)
+        slide_pii_matching,
+        slide_05_data_strategy,
+        slide_customer_match_results,  # NEW: live match against active CA customers
+        slide_claim_integration,
+        slide_compliance_guardrails,
         slide_workflow_summary,
     ]
     total = len(builders)
