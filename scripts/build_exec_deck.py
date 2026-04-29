@@ -333,12 +333,12 @@ def slide_05_data_strategy(prs, n, total):
                 "Where our members live. What each state lets us do.",
                 font_size=26, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.1, 12.5, 0.45,
-                "Top 10 customer states cover ~70% of the SmartCredit base. Three of the top five (FL, TX, GA) need a state agreement before we can ingest. CA is the only top-10 state with a clean public bulk feed — that's where the prototype starts.",
+                "Top 10 customer states cover ~70% of the SmartCredit base. Four of the top five (FL, TX, GA, NY) need a state agreement before we can ingest at scale. CA is the only top-10 state with a clean public bulk feed — that's where the prototype starts.",
                 font_size=11, color=SC_INK_MUTED)
 
     # Top-10 table from Customers_by_State.csv + matrix posture
     rows = [
-        (1,  "FL", 65400,  "BLOCKED", SC_RED,        "FL atty/CPA/PI rep-only — partner or skip ingest"),
+        (1,  "FL", 65400,  "MANUAL",  SC_ORANGE,     "Registered FL rep (atty/CPA/PI per Ch. 717) — manual portal lookups, no automation"),
         (2,  "TX", 61414,  "REQUEST", SC_AMBER,      "Written data request + caching agreement"),
         (3,  "CA", 44222,  "BUILD",   SC_GREEN,      "Public CSV, weekly — 81M rows already loaded ✓"),
         (4,  "GA", 29566,  "REQUEST", SC_AMBER,      "CDR registration → searchable data file (live Jul '24)"),
@@ -393,10 +393,10 @@ def slide_05_data_strategy(prs, n, total):
     # Bottom callout — strategic insight
     add_round_rect(s, 0.5, 6.65, 12.3, 0.55, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 6.72, 12, 0.32,
-                "Top-10 states = 287,765 customers (~70% of base). Only CA is fully ingestable today.",
+                "Top-10 states = 287,765 customers (~70% of base). CA is the only fully bulk-ingestable state today.",
                 font_size=12, bold=True, color=WHITE)
     add_textbox(s, 0.7, 7.0, 12, 0.22,
-                "Sprint 2 unlocks TX + NY + GA → covers our top 5 states (~225K customers, 5× current coverage).",
+                "Sprint 2 unlocks TX + NY + GA at bulk; FL needs a registered-rep partnership for manual access (no automation, but full data).",
                 font_size=10, color=RGBColor(0xCC, 0xDD, 0xFF))
 
 
@@ -652,7 +652,7 @@ def slide_claim_integration(prs, n, total):
              ("Georgia",
               "CDR program (live Jul 2024). Searchable file + claim filing."),
              ("Florida",
-              "FL attorney, CPA, or licensed PI registered with the Dept."),
+              "Registered FL atty/CPA/PI per Ch. 717. Same rep can pull data manually."),
              ("Ohio · Michigan",
               "Registered Finder / locator path."),
              ("Fee cap",
