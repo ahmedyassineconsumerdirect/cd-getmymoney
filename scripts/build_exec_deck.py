@@ -193,10 +193,10 @@ def slide_02_hook(prs, n, total):
     add_textbox(s, 0.5, 4.0, 12.5, 0.7,
                 "is sitting in U.S. state treasuries — money our members are owed.",
                 font_size=28, bold=True, color=SC_INK)
-    # 3 mini facts
+    # 3 mini facts (verified against NAUPA + CNBC, Apr 2026)
     facts = [
-        ("1 in 7", "Americans has unclaimed property in their name"),
-        ("~$200", "average household balance, growing every year"),
+        ("1 in 7", "Americans has unclaimed property — about 33 million people"),
+        ("~$2,080", "average claim value (median $100, mean ~$2,000)"),
         ("0", "credit-monitoring competitors offer this today"),
     ]
     box_w = 4.0; gap = 0.15; y0 = 5.3
@@ -318,35 +318,36 @@ def slide_04_why_we_win(prs, n, total):
 
 
 def slide_05_data_strategy(prs, n, total):
+    """Data ingestion strategy — confirmed against state portals Apr 2026."""
     s = blank_slide(prs)
     add_chrome(s, n, total)
     add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "HOW WE GET THE DATA",
+                "DATA INGESTION",
                 font_size=12, bold=True, color=SC_BLUE)
     add_textbox(s, 0.5, 1.25, 12.5, 0.9,
-                "There's no MissingMoney API. We go state by state.",
-                font_size=28, bold=True, color=SC_INK)
+                "How we get the data — state by state, on a schedule.",
+                font_size=26, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.1, 12.5, 0.5,
-                "21 states ranked by data accessibility, member coverage, and legal posture. Four tiers, one playbook.",
-                font_size=14, color=SC_INK_MUTED)
+                "There is no public MissingMoney API. Each state runs its own program. We sort 21 priority states into four ingest tiers based on what each state actually allows.",
+                font_size=12, color=SC_INK_MUTED)
 
     # 4 tier swim lanes
     tiers = [
-        ("BUILD",   "Public bulk — ingest now",
+        ("BUILD",   "Public bulk download",
          ["CA"],
-         "California publishes a full CSV on sco.ca.gov, refreshed weekly.",
+         "California State Controller publishes the full database as zipped CSVs on sco.ca.gov, refreshed weekly. Already prototyped — 81M rows loaded.",
          SC_GREEN),
-        ("REQUEST", "Permission required",
+        ("REQUEST", "Permission / API access required",
          ["TX", "NY", "GA", "OH", "MI"],
-         "Formal request to the state treasurer / department, plus ToS for caching and redisplay.",
+         "Formal request to the state treasurer or department. NY uses secure FTP (quarterly). GA requires CDR registration to receive the data file. TX requires a written request.",
          SC_AMBER),
-        ("HANDOFF", "Deep-link only",
+        ("HANDOFF", "Deep-link to state portal only",
          ["IL", "PA", "NJ", "SC", "AL", "LA", "VA", "AZ", "MD", "TN", "MS", "MO", "NC"],
-         "No public bulk. Surface in the UI, deep-link to the state's claim portal.",
+         "No public bulk feed. Surface the member's match — if any — by querying the state's public search and deep-linking to their claim portal.",
          SC_INK_MUTED),
-        ("BLOCKED", "Don't ingest",
+        ("BLOCKED", "Do not ingest",
          ["FL", "WA"],
-         "FL portal explicitly forbids automation. WA prohibits commercial redistribution by statute.",
+         "FL portal terms forbid automated access. WA statute prohibits commercial redistribution of the unclaimed-property owner list.",
          SC_RED),
     ]
     y = 2.85
@@ -495,80 +496,88 @@ def slide_privacy_master(prs, n, total):
                 font_size=11, color=SC_INK_BODY)
 
 
-def slide_07_match_reuse(prs, n, total):
+def slide_pii_matching(prs, n, total):
+    """The PII matching engine — same engine, same UX, different mission.
+
+    Combines key trust-precedent points from the previous PrivacyMaster
+    slide so this slide stands alone.
+    """
     s = blank_slide(prs)
     add_chrome(s, n, total)
     add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "PRIVACYMASTER ↔ myRECLAIM",
+                "THE PII MATCHING ENGINE",
                 font_size=12, bold=True, color=SC_BLUE)
     add_textbox(s, 0.5, 1.25, 12.5, 1.0,
-                "Same engine. Same UX pattern. Inverted purpose.",
+                "Same engine members already trust. New mission.",
                 font_size=28, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 2.15, 12.5, 0.45,
+                "SmartCredit's PII matching engine already auto-scans data brokers, businesses, and government sites for member info. Members get an alert and choose Remove or Keep. myReclaim points the same engine at state unclaimed-property records — same auto-scan, same alert, same trust envelope.",
+                font_size=11, color=SC_INK_MUTED)
 
     # Two cards: today / tomorrow with arrow between
-    y = 2.7; col_w = 5.6; gap = 0.7
-    # TODAY
-    add_round_rect(s, 0.5, y, col_w, 3.7, WHITE, line=SC_BORDER, radius=0.03)
+    y = 2.95; col_w = 5.6; gap = 0.7
+
+    # TODAY card
+    add_round_rect(s, 0.5, y, col_w, 3.5, WHITE, line=SC_BORDER, radius=0.03)
     add_rect(s, 0.5, y, col_w, 0.18, SC_INK_MUTED)
-    add_textbox(s, 0.7, y + 0.35, col_w - 0.4, 0.45,
-                "TODAY · PrivacyMaster®",
-                font_size=12, bold=True, color=SC_INK_MUTED)
-    add_textbox(s, 0.7, y + 0.85, col_w - 0.4, 0.7,
+    add_textbox(s, 0.7, y + 0.32, col_w - 0.4, 0.4,
+                "TODAY · DATA-BROKER SCRUB",
+                font_size=11, bold=True, color=SC_INK_MUTED)
+    add_textbox(s, 0.7, y + 0.78, col_w - 0.4, 0.7,
                 "Find data brokers exposing the member",
-                font_size=18, bold=True, color=SC_INK)
+                font_size=17, bold=True, color=SC_INK)
     rows_today = [
-        ("Input",  "SmartCredit member identity"),
-        ("Engine", "Fuzzy + phonetic name match"),
-        ("Corpus", "Data-broker exposure database"),
+        ("Input",         "SmartCredit member identity"),
+        ("Engine",        "Fuzzy + phonetic name match (PII)"),
+        ("Corpus",        "Hundreds of broker, business, gov sources"),
+        ("Pattern",       "Auto-scan → alert → member chooses"),
         ("Member action", "Remove  /  Keep"),
     ]
-    yy = y + 1.7
+    yy = y + 1.55
     for label, body in rows_today:
-        add_textbox(s, 0.7, yy, 1.2, 0.3, label, font_size=10, bold=True, color=SC_BLUE)
-        add_textbox(s, 1.95, yy, col_w - 1.5, 0.3, body, font_size=11, color=SC_INK_BODY)
-        yy += 0.45
+        add_textbox(s, 0.7, yy, 1.4, 0.3, label, font_size=10, bold=True, color=SC_BLUE)
+        add_textbox(s, 2.15, yy, col_w - 1.7, 0.3, body, font_size=10.5, color=SC_INK_BODY)
+        yy += 0.36
 
     # Arrow
-    add_arrow_right(s, 0.5 + col_w + 0.15, y + 1.6, gap - 0.3, 0.6, SC_ORANGE)
-    add_textbox(s, 0.5 + col_w + 0.05, y + 2.25, gap, 0.3,
+    add_arrow_right(s, 0.5 + col_w + 0.15, y + 1.5, gap - 0.3, 0.6, SC_ORANGE)
+    add_textbox(s, 0.5 + col_w + 0.05, y + 2.15, gap, 0.3,
                 "same engine", font_size=9, bold=True, color=SC_ORANGE,
                 align=PP_ALIGN.CENTER)
 
-    # TOMORROW
+    # TOMORROW card
     x2 = 0.5 + col_w + gap
-    add_round_rect(s, x2, y, col_w, 3.7, WHITE, line=SC_BLUE, radius=0.03)
+    add_round_rect(s, x2, y, col_w, 3.5, WHITE, line=SC_BLUE, radius=0.03)
     add_rect(s, x2, y, col_w, 0.18, SC_BLUE)
-    add_textbox(s, x2 + 0.2, y + 0.35, col_w - 0.4, 0.45,
+    add_textbox(s, x2 + 0.2, y + 0.32, col_w - 0.4, 0.4,
                 "TOMORROW · myReclaim",
-                font_size=12, bold=True, color=SC_BLUE)
-    add_textbox(s, x2 + 0.2, y + 0.85, col_w - 0.4, 0.7,
-                "Find unclaimed money for the member",
-                font_size=18, bold=True, color=SC_INK)
+                font_size=11, bold=True, color=SC_BLUE)
+    add_textbox(s, x2 + 0.2, y + 0.78, col_w - 0.4, 0.7,
+                "Find unclaimed money owed to the member",
+                font_size=17, bold=True, color=SC_INK)
     rows_tomorrow = [
-        ("Input",  "Same SmartCredit member identity"),
-        ("Engine", "Same PrivacyMaster matcher"),
-        ("Corpus", "State unclaimed-property records"),
+        ("Input",         "Same SmartCredit member identity"),
+        ("Engine",        "Same PII matcher — no rebuild"),
+        ("Corpus",        "State unclaimed-property records"),
+        ("Pattern",       "Auto-scan → alert → member chooses"),
         ("Member action", "Claim  /  Not me"),
     ]
-    yy = y + 1.7
+    yy = y + 1.55
     for label, body in rows_tomorrow:
-        add_textbox(s, x2 + 0.2, yy, 1.2, 0.3, label, font_size=10, bold=True, color=SC_BLUE)
-        add_textbox(s, x2 + 1.45, yy, col_w - 1.5, 0.3, body, font_size=11, color=SC_INK_BODY)
-        yy += 0.45
+        add_textbox(s, x2 + 0.2, yy, 1.4, 0.3, label, font_size=10, bold=True, color=SC_BLUE)
+        add_textbox(s, x2 + 1.65, yy, col_w - 1.7, 0.3, body, font_size=10.5, color=SC_INK_BODY)
+        yy += 0.36
 
-    # Bottom
-    add_textbox(s, 0.5, 6.7, 12.3, 0.4,
-                "The only new thing is the corpus. The plumbing is already in production.",
-                font_size=14, bold=True, color=SC_INK_MUTED, align=PP_ALIGN.CENTER)
+    # Bottom callout
+    add_round_rect(s, 0.5, 6.65, 12.3, 0.5, SC_BLUE, radius=0.07)
+    add_textbox(s, 0.7, 6.72, 12, 0.36,
+                "myReclaim is not a new product surface — it's a different outcome from the same security envelope members already opted into.",
+                font_size=12, bold=True, color=WHITE)
 
 
 def slide_claim_integration(prs, n, total):
-    """4-tier integration plan for filing claims with each state.
-
-    Key insight surfaced at top: the gate to "SmartCredit submits the claim
-    instead of the user" is REGULATORY (state-approved representative or
-    third-party API access) — not technical.
-    """
+    """Filing the Claim — three concrete delivery models, verified against
+    each state's regulator program (Apr 2026)."""
     s = blank_slide(prs)
     add_chrome(s, n, total)
     add_textbox(s, 0.5, 0.85, 12.5, 0.4,
@@ -576,72 +585,78 @@ def slide_claim_integration(prs, n, total):
                 font_size=12, bold=True, color=SC_BLUE)
     add_textbox(s, 0.5, 1.25, 12.5, 0.95,
                 "The next unlock is regulatory, not technical.",
-                font_size=24, bold=True, color=SC_INK)
-    add_textbox(s, 0.5, 2.1, 12.5, 0.5,
-                "For SmartCredit to submit claims on the member's behalf, we need state-approved representative status — or a third-party claim-submission API where one exists. The code is straightforward; the relationship is the moat.",
-                font_size=11, color=SC_INK_MUTED)
+                font_size=26, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 2.15, 12.5, 0.5,
+                "Every major state already accepts online claim filings. To file on the member's behalf — instead of handing them off — we need state-approved representative status. The code takes days. The state approval is the program.",
+                font_size=12, color=SC_INK_MUTED)
 
-    tiers = [
-        ("TIER 1",
-         "Deep-link to state portal",
-         "Member clicks Claim → state's official site opens. Member files their own claim.",
-         ["All states with online filing",
-          "Zero regulatory exposure",
-          "Ships with Sprint 1"],
-         SC_GREEN, "SHIP NOW"),
-        ("TIER 2",
-         "Browser-extension form-fill",
-         "SmartCredit extension auto-fills the state's claim form from the member's profile. Member still clicks Submit.",
-         ["CA · TX · NY · IL · OH · PA · NJ",
-          "FL excluded (ToS forbids automation)",
-          "Still member-driven submit"],
-         SC_BLUE, "SPRINT 4-5"),
-        ("TIER 3",
-         "Registered representative — SmartCredit submits",
-         "SmartCredit registers under each state's claimant-representative regime and files claims on the member's behalf.",
-         ["GA (CDR) · OH (Registered Finder) · MI (locator) · FL (atty/CPA/PI)",
-          "Background-check + legal review per state",
-          "This is the regulatory unlock"],
-         SC_AMBER, "Q4 2026+"),
-        ("TIER 4",
-         "Direct claim-submission API",
-         "Wire up a third-party API once a state, NAUPA, or Kelmar exposes one.",
-         ["No state offers this today",
-          "Watch NAUPA III / Kelmar evolution",
-          "Opportunistic — not scheduled"],
-         SC_INK_MUTED, "WATCH"),
+    # Three columns: How members file today, How we'd file for them, Where we register first
+    box_w = 4.0
+    gap = 0.15
+    y = 2.95
+    box_h = 3.6
+
+    cards = [
+        # Today — deep link
+        {"title": "TODAY",
+         "subtitle": "Deep-link to state portal",
+         "color": SC_GREEN,
+         "rows": [
+             ("Who files", "The member"),
+             ("How", "We surface the match → click → state's official portal"),
+             ("Coverage", "Every state with online filing"),
+             ("Risk", "None — zero regulatory exposure"),
+             ("Status", "Ships with Sprint 1"),
+         ]},
+        # Tomorrow — registered representative
+        {"title": "TOMORROW",
+         "subtitle": "Registered representative — we file for them",
+         "color": SC_BLUE,
+         "rows": [
+             ("Who files", "SmartCredit, on the member's behalf"),
+             ("How", "Register under each state's claimant-rep regime"),
+             ("Coverage", "Per-state. Each registration is a deal of its own."),
+             ("Risk", "Regulated. Background checks. Annual renewals."),
+             ("Status", "Sprint 4+ once first state approves"),
+         ]},
+        # Where we start
+        {"title": "WHERE WE START",
+         "subtitle": "Three concrete state programs",
+         "color": SC_ORANGE,
+         "rows": [
+             ("Georgia",
+              "CDR program (live since Jul 2024). Registered reps get a "
+              "searchable data file and can file claims for the member."),
+             ("Florida",
+              "Reps must be FL attorney, CPA, or licensed PI registered "
+              "with the Department. Smaller pool, stricter."),
+             ("Ohio",
+              "Registered Professional Finder path. Regulator-administered."),
+             ("Fee cap",
+              "GA caps third-party fees at 30% of recovery. We charge $0."),
+         ]},
     ]
-    y = 2.75
-    row_h = 0.97
-    for tier, title, desc, bullets, color, badge in tiers:
-        # row card
-        add_round_rect(s, 0.5, y, 12.3, row_h - 0.08, WHITE, line=SC_BORDER, radius=0.03)
-        add_rect(s, 0.5, y, 0.22, row_h - 0.08, color)
-        # tier label
-        add_textbox(s, 0.85, y + 0.08, 1.4, 0.3,
-                    tier, font_size=11, bold=True, color=color)
-        add_textbox(s, 0.85, y + 0.35, 2.6, 0.42,
-                    title, font_size=12, bold=True, color=SC_INK)
-        # description
-        add_textbox(s, 3.55, y + 0.1, 5.8, 0.8,
-                    desc, font_size=11, color=SC_INK_BODY)
-        # bullets (right block)
-        bullets_text = "  ·  ".join(bullets)
-        add_textbox(s, 3.55, y + 0.6, 5.8, 0.35,
-                    bullets_text, font_size=9, color=SC_INK_MUTED)
-        # status badge
-        add_pill(s, 9.6, y + 0.28, 1.7, 0.4,
-                 badge, color, WHITE, font_size=10)
-        y += row_h
+    for i, card in enumerate(cards):
+        x = 0.5 + i * (box_w + gap)
+        add_round_rect(s, x, y, box_w, box_h, WHITE, line=SC_BORDER, radius=0.03)
+        add_rect(s, x, y, box_w, 0.18, card["color"])
+        add_textbox(s, x + 0.25, y + 0.32, box_w - 0.5, 0.4,
+                    card["title"], font_size=11, bold=True, color=card["color"])
+        add_textbox(s, x + 0.25, y + 0.7, box_w - 0.5, 0.55,
+                    card["subtitle"], font_size=14, bold=True, color=SC_INK)
+        yy = y + 1.4
+        for label, body in card["rows"]:
+            add_textbox(s, x + 0.25, yy, 1.3, 0.28,
+                        label, font_size=9.5, bold=True, color=SC_BLUE)
+            add_textbox(s, x + 0.25, yy + 0.26, box_w - 0.5, 0.45,
+                        body, font_size=9.5, color=SC_INK_BODY)
+            yy += 0.45
 
-    # Bottom callout — pull quote framing the takeaway
-    add_round_rect(s, 0.5, 6.65, 12.3, 0.65, SC_BLUE, radius=0.05)
-    add_textbox(s, 0.7, 6.72, 12, 0.32,
-                "The technical work is done in days. The state-approval work is the program.",
+    # Bottom callout
+    add_round_rect(s, 0.5, 6.7, 12.3, 0.55, SC_BLUE, radius=0.07)
+    add_textbox(s, 0.7, 6.78, 12, 0.32,
+                "Members never pay. We never take a cut. Free is the regulatory shield and the brand promise.",
                 font_size=13, bold=True, color=WHITE)
-    add_textbox(s, 0.7, 7.02, 12, 0.28,
-                "Each state we register in expands what \"we found you money\" actually means — from \"go file this\" to \"we filed it for you.\"",
-                font_size=10, color=RGBColor(0xCC, 0xDD, 0xFF))
 
 
 def slide_08_roadmap(prs, n, total):
@@ -838,6 +853,80 @@ def slide_11_ask(prs, n, total):
     add_rect(s, 0.5, 6.85, 12.3, 0.0, SC_INK)
 
 
+def slide_workflow_summary(prs, n, total):
+    """Closing slide: the workflow that needs to happen, in order."""
+    s = blank_slide(prs)
+    add_chrome(s, n, total)
+    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
+                "WORKFLOW · WHAT NEEDS TO HAPPEN NEXT",
+                font_size=12, bold=True, color=SC_BLUE)
+    add_textbox(s, 0.5, 1.25, 12.5, 0.9,
+                "From approval to first member alert.",
+                font_size=28, bold=True, color=SC_INK)
+
+    steps = [
+        ("01",
+         "Exec approval & resourcing",
+         "Greenlight myReclaim. Assign 1 data engineer + 1 product engineer.",
+         "Now",
+         SC_BLUE),
+        ("02",
+         "California ingestion live",
+         "Scheduled pull from sco.ca.gov → S3 → Snowflake. Canonical schema, dedupe, dbt models.",
+         "Sprint 1 · ~6 weeks",
+         SC_BLUE),
+        ("03",
+         "Plug in the PII matching engine",
+         "Connect SmartCredit's existing identity matcher to the Snowflake corpus. Surface alerts in member dashboard.",
+         "Sprint 1–2",
+         SC_BLUE),
+        ("04",
+         "Deep-link claim flow shipped",
+         "Member clicks Claim → state portal opens. Zero regulatory exposure. First retention signal lands.",
+         "End of Sprint 2",
+         SC_GREEN),
+        ("05",
+         "State outreach & registrations",
+         "Begin TX & NY data requests. File Georgia CDR registration (first rep path). Open FL conversations.",
+         "Parallel · Sprint 2+",
+         SC_AMBER),
+        ("06",
+         "Expand: more states, more states' worth of money",
+         "TX + NY + GA online (data + claim filing). Browser-extension form-fill for member-driven submit. Quarterly state additions.",
+         "Q3–Q4 2026",
+         SC_AMBER),
+        ("07",
+         "Tier 3 unlock — we file for the member",
+         "First state-approved representative submission. \"We found you money\" becomes \"we filed it for you.\"",
+         "Q4 2026 / Q1 2027",
+         SC_ORANGE),
+    ]
+    y = 2.3
+    row_h = 0.65
+    for num, title, body, when, color in steps:
+        add_round_rect(s, 0.5, y, 12.3, row_h - 0.06, WHITE, line=SC_BORDER, radius=0.03)
+        add_rect(s, 0.5, y, 0.18, row_h - 0.06, color)
+        # Number
+        add_textbox(s, 0.85, y + 0.13, 0.6, 0.36,
+                    num, font_size=15, bold=True, color=color)
+        # Title
+        add_textbox(s, 1.55, y + 0.08, 4.5, 0.28,
+                    title, font_size=12, bold=True, color=SC_INK)
+        # Body
+        add_textbox(s, 1.55, y + 0.32, 8.6, 0.3,
+                    body, font_size=10, color=SC_INK_BODY)
+        # When
+        add_pill(s, 10.5, y + 0.16, 1.7, 0.3,
+                 when, color, WHITE, font_size=9)
+        y += row_h
+
+    # Bottom callout
+    add_round_rect(s, 0.5, 7.0, 12.3, 0.4, SC_INK, radius=0.07)
+    add_textbox(s, 0.7, 7.05, 12, 0.32,
+                "First member alert in ~6 weeks. First \"we filed for you\" within ~9 months.",
+                font_size=12, bold=True, color=WHITE)
+
+
 def slide_12_thanks(prs, n, total):
     s = blank_slide(prs)
     add_rect(s, 0, 0, 13.33, 7.5, SC_INK)
@@ -868,21 +957,23 @@ def main():
     prs.slide_width = Inches(13.33)
     prs.slide_height = Inches(7.5)
 
+    # Slimmed deck (per Apr 29 review):
+    #   - dropped slide_04_why_we_win, slide_privacy_master (key points
+    #     incorporated into slide_pii_matching), slide_06_architecture,
+    #     slide_08_roadmap, slide_09_compliance, slide_10_built,
+    #     slide_11_ask, slide_12_thanks
+    #   - renamed PrivacyMaster ↔ myReclaim to "PII Matching Engine"
+    #   - revised data-strategy to "Data Ingestion"
+    #   - redid claim-integration with verified state-by-state regulator facts
+    #   - new closing: workflow summary
     builders = [
         slide_01_title,
         slide_02_hook,
         slide_03_what_it_is,
-        slide_04_why_we_win,
-        slide_privacy_master,      # NEW: PrivacyMaster trust precedent
-        slide_07_match_reuse,      # PrivacyMaster ↔ myReclaim side-by-side
-        slide_05_data_strategy,
-        slide_06_architecture,
-        slide_claim_integration,   # 4-tier claim-filing strategy
-        slide_08_roadmap,
-        slide_09_compliance,
-        slide_10_built,
-        slide_11_ask,
-        slide_12_thanks,
+        slide_pii_matching,        # was slide_07_match_reuse + privacy_master
+        slide_05_data_strategy,    # now "Data Ingestion"
+        slide_claim_integration,   # redone with GA CDR / FL / OH facts
+        slide_workflow_summary,    # NEW closing slide
     ]
     total = len(builders)
     for i, b in enumerate(builders, start=1):
