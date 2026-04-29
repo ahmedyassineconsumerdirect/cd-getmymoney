@@ -644,26 +644,35 @@ def slide_customer_match_results(prs, n, total):
                 "Number of records each customer's name returned. Fewer records = more distinctive name = more likely match.",
                 font_size=10, color=SC_INK_MUTED)
 
+    # 5 cols: bucket / customers / $ total / $ per customer / confidence
     dist_rows = [
-        ("1 record",        "3,266",   "$239K",  SC_GREEN, "High confidence"),
-        ("2–5 records",     "5,788",   "$1.21M", SC_GREEN, "High confidence"),
-        ("6–20 records",    "4,393",   "$3.50M", SC_AMBER, "Mixed — needs review"),
-        ("20+ records",     "8,417",   "$319M",  SC_INK_MUTED, "Common-name collisions"),
+        ("1 record",      "3,266", "$239K",  "$73",     SC_GREEN,     "High confidence"),
+        ("2–5 records",   "5,788", "$1.21M", "$209",    SC_GREEN,     "High confidence"),
+        ("6–20 records",  "4,393", "$3.50M", "$797",    SC_AMBER,     "Mixed — review"),
+        ("20+ records",   "8,417", "$319M",  "$37,898", SC_INK_MUTED, "Common-name collisions"),
     ]
     y = 5.3
     row_h = 0.33
     # Header row
     add_rect(s, 0.5, y, 6.0, 0.26, SC_INK)
-    for label, x, w in [("Records returned", 0.6, 1.7), ("Customers", 2.4, 1.0), ("$ value", 3.55, 1.0), ("Confidence", 4.7, 1.7)]:
+    cols = [
+        ("Records",     0.55, 0.95),
+        ("Customers",   1.55, 0.85),
+        ("$ total",     2.45, 0.85),
+        ("$/customer",  3.35, 1.00),
+        ("Confidence",  4.40, 2.05),
+    ]
+    for label, x, w in cols:
         add_textbox(s, x, y + 0.04, w, 0.20, label, font_size=9, bold=True, color=WHITE)
     y += 0.26
-    for i, (bucket, custs, val, color, note) in enumerate(dist_rows):
+    for i, (bucket, custs, val, per, color, note) in enumerate(dist_rows):
         bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
         add_rect(s, 0.5, y, 6.0, row_h, bg)
-        add_textbox(s, 0.6, y + 0.06, 1.7, 0.22, bucket, font_size=10.5, bold=True, color=SC_INK)
-        add_textbox(s, 2.4, y + 0.06, 1.0, 0.22, custs, font_size=10.5, color=SC_INK_BODY)
-        add_textbox(s, 3.55, y + 0.06, 1.0, 0.22, val, font_size=10.5, bold=True, color=color)
-        add_textbox(s, 4.7, y + 0.06, 1.7, 0.22, note, font_size=9.5, color=SC_INK_MUTED)
+        add_textbox(s, 0.55, y + 0.06, 0.95, 0.22, bucket, font_size=10, bold=True, color=SC_INK)
+        add_textbox(s, 1.55, y + 0.06, 0.85, 0.22, custs, font_size=10, color=SC_INK_BODY)
+        add_textbox(s, 2.45, y + 0.06, 0.85, 0.22, val, font_size=10, bold=True, color=color)
+        add_textbox(s, 3.35, y + 0.06, 1.00, 0.22, per, font_size=10, color=color)
+        add_textbox(s, 4.40, y + 0.06, 2.05, 0.22, note, font_size=9, color=SC_INK_MUTED)
         y += row_h
 
     # Per-tier breakdown
@@ -672,24 +681,33 @@ def slide_customer_match_results(prs, n, total):
     add_textbox(s, 6.8, 4.92, 6.0, 0.3,
                 "Tier 04 ($500+) carries 53% of the value despite 2% of records.",
                 font_size=10, color=SC_INK_MUTED)
+    # 5 cols: tier / range / customers / records / $ value
     tier_rows = [
-        ("Tier 01",  "$0–$9.99",      "2,283,461", "$5.8M",   SC_INK_MUTED),
-        ("Tier 02",  "$10–$99.99",    "1,622,140", "$57.9M",  SC_AMBER),
-        ("Tier 03",  "$100–$499.99",  "425,201",   "$87.5M",  SC_ORANGE),
-        ("Tier 04",  "$500+",         "97,787",    "$173.1M", SC_BLUE),
+        ("Tier 01", "$0–$9.99",     "19,476", "2.28M",  "$5.8M",   SC_INK_MUTED),
+        ("Tier 02", "$10–$99.99",   "17,927", "1.62M",  "$57.9M",  SC_AMBER),
+        ("Tier 03", "$100–$499.99", "12,384", "425,201","$87.5M",  SC_ORANGE),
+        ("Tier 04", "$500+",        "7,569",  "97,787", "$173.1M", SC_BLUE),
     ]
     y = 5.3
     add_rect(s, 6.8, y, 6.0, 0.26, SC_INK)
-    for label, x, w in [("Tier", 6.9, 1.0), ("Range", 7.95, 1.4), ("Records", 9.45, 1.5), ("$ value", 11.05, 1.5)]:
+    tier_cols = [
+        ("Tier",      6.85, 0.85),
+        ("Range",     7.65, 1.30),
+        ("Customers", 9.00, 1.05),
+        ("Records",   10.05, 1.10),
+        ("$ value",   11.20, 1.55),
+    ]
+    for label, x, w in tier_cols:
         add_textbox(s, x, y + 0.04, w, 0.20, label, font_size=9, bold=True, color=WHITE)
     y += 0.26
-    for i, (tier, rng, recs, val, color) in enumerate(tier_rows):
+    for i, (tier, rng, custs, recs, val, color) in enumerate(tier_rows):
         bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
         add_rect(s, 6.8, y, 6.0, row_h, bg)
-        add_textbox(s, 6.9, y + 0.06, 1.0, 0.22, tier, font_size=10.5, bold=True, color=color)
-        add_textbox(s, 7.95, y + 0.06, 1.4, 0.22, rng, font_size=9.5, color=SC_INK_BODY)
-        add_textbox(s, 9.45, y + 0.06, 1.5, 0.22, recs, font_size=10.5, color=SC_INK_BODY)
-        add_textbox(s, 11.05, y + 0.06, 1.5, 0.22, val, font_size=10.5, bold=True, color=color)
+        add_textbox(s, 6.85, y + 0.06, 0.85, 0.22, tier, font_size=10, bold=True, color=color)
+        add_textbox(s, 7.65, y + 0.06, 1.30, 0.22, rng, font_size=9.5, color=SC_INK_BODY)
+        add_textbox(s, 9.00, y + 0.06, 1.05, 0.22, custs, font_size=10, color=SC_INK_BODY)
+        add_textbox(s, 10.05, y + 0.06, 1.10, 0.22, recs, font_size=10, color=SC_INK_BODY)
+        add_textbox(s, 11.20, y + 0.06, 1.55, 0.22, val, font_size=10, bold=True, color=color)
         y += row_h
 
     # Bottom callout — the honest framing
