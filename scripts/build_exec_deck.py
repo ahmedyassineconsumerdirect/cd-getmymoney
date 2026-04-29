@@ -613,11 +613,11 @@ def slide_claim_integration(prs, n, total):
                 "Most states accept online claim filings — that's our v1 path. When a state requires a notarized paper packet, we ship it via ActionLetters (our existing letter-mailing service that already handles credit-dispute mailers). Filing on the member's behalf is a regulatory unlock per state, not a technical one.",
                 font_size=11, color=SC_INK_MUTED)
 
-    # Three columns: How members file today, How we'd file for them, Where we register first
+    # Three columns: today (e-file), today (mail fallback), tomorrow (rep filing)
     box_w = 4.0
     gap = 0.15
-    y = 2.95
-    box_h = 3.6
+    y = 2.85
+    box_h = 4.0   # bumped from 3.6 to give rows enough breathing room
 
     cards = [
         # v1 — Assisted e-file
@@ -626,22 +626,19 @@ def slide_claim_integration(prs, n, total):
          "color": SC_GREEN,
          "rows": [
              ("Who submits", "The member"),
-             ("How", "We prepare the packet → state's official portal → user submits"),
-             ("We track", "Claim ID + status updates back into SmartCredit"),
-             ("Coverage", "Every state with online filing"),
-             ("Status", "Ships Sprint 1"),
+             ("How",         "We prep the packet · user submits via state portal"),
+             ("We track",    "Claim ID + status sync back to SmartCredit"),
+             ("Status",      "Ships Sprint 1 · every state with online filing"),
          ]},
-        # v2 — Mail packet (already have this rail)
+        # v1 — Mail-packet fallback (already have this rail)
         {"title": "v1 · FALLBACK",
          "subtitle": "Mail packet via ActionLetters",
          "color": SC_AMBER,
          "rows": [
-             ("Who submits", "The member, but we generate + send the paper"),
-             ("How", "Notarized claim packet → ActionLetters → state mail intake"),
-             ("Asset reused",
-              "Same ActionLetters rail SmartCredit uses for credit-bureau dispute letters"),
-             ("When", "States that require notarized physical paperwork"),
-             ("Status", "Available now — no new vendor"),
+             ("Who submits", "Member submits; we generate the paper"),
+             ("How",         "Notarized packet → ActionLetters → state mail intake"),
+             ("When",        "States requiring notarized physical paperwork"),
+             ("Status",      "Available now · same rail as credit-dispute mailers"),
          ]},
         # v2 — Representative filing
         {"title": "v2 · UNLOCK",
@@ -649,37 +646,33 @@ def slide_claim_integration(prs, n, total):
          "color": SC_BLUE,
          "rows": [
              ("Who submits", "SmartCredit, on the member's behalf"),
-             ("Georgia",
-              "CDR program (live Jul 2024). Searchable file + claim filing."),
-             ("Florida",
-              "Registered FL atty/CPA/PI per Ch. 717. Same rep can pull data manually."),
-             ("Ohio · Michigan",
-              "Registered Finder / locator path."),
-             ("Fee cap",
-              "GA caps reps at 30%. We charge $0."),
+             ("Where",       "GA (CDR) · FL (Ch. 717) · OH (Finder) · MI (locator)"),
+             ("Fee",         "GA caps reps at 30% · we charge $0"),
+             ("Status",      "Sprint 4+ once first state approves"),
          ]},
     ]
     for i, card in enumerate(cards):
         x = 0.5 + i * (box_w + gap)
         add_round_rect(s, x, y, box_w, box_h, WHITE, line=SC_BORDER, radius=0.03)
         add_rect(s, x, y, box_w, 0.18, card["color"])
-        add_textbox(s, x + 0.25, y + 0.32, box_w - 0.5, 0.4,
+        add_textbox(s, x + 0.25, y + 0.32, box_w - 0.5, 0.36,
                     card["title"], font_size=11, bold=True, color=card["color"])
         add_textbox(s, x + 0.25, y + 0.7, box_w - 0.5, 0.55,
                     card["subtitle"], font_size=14, bold=True, color=SC_INK)
-        yy = y + 1.4
+        # Each row: label band (0.22 high) + body band (0.52 high) = 0.74 row pitch
+        yy = y + 1.5
         for label, body in card["rows"]:
-            add_textbox(s, x + 0.25, yy, 1.3, 0.28,
-                        label, font_size=9.5, bold=True, color=SC_BLUE)
-            add_textbox(s, x + 0.25, yy + 0.26, box_w - 0.5, 0.45,
-                        body, font_size=9.5, color=SC_INK_BODY)
-            yy += 0.45
+            add_textbox(s, x + 0.25, yy, 1.5, 0.22,
+                        label, font_size=9, bold=True, color=SC_BLUE)
+            add_textbox(s, x + 0.25, yy + 0.24, box_w - 0.5, 0.5,
+                        body, font_size=10, color=SC_INK_BODY)
+            yy += 0.6
 
     # Bottom callout
-    add_round_rect(s, 0.5, 6.65, 12.3, 0.55, SC_BLUE, radius=0.07)
-    add_textbox(s, 0.7, 6.73, 12, 0.32,
+    add_round_rect(s, 0.5, 7.0, 12.3, 0.4, SC_BLUE, radius=0.1)
+    add_textbox(s, 0.7, 7.05, 12, 0.32,
                 "Members never pay. We never take a cut. Free is the regulatory shield and the brand promise.",
-                font_size=13, bold=True, color=WHITE)
+                font_size=12, bold=True, color=WHITE)
 
 
 def slide_08_roadmap(prs, n, total):
