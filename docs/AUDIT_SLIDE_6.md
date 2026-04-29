@@ -1,5 +1,11 @@
 # Audit instructions — Slide 6 customer-match statistics
 
+> **2026-04-29 update — Codex caught two real bugs in the v1 numbers:**
+> 1. Customer rows must be **DISTINCT-ed on (first_norm, last_norm) before the join**. The CSV has 30,862 rows but only 29,405 unique normalized name pairs; the 1,457 duplicate-name rows were each joining to the same set of CA records, multiplying counts and dollars by ~1.83×.
+> 2. The two name orderings must be combined with **`UNION`** (not `UNION ALL`) so customers whose first==last don't generate 321 self-doubled match rows.
+>
+> The numbers below are the **corrected** (deduped) values. The script `scripts/customer_match_fast.py` was updated to produce these.
+
 You are auditing the customer-match numbers on slide 6 of `myReclaim-Exec-Deck.pptx` in this repo. Reproduce the analysis from scratch, then report any discrepancies between your computed numbers and the claimed numbers below.
 
 ## Inputs
@@ -33,13 +39,13 @@ There is an index `ix_owner_normalized` on `owner_name_normalized` — your quer
 
 ## Methodology to reproduce
 
-1. **Load customers** into a DuckDB temp table. Normalize first/last names with `UPPER(TRIM(REGEXP_REPLACE(name, '\s+', ' ', 'g')))`. Skip rows where `FIRST_NAME` or `LAST_NAME` is null/empty.
+1. **Load customers** into a DuckDB temp table. Normalize first/last names with `UPPER(TRIM(REGEXP_REPLACE(name, '\s+', ' ', 'g')))`. Skip rows where `FIRST_NAME` or `LAST_NAME` is null/empty. **Use `SELECT DISTINCT` so duplicate normalized names collapse to one row before the join** (caught by the Codex audit — duplicate rows otherwise multiply per-customer totals).
 
 2. **Build match keys** per customer — both orderings:
    - `key_fl = first_norm || ' ' || last_norm`
    - `key_lf = last_norm || ' ' || first_norm`
 
-3. **Equality join** against `ca_unclaimed.owner_name_normalized`. **Use `UNION ALL` of the two key forms — do not use `OR` in the join clause** (the `OR` form does not use the index and runs >100× slower).
+3. **Equality join** against `ca_unclaimed.owner_name_normalized`. **Combine the two keys with `UNION` (not `UNION ALL`)** so customers whose first_name == last_name don't generate self-doubled match rows. **Do not use `OR` in the join clause** (the `OR` form does not use the index and runs >100× slower).
 
 4. **No address, DOB, or middle-name filtering.** Name-only match.
 
@@ -66,11 +72,11 @@ Expected:
 | 04_From_500_To_Beyond.zip | 3,800,852 |
 | **total** | **92,401,110** |
 
-## The audit query (canonical form)
+## The audit query (canonical form, deduped)
 
 ```sql
 WITH cust AS (
-    SELECT
+    SELECT DISTINCT  -- ← critical: dedupe before the join
         UPPER(TRIM(REGEXP_REPLACE(FIRST_NAME, '\s+', ' ', 'g'))) AS f,
         UPPER(TRIM(REGEXP_REPLACE(LAST_NAME,  '\s+', ' ', 'g'))) AS l
     FROM read_csv_auto(
@@ -81,7 +87,7 @@ WITH cust AS (
 ),
 all_keys AS (
     SELECT f, l, f || ' ' || l AS k FROM cust
-    UNION ALL
+    UNION  -- ← UNION (not UNION ALL) so first==last names don't double-count
     SELECT f, l, l || ' ' || f AS k FROM cust
 ),
 matches AS (
@@ -96,14 +102,16 @@ Materialize `matches` to a temp table; downstream aggregates run off it.
 
 ## Claims to verify (slide 6)
 
-### Claim 1 — Headline cards
+### Claim 1 — Headline cards (post-Apr 29 dedupe fix)
 
 | Metric | Claimed |
 |---|---|
-| Active CA customers | **30,862** |
-| Customers with ≥1 match | **21,864** |
-| Match rate | **70.8%** |
-| Estimated value across all matches | **$324M** (precisely $324,359,421.31) |
+| CSV rows in active CA cohort | **30,862** |
+| Distinct normalized names | **29,405** |
+| Names with ≥1 match | **21,864** |
+| Match rate (vs distinct) | **74.4%** |
+| Records matched | **2,414,471** |
+| Estimated value across all matches | **$178,343,939** |
 
 Audit query:
 ```sql
@@ -113,17 +121,17 @@ SELECT
 FROM matches;
 ```
 
-### Claim 2 — Match distribution (records returned per customer)
+### Claim 2 — Match distribution (records returned per customer, deduped)
 
-Each customer falls in exactly one bucket based on **how many records returned** when their name was searched. Customer counts should sum to 21,864.
+Each distinct customer name falls in exactly one bucket based on **how many records returned** when that name was searched. Customer counts should sum to 21,864.
 
 | Records returned | Customers | $ total in bucket | $/customer |
 |---|---|---|---|
-| 1 record | 3,266 | $239K | $73 |
-| 2–5 records | 5,788 | $1.21M | $209 |
-| 6–20 records | 4,393 | $3.50M | $797 |
-| 20+ records | 8,417 | $319M | $37,898 |
-| **TOTAL** | **21,864** | **$324M** | — |
+| 1 record | 3,278 | $239K | $73 |
+| 2–5 records | 5,798 | $1.22M | $210 |
+| 6–20 records | 4,402 | $3.52M | $800 |
+| 20+ records | 8,386 | $173M | $20,673 |
+| **TOTAL** | **21,864** | **$178M** | — |
 
 Audit query:
 ```sql
@@ -146,17 +154,17 @@ GROUP BY 1
 ORDER BY MIN(records);
 ```
 
-### Claim 3 — Customers by total owed (each customer in exactly one bucket)
+### Claim 3 — Customers by total owed (each customer in exactly one bucket, deduped)
 
-Customer counts sum to 21,864. Bucket totals sum to $324M.
+Customer counts sum to 21,864. Bucket totals sum to $178M.
 
 | Total owed | Customers | Bucket total | $/customer |
 |---|---|---|---|
-| $0–$9.99 | 2,706 | $8K | $3 |
-| $10–$99.99 | 4,564 | $200K | $44 |
-| $100–$499.99 | 4,289 | $1.05M | $246 |
-| $500+ | 10,305 | $323M | $31,353 |
-| **TOTAL** | **21,864** | **$324,359,421.31** | — |
+| $0–$9.99 | 2,707 | $8K | $3 |
+| $10–$99.99 | 4,571 | $200K | $44 |
+| $100–$499.99 | 4,297 | $1.06M | $246 |
+| $500+ | 10,289 | $177M | $17,211 |
+| **TOTAL** | **21,864** | **$178,343,938.87** | — |
 
 Audit query:
 ```sql

@@ -24,17 +24,15 @@ def main() -> None:
     print(f"[{time.strftime('%H:%M:%S')}] Connecting to {DB_PATH}")
     conn = duckdb.connect(DB_PATH)
 
-    # --- Load customers ---------------------------------------------------
+    # --- Load customers (DEDUPED on normalized first/last) ----------------
+    # IMPORTANT: customer rows that share a normalized name must be deduped
+    # before the join. Otherwise each duplicate-named row joins to the same
+    # set of CA records, multiplying counts and dollar values. Codex caught
+    # this — see docs/AUDIT_SLIDE_6.md for the methodology fix.
     conn.execute("DROP TABLE IF EXISTS sc_customers_ca")
     conn.execute(f"""
         CREATE TABLE sc_customers_ca AS
-        SELECT
-            FIRST_NAME       AS first_name,
-            LAST_NAME        AS last_name,
-            MIDDLE_NAME      AS middle_name,
-            CUSTOMER_ADDRESS_CITY    AS city,
-            CUSTOMER_ADDRESS_ZIPCODE AS zip,
-            CAST(CUSTOMERS AS BIGINT) AS customers,
+        SELECT DISTINCT
             UPPER(TRIM(REGEXP_REPLACE(FIRST_NAME, '\\s+', ' ', 'g'))) AS first_norm,
             UPPER(TRIM(REGEXP_REPLACE(LAST_NAME,  '\\s+', ' ', 'g'))) AS last_norm
         FROM read_csv_auto('{CUSTOMERS_CSV}', header=true)
@@ -42,7 +40,12 @@ def main() -> None:
           AND TRIM(FIRST_NAME) <> '' AND TRIM(LAST_NAME) <> ''
     """)
     n_customers = conn.execute("SELECT COUNT(*) FROM sc_customers_ca").fetchone()[0]
-    print(f"[{time.strftime('%H:%M:%S')}] Loaded {n_customers:,} active CA customers")
+    n_csv_rows = conn.execute(f"""
+        SELECT COUNT(*)
+        FROM read_csv_auto('{CUSTOMERS_CSV}', header=true)
+        WHERE FIRST_NAME IS NOT NULL AND LAST_NAME IS NOT NULL
+    """).fetchone()[0]
+    print(f"[{time.strftime('%H:%M:%S')}] CSV rows: {n_csv_rows:,}  Distinct names: {n_customers:,}")
 
     # --- Loaded tiers -----------------------------------------------------
     by_source = conn.execute(
@@ -66,8 +69,10 @@ def main() -> None:
             FROM sc_customers_ca
         ),
         all_keys AS (
+            -- UNION (not UNION ALL) eliminates the 321 duplicate hits
+            -- when first_norm == last_norm
             SELECT first_norm, last_norm, key_fl AS k FROM cust_keys
-            UNION ALL
+            UNION
             SELECT first_norm, last_norm, key_lf AS k FROM cust_keys
         )
         SELECT
