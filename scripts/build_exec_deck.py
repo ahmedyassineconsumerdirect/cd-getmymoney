@@ -318,63 +318,86 @@ def slide_04_why_we_win(prs, n, total):
 
 
 def slide_05_data_strategy(prs, n, total):
-    """Data ingestion strategy — confirmed against state portals Apr 2026."""
+    """Data ingestion priority — driven by SmartCredit customer concentration.
+
+    Top 10 states cover ~70% of the customer base. Pairs each state's
+    customer count with its ingest posture. Sourced from
+    Customers_by_State.csv (Apr 2026) + state matrix research.
+    """
     s = blank_slide(prs)
     add_chrome(s, n, total)
     add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "DATA INGESTION",
+                "DATA INGESTION · CUSTOMER-DRIVEN PRIORITY",
                 font_size=12, bold=True, color=SC_BLUE)
     add_textbox(s, 0.5, 1.25, 12.5, 0.9,
-                "How we get the data — state by state, on a schedule.",
+                "Where our members live. What each state lets us do.",
                 font_size=26, bold=True, color=SC_INK)
-    add_textbox(s, 0.5, 2.1, 12.5, 0.5,
-                "There is no public MissingMoney API. Each state runs its own program. We sort 21 priority states into four ingest tiers based on what each state actually allows.",
-                font_size=12, color=SC_INK_MUTED)
+    add_textbox(s, 0.5, 2.1, 12.5, 0.45,
+                "Top 10 customer states cover ~70% of the SmartCredit base. Three of the top five (FL, TX, GA) need a state agreement before we can ingest. CA is the only top-10 state with a clean public bulk feed — that's where the prototype starts.",
+                font_size=11, color=SC_INK_MUTED)
 
-    # 4 tier swim lanes
-    tiers = [
-        ("BUILD",   "Public bulk download",
-         ["CA"],
-         "California State Controller publishes the full database as zipped CSVs on sco.ca.gov, refreshed weekly. Already prototyped — 81M rows loaded.",
-         SC_GREEN),
-        ("REQUEST", "Permission / API access required",
-         ["TX", "NY", "GA", "OH", "MI"],
-         "Formal request to the state treasurer or department. NY uses secure FTP (quarterly). GA requires CDR registration to receive the data file. TX requires a written request.",
-         SC_AMBER),
-        ("HANDOFF", "Deep-link to state portal only",
-         ["IL", "PA", "NJ", "SC", "AL", "LA", "VA", "AZ", "MD", "TN", "MS", "MO", "NC"],
-         "No public bulk feed. Surface the member's match — if any — by querying the state's public search and deep-linking to their claim portal.",
-         SC_INK_MUTED),
-        ("BLOCKED", "Do not ingest",
-         ["FL", "WA", "UT"],
-         "FL portal terms forbid automated access (rep-only via FL atty/CPA/PI). WA + UT statute prohibits commercial redistribution of the owner list.",
-         SC_RED),
+    # Top-10 table from Customers_by_State.csv + matrix posture
+    rows = [
+        (1,  "FL", 65400,  "BLOCKED", SC_RED,        "FL atty/CPA/PI rep-only — partner or skip ingest"),
+        (2,  "TX", 61414,  "REQUEST", SC_AMBER,      "Written data request + caching agreement"),
+        (3,  "CA", 44222,  "BUILD",   SC_GREEN,      "Public CSV, weekly — 81M rows already loaded ✓"),
+        (4,  "GA", 29566,  "REQUEST", SC_AMBER,      "CDR registration → searchable data file (live Jul '24)"),
+        (5,  "NY", 22137,  "REQUEST", SC_AMBER,      "Secure-FTP owner-name file, quarterly"),
+        (6,  "IL", 16242,  "HANDOFF", SC_INK_MUTED,  "No bulk feed; assisted e-file via iCash"),
+        (7,  "NC", 14404,  "HANDOFF", SC_INK_MUTED,  "PDFs only; not a clean feed"),
+        (8,  "PA", 12290,  "HANDOFF", SC_INK_MUTED,  "No bulk; assisted e-file"),
+        (9,  "NJ", 11856,  "HANDOFF", SC_INK_MUTED,  "No bulk; assisted e-file"),
+        (10, "SC", 10534,  "HANDOFF", SC_INK_MUTED,  "No bulk; assisted e-file"),
     ]
-    y = 2.85
-    row_h = 1.0
-    for tier_name, desc, states, body, color in tiers:
-        # Card
-        add_round_rect(s, 0.5, y, 12.3, row_h - 0.1, WHITE, line=SC_BORDER, radius=0.03)
-        # Color rail
-        add_rect(s, 0.5, y, 0.18, row_h - 0.1, color)
+
+    # Header strip
+    y0 = 2.7
+    add_rect(s, 0.5, y0, 12.3, 0.32, SC_INK)
+    headers = [
+        ("#",         0.6,  0.5),
+        ("STATE",     1.15, 0.9),
+        ("CUSTOMERS", 2.1,  1.6),
+        ("INGEST",    3.85, 1.4),
+        ("WHAT THAT MEANS", 5.4, 7.4),
+    ]
+    for label, x, w in headers:
+        add_textbox(s, x, y0 + 0.06, w, 0.22,
+                    label, font_size=9, bold=True, color=WHITE)
+
+    # Body rows
+    y = y0 + 0.32
+    row_h = 0.36
+    for i, (rank, state, customers, tier, color, note) in enumerate(rows):
+        bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
+        add_rect(s, 0.5, y, 12.3, row_h, bg)
+        # Highlight CA row (the only ingestable top-10 state today)
+        if state == "CA":
+            add_rect(s, 0.5, y, 0.12, row_h, SC_GREEN)
+        # Rank
+        add_textbox(s, 0.6, y + 0.08, 0.5, 0.22,
+                    f"{rank}", font_size=11, bold=True, color=SC_INK_MUTED)
+        # State code
+        add_textbox(s, 1.15, y + 0.06, 0.9, 0.24,
+                    state, font_size=14, bold=True, color=SC_INK)
+        # Customer count
+        add_textbox(s, 2.1, y + 0.07, 1.6, 0.22,
+                    f"{customers:,}", font_size=12, bold=True, color=SC_INK)
         # Tier badge
-        add_pill(s, 0.85, y + 0.18, 1.3, 0.36, tier_name, color, WHITE, font_size=11)
-        add_textbox(s, 0.85, y + 0.55, 2.0, 0.32,
-                    desc, font_size=11, color=SC_INK_MUTED)
-        # State chips
-        x = 2.6
-        for state_code in states:
-            chip_w = 0.42
-            add_round_rect(s, x, y + 0.32, chip_w, 0.36,
-                           WHITE, line=color, radius=0.2)
-            add_textbox(s, x, y + 0.36, chip_w, 0.3,
-                        state_code, font_size=10, bold=True,
-                        color=color, align=PP_ALIGN.CENTER)
-            x += chip_w + 0.08
-        # Body
-        add_textbox(s, 2.6, y + 0.7, 10.0, 0.3,
-                    body, font_size=10, color=SC_INK_BODY)
+        add_pill(s, 3.85, y + 0.06, 1.05, 0.24,
+                 tier, color, WHITE, font_size=8)
+        # Note
+        add_textbox(s, 5.4, y + 0.08, 7.4, 0.22,
+                    note, font_size=10, color=SC_INK_BODY)
         y += row_h
+
+    # Bottom callout — strategic insight
+    add_round_rect(s, 0.5, 6.65, 12.3, 0.55, SC_BLUE, radius=0.07)
+    add_textbox(s, 0.7, 6.72, 12, 0.32,
+                "Top-10 states = 287,765 customers (~70% of base). Only CA is fully ingestable today.",
+                font_size=12, bold=True, color=WHITE)
+    add_textbox(s, 0.7, 7.0, 12, 0.22,
+                "Sprint 2 unlocks TX + NY + GA → covers our top 5 states (~225K customers, 5× current coverage).",
+                font_size=10, color=RGBColor(0xCC, 0xDD, 0xFF))
 
 
 def slide_06_architecture(prs, n, total):
@@ -587,7 +610,7 @@ def slide_claim_integration(prs, n, total):
                 "Three channels. E-file preferred. Mail when required. Rep when approved.",
                 font_size=22, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.15, 12.5, 0.5,
-                "Most states accept online claim filings — that's our v1 path. When a state requires a notarized paper packet, we ship it via Lob (already in production for our credit-dispute mailers). Filing on the member's behalf is a regulatory unlock per state, not a technical one.",
+                "Most states accept online claim filings — that's our v1 path. When a state requires a notarized paper packet, we ship it via ActionLetters (our existing letter-mailing service that already handles credit-dispute mailers). Filing on the member's behalf is a regulatory unlock per state, not a technical one.",
                 font_size=11, color=SC_INK_MUTED)
 
     # Three columns: How members file today, How we'd file for them, Where we register first
@@ -610,13 +633,13 @@ def slide_claim_integration(prs, n, total):
          ]},
         # v2 — Mail packet (already have this rail)
         {"title": "v1 · FALLBACK",
-         "subtitle": "Mail packet via Lob",
+         "subtitle": "Mail packet via ActionLetters",
          "color": SC_AMBER,
          "rows": [
              ("Who submits", "The member, but we generate + send the paper"),
-             ("How", "Notarized claim packet → Lob → state mail intake"),
+             ("How", "Notarized claim packet → ActionLetters → state mail intake"),
              ("Asset reused",
-              "Same Lob rail SmartCredit already uses for credit-bureau dispute letters"),
+              "Same ActionLetters rail SmartCredit uses for credit-bureau dispute letters"),
              ("When", "States that require notarized physical paperwork"),
              ("Status", "Available now — no new vendor"),
          ]},
@@ -881,8 +904,8 @@ def slide_workflow_summary(prs, n, total):
          "Sprint 1–2",
          SC_BLUE),
         ("04",
-         "Assisted e-file shipped (with mail-packet fallback via Lob)",
-         "Member confirms a match → SmartCredit preps the packet → user submits via state portal. Lob handles physical packets where states require it.",
+         "Assisted e-file shipped (with ActionLetters mail-packet fallback)",
+         "Member confirms a match → SmartCredit preps the packet → user submits via state portal. ActionLetters handles physical packets where states require it.",
          "End of Sprint 2",
          SC_GREEN),
         ("05",
