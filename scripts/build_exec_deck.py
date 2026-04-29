@@ -617,8 +617,8 @@ def slide_customer_match_results(prs, n, total):
                 "We matched 29,405 distinct customer names (from 30,862 active CA rows) against all four CA unclaimed tiers (92.4M records).",
                 font_size=20, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.2, 12.5, 0.45,
-                "Method: exact name match (FIRST LAST or LAST FIRST) on de-duplicated customer names. Same logic the prototype uses, run via the indexed equality path. The state determines actual eligibility per record.",
-                font_size=11, color=SC_INK_MUTED)
+                "Cohort: active SmartCredit customers with customerproductid=4, excluding test accounts (30,862 of the 44,222 total CA base). Method: exact name match (FIRST LAST or LAST FIRST) on de-duplicated customer names — same logic the prototype uses, indexed equality path. State determines actual eligibility per record.",
+                font_size=10, color=SC_INK_MUTED)
 
     # Headline metrics row (DEDUPED — see docs/AUDIT_SLIDE_6.md)
     headlines = [
