@@ -324,9 +324,9 @@ def slide_04_why_we_win(prs, n, total):
 def slide_05_data_strategy(prs, n, total):
     """Data ingestion priority — driven by SmartCredit customer concentration.
 
-    Top 10 states cover ~65% of the customer base (288,065 of 443,206).
-    Pairs each state's customer count with its ingest posture. Sourced
-    from Customers_by_State.csv (Apr 2026) + state matrix research.
+    Top 10 states cover ~68% of net actives (201,829 of 297,096). Pairs
+    each state's customer count with its ingest posture. Sourced from
+    SC Net Actives by State.csv (Apr 2026) + state matrix research.
     """
     s = blank_slide(prs)
     add_chrome(s, n, total)
@@ -337,21 +337,21 @@ def slide_05_data_strategy(prs, n, total):
                 "Where our members live. What each state lets us do.",
                 font_size=26, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.1, 12.5, 0.45,
-                "Top 10 customer states cover ~65% of the SmartCredit base (288,065 of 443,206). Four of the top five (FL, TX, GA, NY) need a state agreement before we can ingest at scale. CA is the only top-10 state with a clean public bulk feed — that's where the prototype starts.",
+                "Top 10 customer states cover ~68% of SmartCredit net actives (201,829 of 297,096). Four of the top five (FL, TX, GA, NY) need a state agreement before we can ingest at scale. CA is the only top-10 state with a clean public bulk feed — that's where the prototype starts.",
                 font_size=11, color=SC_INK_MUTED)
 
     # Top-10 table from Customers_by_State.csv + matrix posture
     rows = [
-        (1,  "FL", 65400,  "LEGAL",   SC_ORANGE,     "Atty/CPA/PI rep path (Ch. 717). Bulk caching needs written DFS approval; portal manual by default."),
-        (2,  "TX", 61414,  "REQUEST", SC_AMBER,      "Request-based dataset; enable only after written caching/redisplay approval."),
-        (3,  "CA", 44222,  "BUILD",   SC_GREEN,      "Public CSV, updated Thursdays — prototype loaded 92.4M rows across 4 tiers ✓"),
-        (4,  "GA", 29566,  "REQUEST", SC_AMBER,      "CDR registration + background checks → weekly delimited file (>1 GB)"),
-        (5,  "NY", 22137,  "REQUEST", SC_AMBER,      "Secure-FTP owner-name file, quarterly. Excludes amounts and tax IDs."),
-        (6,  "IL", 16242,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed. Assisted e-file via iCash."),
-        (7,  "NC", 14404,  "HANDOFF", SC_INK_MUTED,  "No clean bulk feed confirmed; annual public PDFs exist."),
-        (8,  "PA", 12290,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed."),
-        (9,  "NJ", 11856,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed."),
-        (10, "SC", 10534,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed."),
+        (1,  "FL", 48436,  "LEGAL",   SC_ORANGE,     "Atty/CPA/PI rep path (Ch. 717). Bulk caching needs written DFS approval; portal manual by default."),
+        (2,  "TX", 45670,  "REQUEST", SC_AMBER,      "Request-based dataset; enable only after written caching/redisplay approval."),
+        (3,  "CA", 31110,  "BUILD",   SC_GREEN,      "Public CSV, updated Thursdays — prototype loaded 92.4M rows across 4 tiers ✓"),
+        (4,  "GA", 18837,  "REQUEST", SC_AMBER,      "CDR registration + background checks → weekly delimited file (>1 GB)"),
+        (5,  "NY", 15001,  "REQUEST", SC_AMBER,      "Secure-FTP owner-name file, quarterly. Excludes amounts and tax IDs."),
+        (6,  "IL", 10536,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed. Assisted e-file via iCash."),
+        (7,  "NC",  9549,  "HANDOFF", SC_INK_MUTED,  "No clean bulk feed confirmed; annual public PDFs exist."),
+        (8,  "NJ",  8526,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed."),
+        (9,  "PA",  8172,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed."),
+        (10, "SC",  5992,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed."),
     ]
 
     # Header strip
@@ -394,7 +394,7 @@ def slide_05_data_strategy(prs, n, total):
     # Bottom callout — strategic insight
     add_round_rect(s, 0.5, 6.65, 12.3, 0.55, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 6.7, 12, 0.28,
-                "Top 10 customer states cover ~65% of the SmartCredit base (288,065 of 443,206).",
+                "Top 10 customer states cover ~68% of SmartCredit net actives (201,829 of 297,096).",
                 font_size=12, bold=True, color=WHITE)
     add_textbox(s, 0.7, 6.95, 12, 0.22,
                 "CA is the only top-10 state with a confirmed public bulk feed; Sprint 2 opens TX, NY, and GA pending state approval.",
