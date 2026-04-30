@@ -342,7 +342,7 @@ def slide_05_data_strategy(prs, n, total):
 
     # Top-10 table from Customers_by_State.csv + matrix posture
     rows = [
-        (1,  "FL", 65400,  "LEGAL",   SC_ORANGE,     "Permissioned claimant-rep path (FL atty/CPA/PI, Ch. 717). Bulk ingest/caching only after written DFS approval; portal manual by default."),
+        (1,  "FL", 65400,  "LEGAL",   SC_ORANGE,     "Atty/CPA/PI rep path (Ch. 717). Bulk caching needs written DFS approval; portal manual by default."),
         (2,  "TX", 61414,  "REQUEST", SC_AMBER,      "Request-based dataset; enable only after written caching/redisplay approval."),
         (3,  "CA", 44222,  "BUILD",   SC_GREEN,      "Public CSV, updated Thursdays — prototype loaded 92.4M rows across 4 tiers ✓"),
         (4,  "GA", 29566,  "REQUEST", SC_AMBER,      "CDR registration + background checks → weekly delimited file (>1 GB)"),
@@ -374,9 +374,6 @@ def slide_05_data_strategy(prs, n, total):
     for i, (rank, state, customers, tier, color, note) in enumerate(rows):
         bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
         add_rect(s, 0.5, y, 12.3, row_h, bg)
-        # Highlight CA row (the only ingestable top-10 state today)
-        if state == "CA":
-            add_rect(s, 0.5, y, 0.12, row_h, SC_GREEN)
         # Rank
         add_textbox(s, 0.6, y + 0.08, 0.5, 0.22,
                     f"{rank}", font_size=11, bold=True, color=SC_INK_MUTED)
@@ -396,11 +393,11 @@ def slide_05_data_strategy(prs, n, total):
 
     # Bottom callout — strategic insight
     add_round_rect(s, 0.5, 6.65, 12.3, 0.55, SC_BLUE, radius=0.07)
-    add_textbox(s, 0.7, 6.72, 12, 0.32,
+    add_textbox(s, 0.7, 6.7, 12, 0.28,
                 "Top 10 customer states cover ~65% of the SmartCredit base (288,065 of 443,206).",
                 font_size=12, bold=True, color=WHITE)
-    add_textbox(s, 0.7, 7.0, 12, 0.22,
-                "CA is the only top-10 state with a confirmed public bulk feed. Sprint 2 begins TX + NY data requests and GA CDR registration; bulk availability depends on state approval, terms, and legal sign-off.",
+    add_textbox(s, 0.7, 6.95, 12, 0.22,
+                "CA is the only top-10 state with a confirmed public bulk feed; Sprint 2 opens TX, NY, and GA pending state approval.",
                 font_size=10, color=RGBColor(0xCC, 0xDD, 0xFF))
 
 
