@@ -31,6 +31,7 @@ TIERS = [
     "04_From_500_To_Beyond.zip",   # high-value first
     "03_From_100_To_Below_500.zip",
     "02_From_10_To_Below_100.zip",
+    "01_From_0_To_Below_10.zip",
 ]
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "raw"
