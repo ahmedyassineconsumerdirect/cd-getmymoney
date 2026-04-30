@@ -614,18 +614,18 @@ def slide_customer_match_results(prs, n, total):
                 "WHAT WE'D FIND TODAY · LIVE MATCH",
                 font_size=12, bold=True, color=SC_BLUE)
     add_textbox(s, 0.5, 1.25, 12.5, 0.95,
-                "We matched 29,405 distinct customer names (from 30,862 active CA rows) against all four CA unclaimed tiers (92.4M records).",
+                "We matched 30,931 active CA customers against all four CA unclaimed tiers (92.4M records).",
                 font_size=20, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.2, 12.5, 0.45,
-                "Cohort: active SmartCredit customers with customerproductid=4, excluding test accounts (30,862 of the 44,222 total CA base). Method: exact LAST FIRST match (CA's storage convention) on de-duplicated customer names. State determines actual eligibility per record.",
+                "Cohort: active SmartCredit customers (customerproductid=4, non-test) — 30,931 of the 44,222 total CA base. Customer-level counts via CUSTOMERTOKEN. Method: exact LAST FIRST match (CA's storage convention). State determines actual eligibility per record.",
                 font_size=10, color=SC_INK_MUTED)
 
-    # Headline metrics row (LAST FIRST only — see docs/AUDIT_SLIDE_6.md)
+    # Headline metrics row (v3 — customertoken-aware, LAST FIRST only)
     headlines = [
-        ("21,655",        "distinct names with at least one match",     SC_BLUE),
-        ("73.6%",         "of the 29,405 distinct names",                SC_BLUE),
-        ("2.3M",          "property records matched",                    SC_ORANGE),
-        ("$172M",         "estimated value across all matches",          SC_ORANGE),
+        ("23,166",        "customers with at least one matching name",   SC_BLUE),
+        ("74.9%",         "of the 30,931 active CA customers",            SC_BLUE),
+        ("2.3M",          "property records matched",                     SC_ORANGE),
+        ("$172M",         "estimated value across all matches",           SC_ORANGE),
     ]
     box_w = 2.95; gap = 0.15; y0 = 2.85
     for i, (big, small, color) in enumerate(headlines):
@@ -645,12 +645,12 @@ def slide_customer_match_results(prs, n, total):
                 font_size=10, color=SC_INK_MUTED)
 
     # 5 cols: bucket / customers / $ total / $ per customer / confidence
-    # Numbers from LAST FIRST only match — see docs/AUDIT_SLIDE_6.md
+    # v3: customertoken-aware (customers = real people, $ deduped per name)
     dist_rows = [
-        ("1 record",      "3,323", "$242K",  "$73",     SC_GREEN,     "High confidence"),
-        ("2–5 records",   "5,757", "$1.21M", "$211",    SC_GREEN,     "High confidence"),
-        ("6–20 records",  "4,347", "$3.49M", "$802",    SC_AMBER,     "Mixed — review"),
-        ("20+ records",   "8,228", "$167M",  "$20,342", SC_INK_MUTED, "Common-name collisions"),
+        ("1 record",      "3,331", "$219K",  "$66",     SC_GREEN,     "High confidence"),
+        ("2–5 records",   "5,790", "$1.19M", "$205",    SC_GREEN,     "High confidence"),
+        ("6–20 records",  "4,388", "$3.47M", "$792",    SC_AMBER,     "Mixed — review"),
+        ("20+ records",   "9,657", "$167M",  "$17,329", SC_INK_MUTED, "Common-name collisions"),
     ]
     y = 5.3
     row_h = 0.33
@@ -682,12 +682,12 @@ def slide_customer_match_results(prs, n, total):
     add_textbox(s, 6.8, 4.92, 6.0, 0.3,
                 "Each customer placed in one bucket based on the SUM of their matched records. Customers add up to 21,864.",
                 font_size=10, color=SC_INK_MUTED)
-    # 4 cols: bucket / customers / $ total / $ per customer (LAST FIRST only)
+    # 4 cols: bucket / customers / $ total / $ per customer (v3 token-aware)
     bucket_rows = [
-        ("$0–$9.99",     "2,765",  "$9K",     "$3",      SC_INK_MUTED),
-        ("$10–$99.99",   "4,505",  "$198K",   "$44",     SC_GREEN),
-        ("$100–$499.99", "4,297",  "$1.06M",  "$247",    SC_AMBER),
-        ("$500+",        "10,088", "$171M",   "$16,956", SC_BLUE),
+        ("$0–$9.99",     "2,774",  "$9K",     "$3",      SC_INK_MUTED),
+        ("$10–$99.99",   "4,526",  "$198K",   "$44",     SC_GREEN),
+        ("$100–$499.99", "4,317",  "$1.06M",  "$245",    SC_AMBER),
+        ("$500+",        "11,549", "$171M",   "$14,814", SC_BLUE),
     ]
     y = 5.3
     add_rect(s, 6.8, y, 6.0, 0.26, SC_INK)
@@ -712,7 +712,7 @@ def slide_customer_match_results(prs, n, total):
     # Bottom callout — the honest framing
     add_round_rect(s, 0.5, 7.0, 12.3, 0.45, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 7.05, 12, 0.32,
-                "11,567 customers in the high-confidence buckets ($0–$499.99) map to ~$1.27M of likely-real CA unclaimed property.",
+                "11,617 customers in the high-confidence buckets ($0–$499.99) map to ~$1.27M of likely-real CA unclaimed property.",
                 font_size=11, bold=True, color=WHITE)
 
 

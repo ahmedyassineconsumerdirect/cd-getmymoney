@@ -15,7 +15,7 @@ from pathlib import Path
 
 import duckdb
 
-CUSTOMERS_CSV = "/Users/ahmedyassine/Downloads/Active_SC_Customers_CA.csv"
+CUSTOMERS_CSV = "/Users/ahmedyassine/Downloads/Customers_by_State.csv"
 DB_PATH = "data/ca_unclaimed.duckdb"
 OUT_JSON = "/tmp/customer_match_results.json"
 
@@ -24,28 +24,32 @@ def main() -> None:
     print(f"[{time.strftime('%H:%M:%S')}] Connecting to {DB_PATH}")
     conn = duckdb.connect(DB_PATH)
 
-    # --- Load customers (DEDUPED on normalized first/last) ----------------
-    # IMPORTANT: customer rows that share a normalized name must be deduped
-    # before the join. Otherwise each duplicate-named row joins to the same
-    # set of CA records, multiplying counts and dollar values. Codex caught
-    # this — see docs/AUDIT_SLIDE_6.md for the methodology fix.
-    conn.execute("DROP TABLE IF EXISTS sc_customers_ca")
+    # --- Load customers (CUSTOMERTOKEN-aware, name-deduped for join) -------
+    # Two views: full token-level table for customer counting, and a
+    # DISTINCT-by-name view for the join (so duplicate-named customers
+    # don't multiply per-name totals). See docs/AUDIT_SLIDE_6.md.
+    conn.execute("DROP TABLE IF EXISTS sc_customers_full")
     conn.execute(f"""
-        CREATE TABLE sc_customers_ca AS
-        SELECT DISTINCT
+        CREATE TABLE sc_customers_full AS
+        SELECT
+            CUSTOMERTOKEN AS customer_token,
             UPPER(TRIM(REGEXP_REPLACE(FIRST_NAME, '\\s+', ' ', 'g'))) AS first_norm,
             UPPER(TRIM(REGEXP_REPLACE(LAST_NAME,  '\\s+', ' ', 'g'))) AS last_norm
         FROM read_csv_auto('{CUSTOMERS_CSV}', header=true)
         WHERE FIRST_NAME IS NOT NULL AND LAST_NAME IS NOT NULL
           AND TRIM(FIRST_NAME) <> '' AND TRIM(LAST_NAME) <> ''
     """)
-    n_customers = conn.execute("SELECT COUNT(*) FROM sc_customers_ca").fetchone()[0]
-    n_csv_rows = conn.execute(f"""
-        SELECT COUNT(*)
-        FROM read_csv_auto('{CUSTOMERS_CSV}', header=true)
-        WHERE FIRST_NAME IS NOT NULL AND LAST_NAME IS NOT NULL
-    """).fetchone()[0]
-    print(f"[{time.strftime('%H:%M:%S')}] CSV rows: {n_csv_rows:,}  Distinct names: {n_customers:,}")
+    conn.execute("DROP TABLE IF EXISTS sc_customers_ca")
+    conn.execute("""
+        CREATE TABLE sc_customers_ca AS
+        SELECT DISTINCT first_norm, last_norm FROM sc_customers_full
+    """)
+    n_csv_rows = conn.execute("SELECT COUNT(*) FROM sc_customers_full").fetchone()[0]
+    n_tokens = conn.execute("SELECT COUNT(DISTINCT customer_token) FROM sc_customers_full").fetchone()[0]
+    n_names = conn.execute("SELECT COUNT(*) FROM sc_customers_ca").fetchone()[0]
+    print(f"[{time.strftime('%H:%M:%S')}] CSV rows: {n_csv_rows:,}  "
+          f"Customer tokens: {n_tokens:,}  Distinct names: {n_names:,}")
+    n_customers = n_tokens  # for downstream "match rate" math
 
     # --- Loaded tiers -----------------------------------------------------
     by_source = conn.execute(

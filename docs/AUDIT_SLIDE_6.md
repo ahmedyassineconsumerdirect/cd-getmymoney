@@ -1,11 +1,15 @@
 # Audit instructions — Slide 6 customer-match statistics
 
-> **2026-04-29 update — three corrections applied since v1:**
-> 1. **Dedupe customer rows** on `(first_norm, last_norm)` before the join. The CSV has 30,862 rows but only 29,405 unique normalized name pairs; the 1,457 duplicate-name rows otherwise multiply per-customer totals by ~1.83×. (Codex)
-> 2. ~~UNION (not UNION ALL) on the two name orderings.~~ → No longer applicable; we now use a single ordering.
-> 3. **Use LAST FIRST only** as the match key. CA's unclaimed-property records are stored as `LAST FIRST` (e.g., `YASSINE AHMED`); searching the FIRST LAST ordering as a hedge pulls in name-reversed strangers (a different person with first/last swapped, whose record CA stores as the FIRST LAST string).
+> **2026-04-30 update — input swapped to Customers_by_State.csv (now contains CUSTOMERTOKEN):**
+> Customer counts on the slide are now real-customer counts (distinct customertoken), not distinct-name counts. The match logic still operates at the name level (we don't know how to disambiguate same-named customers from CA's name-only records), but for reporting we count actual customers via customertoken.
 >
-> The numbers below reflect all three corrections. The script `scripts/customer_match_fast.py` produces these.
+> **All four corrections applied since v1:**
+> 1. **Use Customers_by_State.csv** as the input (has CUSTOMERTOKEN). 30,931 active CA customers (was Active_SC_Customers_CA.csv with 30,862 rows; the new file is the same SQL output with the customertoken column added).
+> 2. **Dedupe by name for the join** so duplicate-named customers don't multiply per-name records/totals (~1.83× inflation otherwise — Codex finding).
+> 3. **Count customers via DISTINCT customertoken**, not distinct names. A name like "Maria Garcia" can map to multiple real customers; each gets credit for the matched name.
+> 4. **Use LAST FIRST only** as the match key. CA stores names as `LAST FIRST` (e.g., `YASSINE AHMED`); the reverse ordering pulls in name-reversed strangers.
+>
+> The numbers below reflect all four corrections. The script `scripts/customer_match_fast.py` produces these.
 
 You are auditing the customer-match numbers on slide 6 of `myReclaim-Exec-Deck.pptx` in this repo. Reproduce the analysis from scratch, then report any discrepancies between your computed numbers and the claimed numbers below.
 
@@ -15,12 +19,12 @@ Two source files. Both must already exist on the auditor's machine.
 
 | File | Purpose |
 |---|---|
-| `/Users/ahmedyassine/Downloads/Active_SC_Customers_CA.csv` | 30,862 active SmartCredit customers in CA |
+| `/Users/ahmedyassine/Downloads/Customers_by_State.csv` | 30,931 active SmartCredit customers in CA (with CUSTOMERTOKEN) |
 | `data/ca_unclaimed.duckdb` (gitignored, in this worktree) | All 4 California tiers of unclaimed-property records loaded from sco.ca.gov |
 
 **Customer CSV columns** (header row):
 ```
-FIRST_NAME,LAST_NAME,MIDDLE_NAME,CUSTOMER_ADDRESS_STATE,CUSTOMER_ADDRESS_CITY,CUSTOMER_ADDRESS_ZIPCODE,CUSTOMERPRODUCTID,CUSTOMERS
+CUSTOMERTOKEN,FIRST_NAME,LAST_NAME,MIDDLE_NAME,CUSTOMER_ADDRESS_STATE,CUSTOMER_ADDRESS_CITY,CUSTOMER_ADDRESS_ZIPCODE,PRODUCT,CUSTOMERS
 ```
 
 **DuckDB table** (`ca_unclaimed`) — relevant columns:
@@ -97,16 +101,17 @@ Materialize `matches` to a temp table; downstream aggregates run off it.
 
 ## Claims to verify (slide 6)
 
-### Claim 1 — Headline cards (LAST FIRST only, deduped)
+### Claim 1 — Headline cards (v3, customertoken-aware)
 
 | Metric | Claimed |
 |---|---|
-| CSV rows in active CA cohort | **30,862** |
-| Distinct normalized names | **29,405** |
-| Names with ≥1 match | **21,655** |
-| Match rate (vs distinct) | **73.6%** |
-| Records matched | **2,311,206** |
-| Estimated value across all matches | **$172,320,607** |
+| Active CA customers (DISTINCT customertoken) | **30,931** |
+| Distinct normalized names | **29,435** |
+| Names with ≥1 match | **21,676** |
+| **Customers (real people) with ≥1 match** | **23,166** |
+| **Match rate (customers / cohort)** | **74.9%** |
+| Records matched | **2,313,185** |
+| Estimated value across all matches | **$172,354,594** |
 
 Audit query:
 ```sql
@@ -116,17 +121,17 @@ SELECT
 FROM matches;
 ```
 
-### Claim 2 — Match distribution (records returned per customer, LAST FIRST only)
+### Claim 2 — Match distribution (records returned per name, v3)
 
-Each distinct customer name falls in exactly one bucket based on **how many records returned** when that name was searched. Customer counts should sum to 21,655.
+Each customer's name produces a record-count when searched; we bucket customers by that count. Customer counts use distinct customertoken; bucket $ values are summed once per name (not per customer). Customer counts sum to 23,166.
 
 | Records returned | Customers | $ total in bucket | $/customer |
 |---|---|---|---|
-| 1 record | 3,323 | $242K | $73 |
-| 2–5 records | 5,757 | $1.21M | $211 |
-| 6–20 records | 4,347 | $3.49M | $802 |
-| 20+ records | 8,228 | $167M | $20,342 |
-| **TOTAL** | **21,655** | **$172M** | — |
+| 1 record | 3,331 | $219K | $66 |
+| 2–5 records | 5,790 | $1.19M | $205 |
+| 6–20 records | 4,388 | $3.47M | $792 |
+| 20+ records | 9,657 | $167M | $17,329 |
+| **TOTAL** | **23,166** | **$172M** | — |
 
 Audit query:
 ```sql
@@ -149,17 +154,17 @@ GROUP BY 1
 ORDER BY MIN(records);
 ```
 
-### Claim 3 — Customers by total owed (each customer in exactly one bucket, LAST FIRST only)
+### Claim 3 — Customers by total owed (v3)
 
-Customer counts sum to 21,655. Bucket totals sum to $172M.
+Each customer assigned to one bucket by the SUM of records under their normalized name. Customer counts use customertoken; bucket totals are summed once per name. Counts sum to 23,166. Bucket totals sum to $172.35M.
 
 | Total owed | Customers | Bucket total | $/customer |
 |---|---|---|---|
-| $0–$9.99 | 2,765 | $9K | $3 |
-| $10–$99.99 | 4,505 | $198K | $44 |
-| $100–$499.99 | 4,297 | $1.06M | $247 |
-| $500+ | 10,088 | $171M | $16,956 |
-| **TOTAL** | **21,655** | **$172,320,606.64** | — |
+| $0–$9.99 | 2,774 | $9K | $3 |
+| $10–$99.99 | 4,526 | $198K | $44 |
+| $100–$499.99 | 4,317 | $1.06M | $245 |
+| $500+ | 11,549 | $171M | $14,814 |
+| **TOTAL** | **23,166** | **$172,354,593.63** | — |
 
 Audit query:
 ```sql
