@@ -713,6 +713,116 @@ def slide_customer_match_results(prs, n, total):
                 font_size=11, bold=True, color=WHITE)
 
 
+def slide_customer_match_with_city(prs, n, total):
+    """Same cohort as the prior slide, but join key adds city.
+
+    Numbers from scripts/customer_match_with_city.py — equality join
+    on owner_name_normalized = LAST FIRST AND last_known_city = city.
+    """
+    s = blank_slide(prs)
+    add_chrome(s, n, total)
+    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
+                "WHAT WE'D FIND TODAY · NAME + CITY MATCH",
+                font_size=12, bold=True, color=SC_BLUE)
+    add_textbox(s, 0.5, 1.25, 12.5, 0.95,
+                "Adding city to the join key cuts common-name collisions — the conservative view of who really has property.",
+                font_size=20, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 2.2, 12.5, 0.45,
+                "Same cohort (30,931 active CA customers, customertoken-aware). Match key now: LAST FIRST + last_known_city. Filters customers without a stored city; CA's last_known_city populated on 96% of records.",
+                font_size=10, color=SC_INK_MUTED)
+
+    # Headline metrics row
+    headlines = [
+        ("11,958",        "customers with at least one name+city match", SC_BLUE),
+        ("38.7%",         "of the 30,931 active CA customers",            SC_BLUE),
+        ("69K",           "property records matched",                     SC_ORANGE),
+        ("$5.04M",        "estimated value across all matches",           SC_ORANGE),
+    ]
+    box_w = 2.95; gap = 0.15; y0 = 2.85
+    for i, (big, small, color) in enumerate(headlines):
+        x = 0.5 + i * (box_w + gap)
+        add_round_rect(s, x, y0, box_w, 1.55, WHITE, line=SC_BORDER, radius=0.04)
+        add_rect(s, x, y0, box_w, 0.15, color)
+        add_textbox(s, x + 0.2, y0 + 0.3, box_w - 0.4, 0.85,
+                    big, font_size=36, bold=True, color=color)
+        add_textbox(s, x + 0.2, y0 + 1.1, box_w - 0.4, 0.4,
+                    small, font_size=10, color=SC_INK_BODY)
+
+    # Distribution table — records returned per (name+city)
+    add_textbox(s, 0.5, 4.6, 6.0, 0.35,
+                "MATCH DISTRIBUTION", font_size=11, bold=True, color=SC_BLUE)
+    add_textbox(s, 0.5, 4.92, 6.0, 0.3,
+                "Records each (name + city) key returned. City filter shrinks the long tail of common-name collisions.",
+                font_size=10, color=SC_INK_MUTED)
+
+    dist_rows = [
+        ("1 record",      "4,742", "$240K",  "$51",     SC_GREEN,     "High confidence"),
+        ("2–5 records",   "4,971", "$710K",  "$143",    SC_GREEN,     "High confidence"),
+        ("6–20 records",  "1,602", "$1.21M", "$755",    SC_AMBER,     "Mixed — review"),
+        ("20+ records",     "643", "$2.88M", "$4,478",  SC_INK_MUTED, "Likely real, large estates"),
+    ]
+    y = 5.3
+    row_h = 0.33
+    add_rect(s, 0.5, y, 6.0, 0.26, SC_INK)
+    cols = [
+        ("Records",     0.55, 0.95),
+        ("Customers",   1.55, 0.85),
+        ("$ total",     2.45, 0.85),
+        ("$/customer",  3.35, 1.00),
+        ("Confidence",  4.40, 2.05),
+    ]
+    for label, x, w in cols:
+        add_textbox(s, x, y + 0.04, w, 0.20, label, font_size=9, bold=True, color=WHITE)
+    y += 0.26
+    for i, (bucket, custs, val, per, color, note) in enumerate(dist_rows):
+        bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
+        add_rect(s, 0.5, y, 6.0, row_h, bg)
+        add_textbox(s, 0.55, y + 0.06, 0.95, 0.22, bucket, font_size=10, bold=True, color=SC_INK)
+        add_textbox(s, 1.55, y + 0.06, 0.85, 0.22, custs, font_size=10, color=SC_INK_BODY)
+        add_textbox(s, 2.45, y + 0.06, 0.85, 0.22, val, font_size=10, bold=True, color=color)
+        add_textbox(s, 3.35, y + 0.06, 1.00, 0.22, per, font_size=10, color=color)
+        add_textbox(s, 4.40, y + 0.06, 2.05, 0.22, note, font_size=9, color=SC_INK_MUTED)
+        y += row_h
+
+    # Customers by total owed (per name+city)
+    add_textbox(s, 6.8, 4.6, 6.0, 0.35,
+                "CUSTOMERS BY TOTAL OWED", font_size=11, bold=True, color=SC_BLUE)
+    add_textbox(s, 6.8, 4.92, 6.0, 0.3,
+                "Each customer placed in one bucket based on the SUM of their matched records. Customers add up to 11,958.",
+                font_size=10, color=SC_INK_MUTED)
+    bucket_rows = [
+        ("$0–$9.99",     "3,684",  "$11K",    "$3",      SC_INK_MUTED),
+        ("$10–$99.99",   "4,395",  "$174K",   "$40",     SC_GREEN),
+        ("$100–$499.99", "2,368",  "$534K",   "$225",    SC_AMBER),
+        ("$500+",        "1,511",  "$4.32M",  "$2,859",  SC_BLUE),
+    ]
+    y = 5.3
+    add_rect(s, 6.8, y, 6.0, 0.26, SC_INK)
+    bucket_cols = [
+        ("Total owed",       6.85, 1.45),
+        ("Customers",        8.40, 1.20),
+        ("Bucket total",     9.65, 1.40),
+        ("$ per customer",   11.10, 1.65),
+    ]
+    for label, x, w in bucket_cols:
+        add_textbox(s, x, y + 0.04, w, 0.20, label, font_size=9, bold=True, color=WHITE)
+    y += 0.26
+    for i, (bucket_range, custs, total_, per_cust, color) in enumerate(bucket_rows):
+        bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
+        add_rect(s, 6.8, y, 6.0, row_h, bg)
+        add_textbox(s, 6.85, y + 0.06, 1.45, 0.22, bucket_range, font_size=10, bold=True, color=color)
+        add_textbox(s, 8.40, y + 0.06, 1.20, 0.22, custs, font_size=10, color=SC_INK_BODY)
+        add_textbox(s, 9.65, y + 0.06, 1.40, 0.22, total_, font_size=10, bold=True, color=color)
+        add_textbox(s, 11.10, y + 0.06, 1.65, 0.22, per_cust, font_size=10, color=color)
+        y += row_h
+
+    # Bottom callout — the honest framing
+    add_round_rect(s, 0.5, 7.0, 12.3, 0.45, SC_BLUE, radius=0.07)
+    add_textbox(s, 0.7, 7.05, 12, 0.32,
+                "Adding city collapses 23,166 → 11,958 matched customers and $172M → $5.04M — the defensible floor before deeper PII matching.",
+                font_size=11, bold=True, color=WHITE)
+
+
 def slide_claim_integration(prs, n, total):
     """Filing the Claim — three concrete delivery models, verified against
     each state's regulator program (Apr 2026)."""
@@ -1177,6 +1287,7 @@ def main():
         slide_pii_matching,
         slide_05_data_strategy,
         slide_customer_match_results,  # NEW: live match against active CA customers
+        slide_customer_match_with_city,  # NEW: same cohort, NAME + CITY join key
         slide_claim_integration,
         slide_compliance_guardrails,
         slide_workflow_summary,
