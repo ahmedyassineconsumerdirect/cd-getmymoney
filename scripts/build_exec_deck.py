@@ -611,16 +611,16 @@ def slide_customer_match_results(prs, n, total):
                 "WHAT WE'D FIND TODAY · LIVE MATCH",
                 font_size=12, bold=True, color=SC_BLUE)
     add_textbox(s, 0.5, 1.25, 12.5, 0.95,
-                "We matched 30,931 active CA customers against all four CA unclaimed tiers (92.4M records).",
+                "We matched 31,110 net actives CA · SmartCredit against all four CA unclaimed tiers (92.4M records).",
                 font_size=20, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.2, 12.5, 0.45,
-                "Cohort: active SmartCredit customers (customerproductid=4, non-test) — 30,931 of the 44,222 total CA base. Customer-level counts via CUSTOMERTOKEN. Method: exact LAST FIRST match (CA's storage convention). State determines actual eligibility per record.",
+                "Matching on name only.",
                 font_size=10, color=SC_INK_MUTED)
 
-    # Headline metrics row (v3 — customertoken-aware, LAST FIRST only)
+    # Headline metrics row
     headlines = [
         ("23,166",        "customers with at least one matching name",   SC_BLUE),
-        ("74.9%",         "of the 30,931 active CA customers",            SC_BLUE),
+        ("74.5%",         "of 31,110 net actives CA · SmartCredit",       SC_BLUE),
         ("2.3M",          "property records matched",                     SC_ORANGE),
         ("$172M",         "estimated value across all matches",           SC_ORANGE),
     ]
@@ -677,7 +677,7 @@ def slide_customer_match_results(prs, n, total):
     add_textbox(s, 6.8, 4.6, 6.0, 0.35,
                 "CUSTOMERS BY TOTAL OWED", font_size=11, bold=True, color=SC_BLUE)
     add_textbox(s, 6.8, 4.92, 6.0, 0.3,
-                "Each customer placed in one bucket based on the SUM of their matched records. Customers add up to 21,864.",
+                "Each customer placed in one bucket based on the SUM of their matched records. Customers add up to 23,166.",
                 font_size=10, color=SC_INK_MUTED)
     # 4 cols: bucket / customers / $ total / $ per customer (v3 token-aware)
     bucket_rows = [
@@ -725,16 +725,16 @@ def slide_customer_match_with_city(prs, n, total):
                 "WHAT WE'D FIND TODAY · NAME + CITY MATCH",
                 font_size=12, bold=True, color=SC_BLUE)
     add_textbox(s, 0.5, 1.25, 12.5, 0.95,
-                "Adding city to the join key cuts common-name collisions — the conservative view of who really has property.",
+                "We matched 31,110 net actives CA · SmartCredit against all four CA unclaimed tiers (92.4M records).",
                 font_size=20, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.2, 12.5, 0.45,
-                "Same cohort (30,931 active CA customers, customertoken-aware). Match key now: LAST FIRST + last_known_city. Filters customers without a stored city; CA's last_known_city populated on 96% of records.",
+                "Matching on name and city.",
                 font_size=10, color=SC_INK_MUTED)
 
     # Headline metrics row
     headlines = [
         ("11,958",        "customers with at least one name+city match", SC_BLUE),
-        ("38.7%",         "of the 30,931 active CA customers",            SC_BLUE),
+        ("38.4%",         "of 31,110 net actives CA · SmartCredit",       SC_BLUE),
         ("69K",           "property records matched",                     SC_ORANGE),
         ("$5.04M",        "estimated value across all matches",           SC_ORANGE),
     ]
