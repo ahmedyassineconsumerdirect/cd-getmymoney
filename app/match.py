@@ -43,6 +43,7 @@ class MatchService(Protocol):
         self,
         first_name: str = "",
         last_name: str = "",
+        city: str | None = None,
         state: str | None = None,
         dob: date | None = None,
         addresses: list[str] | None = None,
@@ -80,6 +81,7 @@ class DemoFuzzyMatcher:
         self,
         first_name: str = "",
         last_name: str = "",
+        city: str | None = None,
         state: str | None = None,
         dob: date | None = None,
         addresses: list[str] | None = None,
@@ -92,11 +94,13 @@ class DemoFuzzyMatcher:
         where_clauses = " AND ".join(["owner_name_normalized LIKE ?"] * len(tokens))
         like_params = [f"%{t}%" for t in tokens]
 
-        # Optional state filter — restrict to the chosen state (e.g. "CA")
-        state_clause = ""
+        extra_clause = ""
         params_extra: list = []
+        if city:
+            extra_clause += " AND UPPER(TRIM(last_known_city)) = ?"
+            params_extra.append(normalize_owner_name(city))
         if state:
-            state_clause = " AND last_known_state = ?"
+            extra_clause += " AND last_known_state = ?"
             params_extra.append(state.upper())
 
         # Tier 1: exact full-name match
@@ -117,7 +121,7 @@ class DemoFuzzyMatcher:
                        ELSE 3
                    END AS match_tier
             FROM ca_unclaimed
-            WHERE {where_clauses}{state_clause}
+            WHERE {where_clauses}{extra_clause}
             ORDER BY match_tier ASC, COALESCE(amount_max, 0) DESC
             LIMIT 100
         """

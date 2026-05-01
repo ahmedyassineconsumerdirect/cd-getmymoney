@@ -61,7 +61,7 @@
     hx-target="#results"
     hx-swap="innerHTML"
     hx-indicator="#search-spinner"
-    class="grid grid-cols-3 gap-5"
+    class="grid grid-cols-4 gap-5"
   >
     <div>
       <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1.5">First name</label>
@@ -70,6 +70,10 @@
     <div>
       <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1.5">Last name</label>
       <input name="last_name" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent">
+    </div>
+    <div>
+      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1.5">City</label>
+      <input name="city" placeholder="e.g. Los Angeles" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent">
     </div>
     <div>
       <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1.5">State</label>
@@ -99,12 +103,12 @@
         <option value="WA">Washington</option>
       </select>
     </div>
-    <div class="col-span-3 pt-2">
+    <div class="col-span-4 pt-2">
       <button type="submit" class="bg-cta text-white font-semibold py-3 px-9 rounded-pill hover:bg-cta-dark transition shadow-sm">
         Search records →
       </button>
     </div>
-    <div id="search-progress" class="col-span-3 search-progress hidden">
+    <div id="search-progress" class="col-span-4 search-progress hidden">
       <div class="flex items-center justify-between mb-2">
         <span class="text-xs font-bold text-brand uppercase tracking-widest">Scanning state records</span>
         <span class="text-xs text-ink-muted">81M+ records · est. 8–12 seconds</span>

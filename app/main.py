@@ -45,16 +45,18 @@ def search(
     request: Request,
     first_name: str = Form(""),
     last_name: str = Form(""),
+    city: str = Form(""),
     state: str = Form(""),
 ):
     matcher = _get_match_service()
     matches = matcher.find_matches(
         first_name=first_name,
         last_name=last_name,
+        city=city.strip() or None,
         state=state.strip().upper() or None,
     )
     total = sum((m.amount_max or 0) for m in matches)
-    has_input = any(v.strip() for v in (first_name, last_name, state))
+    has_input = any(v.strip() for v in (first_name, last_name, city, state))
     return templates.TemplateResponse(
         "_results.html",
         {
