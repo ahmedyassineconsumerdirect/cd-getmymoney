@@ -340,7 +340,7 @@ def slide_05_data_strategy(prs, n, total):
     """Data ingestion priority — driven by SmartCredit customer concentration.
 
     Top 10 states cover ~68% of net actives (201,829 of 297,096). Pairs
-    each state's customer count with its ingest posture. Sourced from
+    each state's net-actives count with its ingest posture. Sourced from
     SC Net Actives by State.csv (Apr 2026) + state matrix research.
     """
     s = blank_slide(prs)
@@ -352,7 +352,7 @@ def slide_05_data_strategy(prs, n, total):
                 "Where our members live. What each state lets us do.",
                 font_size=26, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.1, 12.5, 0.45,
-                "Top 10 customer states cover ~68% of SmartCredit net actives (201,829 of 297,096). Four of the top five (FL, TX, GA, NY) need a state agreement before we can ingest at scale. CA is the only top-10 state with a clean public bulk feed — that's where the prototype starts.",
+                "Top 10 states cover ~68% of SC net actives (201,829 of 297,096). Four of the top five (FL, TX, GA, NY) need a state agreement before we can ingest at scale. CA is the only top-10 state with a clean public bulk feed — that's where the prototype starts.",
                 font_size=11, color=SC_INK_MUTED)
 
     # Top-10 table from Customers_by_State.csv + matrix posture
@@ -375,7 +375,7 @@ def slide_05_data_strategy(prs, n, total):
     headers = [
         ("#",         0.6,  0.5),
         ("STATE",     1.15, 0.9),
-        ("CUSTOMERS", 2.1,  1.6),
+        ("NET ACTIVES", 2.1, 1.6),
         ("INGEST",    3.85, 1.4),
         ("WHAT THAT MEANS", 5.4, 7.4),
     ]
@@ -409,7 +409,7 @@ def slide_05_data_strategy(prs, n, total):
     # Bottom callout — strategic insight
     add_round_rect(s, 0.5, 6.65, 12.3, 0.55, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 6.7, 12, 0.28,
-                "Top 10 customer states cover ~68% of SmartCredit net actives (201,829 of 297,096).",
+                "Top 10 states cover ~68% of SC net actives (201,829 of 297,096).",
                 font_size=12, bold=True, color=WHITE)
     add_textbox(s, 0.7, 6.95, 12, 0.22,
                 "CA is the only top-10 state with a confirmed public bulk feed; Sprint 2 opens TX, NY, and GA pending state approval.",
@@ -615,116 +615,77 @@ def slide_pii_matching(prs, n, total):
 
 
 def slide_customer_match_results(prs, n, total):
-    """Live match against the SmartCredit active-CA customer base.
+    """Live match against SC net actives in CA — name only (the ceiling).
 
-    Numbers come from scripts/customer_match_fast.py run on Apr 29 2026
-    against all four CA tiers (92.4M rows).
+    Aggregate $ and record counts are intentionally not headlined: they're
+    inflated by common-name collisions. Coverage % is the honest takeaway;
+    the next slide adds city for the defensible view.
     """
     s = blank_slide(prs)
     add_chrome(s, n, total)
     add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "WHAT WE'D FIND TODAY · LIVE MATCH",
+                "WHAT WE'D FIND TODAY · NAME ONLY",
                 font_size=12, bold=True, color=SC_BLUE)
     add_textbox(s, 0.5, 1.25, 12.5, 0.95,
                 "We matched 31,110 net actives CA · SmartCredit against all four CA unclaimed tiers (92.4M records).",
                 font_size=20, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.2, 12.5, 0.45,
-                "Matching on name only.",
+                "Matching on name only — the upper bound. Common names like 'John Smith' inflate the totals; the next slide adds city for the defensible view.",
                 font_size=10, color=SC_INK_MUTED)
 
-    # Headline metrics row
+    # Two large headline cards — coverage only (no inflated $ / record counts)
     headlines = [
-        ("23,166",        "customers with at least one matching name",   SC_BLUE),
-        ("74.5%",         "of 31,110 net actives CA · SmartCredit",       SC_BLUE),
-        ("2.3M",          "property records matched",                     SC_ORANGE),
-        ("$172M",         "estimated value across all matches",           SC_ORANGE),
+        ("23,166", "net actives matched at least one name",       SC_BLUE),
+        ("74.5%",  "of 31,110 net actives CA · SmartCredit",      SC_BLUE),
     ]
-    box_w = 2.95; gap = 0.15; y0 = 2.85
+    box_w = 6.05; gap = 0.2; y0 = 2.85
     for i, (big, small, color) in enumerate(headlines):
         x = 0.5 + i * (box_w + gap)
         add_round_rect(s, x, y0, box_w, 1.55, WHITE, line=SC_BORDER, radius=0.04)
         add_rect(s, x, y0, box_w, 0.15, color)
-        add_textbox(s, x + 0.2, y0 + 0.3, box_w - 0.4, 0.85,
-                    big, font_size=36, bold=True, color=color)
-        add_textbox(s, x + 0.2, y0 + 1.1, box_w - 0.4, 0.4,
-                    small, font_size=10, color=SC_INK_BODY)
+        add_textbox(s, x + 0.3, y0 + 0.3, box_w - 0.6, 0.85,
+                    big, font_size=44, bold=True, color=color)
+        add_textbox(s, x + 0.3, y0 + 1.1, box_w - 0.6, 0.4,
+                    small, font_size=11, color=SC_INK_BODY)
 
-    # Distribution table — separates likely-true matches from common-name collisions
-    add_textbox(s, 0.5, 4.6, 6.0, 0.35,
-                "MATCH DISTRIBUTION", font_size=11, bold=True, color=SC_BLUE)
-    add_textbox(s, 0.5, 4.92, 6.0, 0.3,
-                "Number of records each customer's name returned. Fewer records = more distinctive name = more likely match.",
+    # Single centered table — net actives by total $ owed
+    add_textbox(s, 2.5, 4.65, 8.3, 0.35,
+                "NET ACTIVES BY TOTAL OWED (under their name)", font_size=11, bold=True, color=SC_BLUE)
+    add_textbox(s, 2.5, 4.97, 8.3, 0.3,
+                "Each net active placed in one bucket by the SUM of their matched records. Add up to 23,166.",
                 font_size=10, color=SC_INK_MUTED)
 
-    # 5 cols: bucket / customers / $ total / $ per customer / confidence
-    # v3: customertoken-aware (customers = real people, $ deduped per name)
-    dist_rows = [
-        ("1 record",      "3,331", "$219K",  "$66",     SC_GREEN,     "High confidence"),
-        ("2–5 records",   "5,790", "$1.19M", "$205",    SC_GREEN,     "High confidence"),
-        ("6–20 records",  "4,388", "$3.47M", "$792",    SC_AMBER,     "Mixed — review"),
-        ("20+ records",   "9,657", "$167M",  "$17,329", SC_INK_MUTED, "Common-name collisions"),
-    ]
-    y = 5.3
-    row_h = 0.33
-    # Header row
-    add_rect(s, 0.5, y, 6.0, 0.26, SC_INK)
-    cols = [
-        ("Records",     0.55, 0.95),
-        ("Customers",   1.55, 0.85),
-        ("$ total",     2.45, 0.85),
-        ("$/customer",  3.35, 1.00),
-        ("Confidence",  4.40, 2.05),
-    ]
-    for label, x, w in cols:
-        add_textbox(s, x, y + 0.04, w, 0.20, label, font_size=9, bold=True, color=WHITE)
-    y += 0.26
-    for i, (bucket, custs, val, per, color, note) in enumerate(dist_rows):
-        bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
-        add_rect(s, 0.5, y, 6.0, row_h, bg)
-        add_textbox(s, 0.55, y + 0.06, 0.95, 0.22, bucket, font_size=10, bold=True, color=SC_INK)
-        add_textbox(s, 1.55, y + 0.06, 0.85, 0.22, custs, font_size=10, color=SC_INK_BODY)
-        add_textbox(s, 2.45, y + 0.06, 0.85, 0.22, val, font_size=10, bold=True, color=color)
-        add_textbox(s, 3.35, y + 0.06, 1.00, 0.22, per, font_size=10, color=color)
-        add_textbox(s, 4.40, y + 0.06, 2.05, 0.22, note, font_size=9, color=SC_INK_MUTED)
-        y += row_h
-
-    # Per-customer total bucketed
-    add_textbox(s, 6.8, 4.6, 6.0, 0.35,
-                "CUSTOMERS BY TOTAL OWED", font_size=11, bold=True, color=SC_BLUE)
-    add_textbox(s, 6.8, 4.92, 6.0, 0.3,
-                "Each customer placed in one bucket based on the SUM of their matched records. Customers add up to 23,166.",
-                font_size=10, color=SC_INK_MUTED)
-    # 4 cols: bucket / customers / $ total / $ per customer (v3 token-aware)
     bucket_rows = [
         ("$0–$9.99",     "2,774",  "$9K",     "$3",      SC_INK_MUTED),
         ("$10–$99.99",   "4,526",  "$198K",   "$44",     SC_GREEN),
         ("$100–$499.99", "4,317",  "$1.06M",  "$245",    SC_AMBER),
         ("$500+",        "11,549", "$171M",   "$14,814", SC_BLUE),
     ]
-    y = 5.3
-    add_rect(s, 6.8, y, 6.0, 0.26, SC_INK)
+    y = 5.4
+    row_h = 0.34
+    add_rect(s, 2.5, y, 8.3, 0.28, SC_INK)
     bucket_cols = [
-        ("Total owed",       6.85, 1.45),
-        ("Customers",        8.40, 1.20),
-        ("Bucket total",     9.65, 1.40),
-        ("$ per customer",   11.10, 1.65),
+        ("Total owed",       2.6,  1.9),
+        ("Net actives",      4.7,  1.6),
+        ("Bucket total",     6.5,  1.9),
+        ("$ per net active", 8.6,  2.1),
     ]
     for label, x, w in bucket_cols:
-        add_textbox(s, x, y + 0.04, w, 0.20, label, font_size=9, bold=True, color=WHITE)
-    y += 0.26
-    for i, (bucket_range, custs, total, per_cust, color) in enumerate(bucket_rows):
+        add_textbox(s, x, y + 0.05, w, 0.22, label, font_size=10, bold=True, color=WHITE)
+    y += 0.28
+    for i, (bucket_range, custs, total_, per_cust, color) in enumerate(bucket_rows):
         bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
-        add_rect(s, 6.8, y, 6.0, row_h, bg)
-        add_textbox(s, 6.85, y + 0.06, 1.45, 0.22, bucket_range, font_size=10, bold=True, color=color)
-        add_textbox(s, 8.40, y + 0.06, 1.20, 0.22, custs, font_size=10, color=SC_INK_BODY)
-        add_textbox(s, 9.65, y + 0.06, 1.40, 0.22, total, font_size=10, bold=True, color=color)
-        add_textbox(s, 11.10, y + 0.06, 1.65, 0.22, per_cust, font_size=10, color=color)
+        add_rect(s, 2.5, y, 8.3, row_h, bg)
+        add_textbox(s, 2.6, y + 0.07, 1.9, 0.24, bucket_range, font_size=11, bold=True, color=color)
+        add_textbox(s, 4.7, y + 0.07, 1.6, 0.24, custs, font_size=11, color=SC_INK_BODY)
+        add_textbox(s, 6.5, y + 0.07, 1.9, 0.24, total_, font_size=11, bold=True, color=color)
+        add_textbox(s, 8.6, y + 0.07, 2.1, 0.24, per_cust, font_size=11, color=color)
         y += row_h
 
-    # Bottom callout — the honest framing
+    # Bottom caveat — calls out that aggregate $ is the ceiling, not the truth
     add_round_rect(s, 0.5, 7.0, 12.3, 0.45, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 7.05, 12, 0.32,
-                "11,617 customers in the high-confidence buckets ($0–$499.99) map to ~$1.27M of likely-real CA unclaimed property.",
+                "Aggregate $172M / 2.3M records on this slide are upper bounds — name alone collides on common names. See next slide (name + city).",
                 font_size=11, bold=True, color=WHITE)
 
 
@@ -746,12 +707,12 @@ def slide_customer_match_with_city(prs, n, total):
                 "Matching on name and city.",
                 font_size=10, color=SC_INK_MUTED)
 
-    # Headline metrics row
+    # Headline metrics row — defensible numbers with city filter
     headlines = [
-        ("11,958",        "customers with at least one name+city match", SC_BLUE),
-        ("38.4%",         "of 31,110 net actives CA · SmartCredit",       SC_BLUE),
-        ("69K",           "property records matched",                     SC_ORANGE),
-        ("$5.04M",        "estimated value across all matches",           SC_ORANGE),
+        ("11,958", "net actives matched (name + city)",     SC_BLUE),
+        ("38.4%",  "of 31,110 net actives CA · SmartCredit", SC_BLUE),
+        ("69K",    "property records matched",               SC_ORANGE),
+        ("$5.04M", "estimated value across all matches",     SC_ORANGE),
     ]
     box_w = 2.95; gap = 0.15; y0 = 2.85
     for i, (big, small, color) in enumerate(headlines):
@@ -763,47 +724,11 @@ def slide_customer_match_with_city(prs, n, total):
         add_textbox(s, x + 0.2, y0 + 1.1, box_w - 0.4, 0.4,
                     small, font_size=10, color=SC_INK_BODY)
 
-    # Distribution table — records returned per (name+city)
-    add_textbox(s, 0.5, 4.6, 6.0, 0.35,
-                "MATCH DISTRIBUTION", font_size=11, bold=True, color=SC_BLUE)
-    add_textbox(s, 0.5, 4.92, 6.0, 0.3,
-                "Records each (name + city) key returned. City filter shrinks the long tail of common-name collisions.",
-                font_size=10, color=SC_INK_MUTED)
-
-    dist_rows = [
-        ("1 record",      "4,742", "$240K",  "$51",     SC_GREEN,     "High confidence"),
-        ("2–5 records",   "4,971", "$710K",  "$143",    SC_GREEN,     "High confidence"),
-        ("6–20 records",  "1,602", "$1.21M", "$755",    SC_AMBER,     "Mixed — review"),
-        ("20+ records",     "643", "$2.88M", "$4,478",  SC_INK_MUTED, "Likely real, large estates"),
-    ]
-    y = 5.3
-    row_h = 0.33
-    add_rect(s, 0.5, y, 6.0, 0.26, SC_INK)
-    cols = [
-        ("Records",     0.55, 0.95),
-        ("Customers",   1.55, 0.85),
-        ("$ total",     2.45, 0.85),
-        ("$/customer",  3.35, 1.00),
-        ("Confidence",  4.40, 2.05),
-    ]
-    for label, x, w in cols:
-        add_textbox(s, x, y + 0.04, w, 0.20, label, font_size=9, bold=True, color=WHITE)
-    y += 0.26
-    for i, (bucket, custs, val, per, color, note) in enumerate(dist_rows):
-        bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
-        add_rect(s, 0.5, y, 6.0, row_h, bg)
-        add_textbox(s, 0.55, y + 0.06, 0.95, 0.22, bucket, font_size=10, bold=True, color=SC_INK)
-        add_textbox(s, 1.55, y + 0.06, 0.85, 0.22, custs, font_size=10, color=SC_INK_BODY)
-        add_textbox(s, 2.45, y + 0.06, 0.85, 0.22, val, font_size=10, bold=True, color=color)
-        add_textbox(s, 3.35, y + 0.06, 1.00, 0.22, per, font_size=10, color=color)
-        add_textbox(s, 4.40, y + 0.06, 2.05, 0.22, note, font_size=9, color=SC_INK_MUTED)
-        y += row_h
-
-    # Customers by total owed (per name+city)
-    add_textbox(s, 6.8, 4.6, 6.0, 0.35,
-                "CUSTOMERS BY TOTAL OWED", font_size=11, bold=True, color=SC_BLUE)
-    add_textbox(s, 6.8, 4.92, 6.0, 0.3,
-                "Each customer placed in one bucket based on the SUM of their matched records. Customers add up to 11,958.",
+    # Single centered table — net actives by total $ owed
+    add_textbox(s, 2.5, 4.65, 8.3, 0.35,
+                "NET ACTIVES BY TOTAL OWED (name + city)", font_size=11, bold=True, color=SC_BLUE)
+    add_textbox(s, 2.5, 4.97, 8.3, 0.3,
+                "Each net active placed in one bucket by the SUM of their matched records. Add up to 11,958.",
                 font_size=10, color=SC_INK_MUTED)
     bucket_rows = [
         ("$0–$9.99",     "3,684",  "$11K",    "$3",      SC_INK_MUTED),
@@ -811,30 +736,31 @@ def slide_customer_match_with_city(prs, n, total):
         ("$100–$499.99", "2,368",  "$534K",   "$225",    SC_AMBER),
         ("$500+",        "1,511",  "$4.32M",  "$2,859",  SC_BLUE),
     ]
-    y = 5.3
-    add_rect(s, 6.8, y, 6.0, 0.26, SC_INK)
+    y = 5.4
+    row_h = 0.34
+    add_rect(s, 2.5, y, 8.3, 0.28, SC_INK)
     bucket_cols = [
-        ("Total owed",       6.85, 1.45),
-        ("Customers",        8.40, 1.20),
-        ("Bucket total",     9.65, 1.40),
-        ("$ per customer",   11.10, 1.65),
+        ("Total owed",       2.6,  1.9),
+        ("Net actives",      4.7,  1.6),
+        ("Bucket total",     6.5,  1.9),
+        ("$ per net active", 8.6,  2.1),
     ]
     for label, x, w in bucket_cols:
-        add_textbox(s, x, y + 0.04, w, 0.20, label, font_size=9, bold=True, color=WHITE)
-    y += 0.26
+        add_textbox(s, x, y + 0.05, w, 0.22, label, font_size=10, bold=True, color=WHITE)
+    y += 0.28
     for i, (bucket_range, custs, total_, per_cust, color) in enumerate(bucket_rows):
         bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
-        add_rect(s, 6.8, y, 6.0, row_h, bg)
-        add_textbox(s, 6.85, y + 0.06, 1.45, 0.22, bucket_range, font_size=10, bold=True, color=color)
-        add_textbox(s, 8.40, y + 0.06, 1.20, 0.22, custs, font_size=10, color=SC_INK_BODY)
-        add_textbox(s, 9.65, y + 0.06, 1.40, 0.22, total_, font_size=10, bold=True, color=color)
-        add_textbox(s, 11.10, y + 0.06, 1.65, 0.22, per_cust, font_size=10, color=color)
+        add_rect(s, 2.5, y, 8.3, row_h, bg)
+        add_textbox(s, 2.6, y + 0.07, 1.9, 0.24, bucket_range, font_size=11, bold=True, color=color)
+        add_textbox(s, 4.7, y + 0.07, 1.6, 0.24, custs, font_size=11, color=SC_INK_BODY)
+        add_textbox(s, 6.5, y + 0.07, 1.9, 0.24, total_, font_size=11, bold=True, color=color)
+        add_textbox(s, 8.6, y + 0.07, 2.1, 0.24, per_cust, font_size=11, color=color)
         y += row_h
 
-    # Bottom callout — the honest framing
+    # Bottom callout — what the city filter buys us
     add_round_rect(s, 0.5, 7.0, 12.3, 0.45, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 7.05, 12, 0.32,
-                "Adding city collapses 23,166 → 11,958 matched customers and $172M → $5.04M — the defensible floor before deeper PII matching.",
+                "Adding city collapses 23,166 → 11,958 matched and $172M → $5.04M — the defensible floor before production PII (DOB, SSN-last-4, full address).",
                 font_size=11, bold=True, color=WHITE)
 
 
