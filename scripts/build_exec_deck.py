@@ -766,6 +766,84 @@ def slide_customer_match_with_city(prs, n, total):
                 font_size=11, bold=True, color=WHITE)
 
 
+def slide_next_steps(prs, n, total):
+    """Next steps — engage legal to unlock the top 5 states.
+
+    The prototype shows what's possible against CA's public CSV.
+    Scaling beyond that is a regulatory unlock, not a technical one.
+    Each top-5 state has a specific posture; legal's job is to open
+    the right door for each.
+    """
+    s = blank_slide(prs)
+    add_chrome(s, n, total)
+    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
+                "NEXT STEPS",
+                font_size=12, bold=True, color=SC_BLUE)
+    add_textbox(s, 0.5, 1.25, 12.5, 1.0,
+                "Engage legal — unlock the top 5 states where our members live.",
+                font_size=26, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 2.2, 12.5, 0.5,
+                "The prototype proves we can match at scale against CA's public feed. Scaling to FL, TX, GA, NY is a regulatory unlock — not a technical one. Legal owns the next step in each state: confirm caching/redisplay rights, file the right registration, or open a written-permission dialogue.",
+                font_size=11, color=SC_INK_MUTED)
+
+    # Top-5 action cards — each with state, posture, the specific legal ask
+    rows = [
+        (1, "FL", 48436, "LEGAL",   SC_ORANGE,
+         "Open dialogue with FL Dept of Financial Services on Ch. 717 registered-rep path AND written approval for bulk caching of the claimant portal data. Confirm FL atty / CPA / PI partnership model."),
+        (2, "TX", 45670, "REQUEST", SC_AMBER,
+         "Submit dataset request via data.gov contact (name, company, mailing address, phone, TX PI license if applicable). Secure written approval for caching, matching, redisplay, and commercial use before production."),
+        (3, "CA", 31110, "BUILD",   SC_GREEN,
+         "Already ingestible — public CSV in production. Legal sign-off needed on commercial caching + in-product redisplay terms before launch. Lowest-friction state."),
+        (4, "GA", 18837, "REQUEST", SC_AMBER,
+         "Begin Claimant Designated Representative registration (background checks + bond). Confirm reuse and automation rights for the weekly delimited file. CDR fee cap is 30% — we charge $0."),
+        (5, "NY", 15001, "REQUEST", SC_AMBER,
+         "Submit owner-name file request to OSC (secure-FTP TXT, quarterly). File excludes amounts and tax IDs. Get written caching and redisplay approval for matching against members."),
+    ]
+
+    # Header strip
+    y0 = 2.85
+    add_rect(s, 0.5, y0, 12.3, 0.32, SC_INK)
+    headers = [
+        ("#",                0.6,  0.5),
+        ("STATE",            1.15, 0.9),
+        ("NET ACTIVES",      2.1,  1.6),
+        ("POSTURE",          3.85, 1.05),
+        ("LEGAL ACTION",     5.05, 7.7),
+    ]
+    for label, x, w in headers:
+        add_textbox(s, x, y0 + 0.06, w, 0.22,
+                    label, font_size=9, bold=True, color=WHITE)
+
+    # Body rows
+    y = y0 + 0.32
+    row_h = 0.74
+    for i, (rank, state, customers, tier, color, action) in enumerate(rows):
+        bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
+        add_rect(s, 0.5, y, 12.3, row_h, bg)
+        # Rank
+        add_textbox(s, 0.6, y + 0.27, 0.5, 0.22,
+                    f"{rank}", font_size=12, bold=True, color=SC_INK_MUTED)
+        # State code
+        add_textbox(s, 1.15, y + 0.24, 0.9, 0.28,
+                    state, font_size=16, bold=True, color=SC_INK)
+        # Net actives count
+        add_textbox(s, 2.1, y + 0.27, 1.6, 0.22,
+                    f"{customers:,}", font_size=13, bold=True, color=SC_INK)
+        # Posture pill
+        add_pill(s, 3.85, y + 0.24, 1.05, 0.28,
+                 tier, color, WHITE, font_size=9)
+        # Legal action description
+        add_textbox(s, 5.05, y + 0.07, 7.7, row_h - 0.14,
+                    action, font_size=10, color=SC_INK_BODY)
+        y += row_h
+
+    # Bottom callout — own this. timeline.
+    add_round_rect(s, 0.5, 7.0, 12.3, 0.45, SC_BLUE, radius=0.07)
+    add_textbox(s, 0.7, 7.05, 12, 0.32,
+                "Owner: Legal · Goal: written posture per state in 30 days · Output: go/no-go decision matrix to unlock the next ingest tier.",
+                font_size=11, bold=True, color=WHITE)
+
+
 def slide_claim_integration(prs, n, total):
     """Filing the Claim — three concrete delivery models, verified against
     each state's regulator program (Apr 2026)."""
@@ -1229,11 +1307,9 @@ def main():
         slide_03_what_it_is,
         slide_pii_matching,
         slide_05_data_strategy,
-        slide_customer_match_results,  # NEW: live match against active CA customers
-        slide_customer_match_with_city,  # NEW: same cohort, NAME + CITY join key
-        slide_claim_integration,
-        slide_compliance_guardrails,
-        slide_workflow_summary,
+        slide_customer_match_results,
+        slide_customer_match_with_city,
+        slide_next_steps,
     ]
     total = len(builders)
     for i, b in enumerate(builders, start=1):
