@@ -246,8 +246,8 @@ def slide_03_what_it_is(prs, n, total):
          "\"Possible match found. The state may be holding property in your name.\""),
         ("2", "They review the possible matches",
          "Holder, type, amount range — laid out as cards. The state determines eligibility."),
-        ("3", "We help them file with the state",
-         "Prepare claim packet · route to official state portal · track status."),
+        ("3", "We hand them off to the state",
+         "Deep-link to the official state claim portal with step-by-step instructions for filing."),
     ]
     yy = y + 0.55
     for num, title, body in steps:
