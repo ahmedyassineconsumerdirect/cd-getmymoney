@@ -630,27 +630,29 @@ def slide_customer_match_results(prs, n, total):
                 "We matched 31,110 net actives CA · SmartCredit against all four CA unclaimed tiers (92.4M records).",
                 font_size=20, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.2, 12.5, 0.45,
-                "Matching on name only — the upper bound. Common names like 'John Smith' inflate the totals; the next slide adds city for the defensible view.",
+                "Matching on name only.",
                 font_size=10, color=SC_INK_MUTED)
 
-    # Two large headline cards — coverage only (no inflated $ / record counts)
+    # Headline metrics row — same shape as slide 7, name-only numbers
     headlines = [
-        ("23,166", "net actives matched at least one name",       SC_BLUE),
-        ("74.5%",  "of 31,110 net actives CA · SmartCredit",      SC_BLUE),
+        ("23,166", "net actives matched (name only)",       SC_BLUE),
+        ("74.5%",  "of 31,110 net actives CA · SmartCredit", SC_BLUE),
+        ("2.3M",   "property records matched",               SC_ORANGE),
+        ("$172M",  "estimated value across all matches",     SC_ORANGE),
     ]
-    box_w = 6.05; gap = 0.2; y0 = 2.85
+    box_w = 2.95; gap = 0.15; y0 = 2.85
     for i, (big, small, color) in enumerate(headlines):
         x = 0.5 + i * (box_w + gap)
         add_round_rect(s, x, y0, box_w, 1.55, WHITE, line=SC_BORDER, radius=0.04)
         add_rect(s, x, y0, box_w, 0.15, color)
-        add_textbox(s, x + 0.3, y0 + 0.3, box_w - 0.6, 0.85,
-                    big, font_size=44, bold=True, color=color)
-        add_textbox(s, x + 0.3, y0 + 1.1, box_w - 0.6, 0.4,
-                    small, font_size=11, color=SC_INK_BODY)
+        add_textbox(s, x + 0.2, y0 + 0.3, box_w - 0.4, 0.85,
+                    big, font_size=36, bold=True, color=color)
+        add_textbox(s, x + 0.2, y0 + 1.1, box_w - 0.4, 0.4,
+                    small, font_size=10, color=SC_INK_BODY)
 
-    # Single centered table — net actives by total $ owed
+    # Single centered table — net actives by total $ owed (name only)
     add_textbox(s, 2.5, 4.65, 8.3, 0.35,
-                "NET ACTIVES BY TOTAL OWED (under their name)", font_size=11, bold=True, color=SC_BLUE)
+                "NET ACTIVES BY TOTAL OWED (name only)", font_size=11, bold=True, color=SC_BLUE)
     add_textbox(s, 2.5, 4.97, 8.3, 0.3,
                 "Each net active placed in one bucket by the SUM of their matched records. Add up to 23,166.",
                 font_size=10, color=SC_INK_MUTED)
@@ -682,10 +684,10 @@ def slide_customer_match_results(prs, n, total):
         add_textbox(s, 8.6, y + 0.07, 2.1, 0.24, per_cust, font_size=11, color=color)
         y += row_h
 
-    # Bottom caveat — calls out that aggregate $ is the ceiling, not the truth
+    # Bottom callout — flag that name-only is the ceiling
     add_round_rect(s, 0.5, 7.0, 12.3, 0.45, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 7.05, 12, 0.32,
-                "Aggregate $172M / 2.3M records on this slide are upper bounds — name alone collides on common names. See next slide (name + city).",
+                "Name-only is the upper bound — common names inflate the totals. Next slide adds city for the defensible view.",
                 font_size=11, bold=True, color=WHITE)
 
 
