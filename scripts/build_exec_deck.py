@@ -184,29 +184,44 @@ def slide_02_hook(prs, n, total):
     add_chrome(s, n, total)
     # Eyebrow
     add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "THE OPPORTUNITY",
+                "WHAT IS UNCLAIMED PROPERTY?",
                 font_size=12, bold=True, color=SC_BLUE)
-    # Big stat
-    add_textbox(s, 0.5, 1.4, 12.5, 2.5,
-                "$70B+",
-                font_size=160, bold=True, color=SC_BLUE)
-    add_textbox(s, 0.5, 4.0, 12.5, 0.7,
-                "estimated in unclaimed property nationwide. Some of it is reported in our members' names.",
-                font_size=24, bold=True, color=SC_INK)
-    # 3 mini facts — sourced from NAUPA FY2024 release (Oct 2024)
-    facts = [
-        ("~33M", "people may have property waiting to be claimed (NAUPA)"),
-        ("$2,080", "average claim paid through MissingMoney.com (median $100, FY2024)"),
-        ("Unique", "combination of verified-identity matching + alerts + free claim guidance"),
+    # Plain-English definition (the hero of the slide)
+    add_textbox(s, 0.5, 1.3, 12.5, 1.2,
+                "Money owed to you that the company holding it lost track of.",
+                font_size=34, bold=True, color=SC_INK)
+    # Sub-explanation
+    add_textbox(s, 0.5, 2.6, 12.5, 1.1,
+                "When a bank, employer, insurer, or utility can't reach the owner of an account or balance for a "
+                "set period (typically 1–3 years), state law requires them to turn it over to the state. "
+                "It sits there — in the owner's name — until someone claims it.",
+                font_size=15, color=SC_INK_BODY)
+
+    # Common sources — concrete examples so it clicks
+    add_textbox(s, 0.5, 4.0, 12.5, 0.3,
+                "COMMON SOURCES",
+                font_size=10, bold=True, color=SC_BLUE)
+    sources = [
+        ("Bank accounts",       "Dormant savings, checking, CDs"),
+        ("Uncashed paychecks",  "Final wages, commissions, bonuses"),
+        ("Refunds & deposits",  "Utility, rent, insurance, retail"),
+        ("Investments",         "Stock dividends, matured bonds, IRAs"),
     ]
-    box_w = 4.0; gap = 0.15; y0 = 5.3
-    for i, (big, small) in enumerate(facts):
+    box_w = 3.0; gap = 0.13; y0 = 4.4
+    for i, (title, body) in enumerate(sources):
         x = 0.5 + i * (box_w + gap)
-        add_round_rect(s, x, y0, box_w, 1.4, WHITE, line=SC_BORDER, radius=0.04)
-        add_textbox(s, x + 0.3, y0 + 0.18, box_w - 0.6, 0.7,
-                    big, font_size=36, bold=True, color=SC_ORANGE)
-        add_textbox(s, x + 0.3, y0 + 0.85, box_w - 0.6, 0.5,
-                    small, font_size=12, color=SC_INK_BODY)
+        add_round_rect(s, x, y0, box_w, 1.25, WHITE, line=SC_BORDER, radius=0.04)
+        add_rect(s, x, y0, box_w, 0.08, SC_BLUE)
+        add_textbox(s, x + 0.25, y0 + 0.22, box_w - 0.5, 0.35,
+                    title, font_size=14, bold=True, color=SC_INK)
+        add_textbox(s, x + 0.25, y0 + 0.62, box_w - 0.5, 0.55,
+                    body, font_size=11, color=SC_INK_BODY)
+
+    # Scale anchor — keep the $ context, but as a footnote not the hero
+    add_round_rect(s, 0.5, 6.0, 12.3, 0.55, SC_BLUE, radius=0.07)
+    add_textbox(s, 0.7, 6.07, 12, 0.4,
+                "Nationwide: $70B+ sitting with state treasurers · ~33M Americans have property waiting (NAUPA, FY2024)",
+                font_size=12, bold=True, color=WHITE)
 
 
 def slide_03_what_it_is(prs, n, total):
