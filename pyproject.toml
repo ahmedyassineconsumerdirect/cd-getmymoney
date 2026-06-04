@@ -1,7 +1,7 @@
 [project]
-name = "cd-funds-finder"
+name = "cd-getmymoney"
 version = "0.1.0"
-description = "Unclaimed property finder prototype for SmartCredit"
+description = "Get My Money Back — unclaimed-property finder for SmartCredit"
 requires-python = ">=3.11"
 
 [tool.pytest.ini_options]
