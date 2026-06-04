@@ -1,17 +1,46 @@
-.worktrees/
-.superpowers/
-.venv/
+# --- Python ---
 __pycache__/
-*.pyc
-data/
+*.py[cod]
+.venv/
+venv/
 .pytest_cache/
-.DS_Store
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# --- Data & database (large / regenerated; holds member data) ---
+data/
 *.duckdb
 *.duckdb.wal
+
+# --- Secrets & credentials (NEVER commit) ---
+.env
+.env.*
+*.env
+# MaxAI / Pine session creds (also under data/, ignored here as a safety net)
+**/maxai_pine_token.json
+**/maxai_pine_pending.json
+**/maxai_pine_code.txt
+
+# --- Session / test artifacts ---
+/*.png
+.playwright-mcp/
+*.log
+
+# --- Tooling / worktrees ---
+.worktrees/
+.superpowers/
+
+# --- Office temp / lock files ---
 ~$*.pptx
 ~$*.docx
 ~$*.xlsx
 
-# session artifacts
-/*.png
-.playwright-mcp/
+# --- Editor / OS ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
