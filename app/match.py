@@ -36,6 +36,14 @@ class Match:
     amount_display: str = ""
     has_range: bool = False
     claim_url: str = ""
+    # Snapshot-diff status: 'active' (in both snapshots, claimable),
+    # 'new' (newly reported), 'claimed' (gone from latest state file).
+    status: str = "active"
+    status_label: str = "Potential match"
+    status_badge_class: str = ""
+    status_dot: str = ""
+    claimable: bool = True
+    relevance: int = 0
 
 
 class MatchService(Protocol):
@@ -61,6 +69,39 @@ def _tokenize_query(*parts: str) -> list[str]:
             if len(tok) >= 2 and tok not in tokens:
                 tokens.append(tok)
     return tokens
+
+
+def _name_parts(*parts: str) -> list[str]:
+    """All normalized name tokens INCLUDING single-letter middle initials,
+    used for relevance ranking (the filter still uses >=2-char tokens)."""
+    out: list[str] = []
+    for p in parts:
+        if not p:
+            continue
+        for tok in normalize_owner_name(p).split():
+            if tok and tok not in out:
+                out.append(tok)
+    return out
+
+
+def relevance_score(owner_normalized: str, q_parts: list[str], last_norm: str) -> int:
+    """How closely a stored owner name matches the searched name — higher is
+    closer. Mirrors how state portals rank by name, not by dollar amount:
+    exact same name parts first, then partial overlaps, with extra/different
+    given names (e.g. a co-owner's name) pushed down."""
+    cand = owner_normalized.split()
+    if not cand:
+        return -999
+    cset, qset = set(cand), set(q_parts)
+    inter = qset & cset
+    score = len(inter) * 10 - len(qset - cset) * 8 - len(cset - qset) * 5
+    if cset == qset:                 # exact same set of name parts (any order)
+        score += 60
+        if cand == q_parts:          # exact same order too
+            score += 15
+    if last_norm and cand[0] == last_norm:  # canonical "LAST FIRST ..." form
+        score += 6
+    return score
 
 
 class DemoFuzzyMatcher:
@@ -90,14 +131,22 @@ class DemoFuzzyMatcher:
         if not tokens:
             return []
 
-        # Each token must appear as a substring (case-insensitive after normalize).
+        # Each token must appear as a substring (case-insensitive after
+        # normalize). A leading-wildcard LIKE can't use the owner-name index, so
+        # this is a full scan — but on warm cache it's ~0.2s over 90M rows, and
+        # crucially it preserves full recall (finds joint/co-owner rows such as
+        # "PHILIP AND JUDY EVANS" where the surname is not the leading token).
+        # The first query after a cold start pages the column into cache (slow
+        # once); _warm_cache() in app.main pre-warms it on startup.
         where_clauses = " AND ".join(["owner_name_normalized LIKE ?"] * len(tokens))
         like_params = [f"%{t}%" for t in tokens]
 
         extra_clause = ""
         params_extra: list = []
         if city:
-            extra_clause += " AND UPPER(TRIM(last_known_city)) = ?"
+            # Collapse interior whitespace on BOTH sides so "San  Francisco"
+            # (double space in the source) still matches "San Francisco".
+            extra_clause += " AND REGEXP_REPLACE(UPPER(TRIM(last_known_city)), '\\s+', ' ', 'g') = ?"
             params_extra.append(normalize_owner_name(city))
         if state:
             extra_clause += " AND last_known_state = ?"
@@ -109,6 +158,14 @@ class DemoFuzzyMatcher:
         full = " ".join(tokens)
         first_tok = tokens[0]
 
+        # Ranking inputs (include middle initials). The final order is by name
+        # closeness (see relevance_score), like the state portal — not by amount.
+        q_parts = _name_parts(first_name, last_name)
+        last_toks = normalize_owner_name(last_name).split()
+        last_norm = last_toks[-1] if last_toks else ""
+
+        # Fetch a generous candidate set biased toward tight names (shorter
+        # owner strings contain fewer extra tokens), then re-rank in Python.
         sql = f"""
             SELECT record_id, holder_name, owner_name,
                    last_known_address, last_known_city,
@@ -122,16 +179,39 @@ class DemoFuzzyMatcher:
                    END AS match_tier
             FROM ca_unclaimed
             WHERE {where_clauses}{extra_clause}
-            ORDER BY match_tier ASC, COALESCE(amount_max, 0) DESC
-            LIMIT 100
+            ORDER BY match_tier ASC, LENGTH(owner_name_normalized) ASC,
+                     COALESCE(amount_max, 0) DESC
+            LIMIT 250
         """
         params = [full, f"{first_tok}%", *like_params, *params_extra]
         rows = self.conn.execute(sql, params).fetchall()
-        # Strip the match_tier column before constructing Match
+
+        # Resolve snapshot-diff status in a second, index-driven lookup keyed on
+        # the (<=100) matched record ids — far cheaper than joining the 19M-row
+        # property_status table against a full-table LIKE scan. Tolerate a
+        # missing table (fresh DB / pre-snapshot) by defaulting to 'active'.
+        record_ids = [r[0] for r in rows]
+        status_map: dict[int, str] = {}
+        if record_ids:
+            placeholders = ",".join("?" * len(record_ids))
+            try:
+                for rid, st in self.conn.execute(
+                    f"SELECT record_id, status FROM property_status WHERE record_id IN ({placeholders})",
+                    record_ids,
+                ).fetchall():
+                    status_map[rid] = st
+            except Exception:
+                pass
+
+        # Columns 0..10 map positionally to the Match required fields; the last
+        # column is match_tier (ranking only — not stored on Match).
         from app import presentation as _p
         results: list[Match] = []
         for r in rows:
-            m = Match(*r[:-1])
+            m = Match(*r[:11])
+            status = status_map.get(r[0], "active")
+            if status not in ("new", "active", "claimed"):
+                status = "active"
             disp = _p.property_type_display(m.property_type)
             m.icon_key = disp["icon_key"]
             m.property_type_display = disp["label"]
@@ -142,8 +222,23 @@ class DemoFuzzyMatcher:
             )
             m.amount_display, m.has_range = _p.amount_display(m.amount_min, m.amount_max)
             m.claim_url = _p.claim_url(m.last_known_state)
+            sd = _p.status_display(status)
+            m.status = status
+            m.status_label = sd["label"]
+            m.status_badge_class = sd["badge_class"]
+            m.status_dot = sd["dot"]
+            m.claimable = sd["claimable"]
+            m.relevance = relevance_score(normalize_owner_name(m.owner_name), q_parts, last_norm)
             results.append(m)
-        return results
+
+        # Order by name closeness first (like the state portal), then by zip
+        # code (records without a zip sort last), amount as a final tiebreak.
+        def _sort_key(m: "Match"):
+            z = (m.last_known_zip or "").strip()
+            return (-m.relevance, z == "", z, -(m.amount_max or 0))
+
+        results.sort(key=_sort_key)
+        return results[:100]
 
 
 # Backward-compat alias kept so legacy imports don't break.

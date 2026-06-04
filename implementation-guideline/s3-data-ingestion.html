@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get My Money Back — S3 Data Ingestion Implementation Guide</title>
+<style>
+  :root{
+    --brand:#2863C5; --brand-dark:#1f4f9e; --brand-light:#E6EFFA;
+    --cta:#FC4C0B; --ink:#0F172A; --body:#334155; --muted:#64748B;
+    --line:#E2E8F0; --bg:#F8FAFC; --code-bg:#0F172A; --ok:#0F6E56; --warn:#B45309;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--body);font-family:"Open Sans","Segoe UI",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:0 24px 80px}
+  header.hero{background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:#fff;padding:48px 0 40px;margin-bottom:0}
+  header.hero .wrap{padding-bottom:0}
+  .eyebrow{font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#BFD4F2;margin:0 0 10px}
+  h1{font-size:34px;line-height:1.12;margin:0 0 12px;font-weight:800;letter-spacing:-.01em}
+  .sub{font-size:18px;color:#E6EFFA;max-width:680px;margin:0}
+  .meta{margin-top:22px;display:flex;flex-wrap:wrap;gap:8px 22px;font-size:13px;color:#CFE0F7}
+  .meta b{color:#fff;font-weight:700}
+  h2{font-size:24px;color:var(--ink);font-weight:800;margin:46px 0 6px;padding-top:10px;letter-spacing:-.01em}
+  h2 .num{color:var(--brand);font-weight:800;margin-right:10px}
+  h3{font-size:17px;color:var(--ink);font-weight:700;margin:26px 0 6px}
+  p{margin:10px 0}
+  a{color:var(--brand)}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .lead{font-size:17px;color:var(--body)}
+  code{background:#EEF2F7;color:#0B2A52;padding:1px 6px;border-radius:5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}
+  pre{background:var(--code-bg);color:#E6EDF5;padding:16px 18px;border-radius:10px;overflow:auto;font-size:13px;line-height:1.55;margin:14px 0}
+  pre code{background:none;color:inherit;padding:0}
+  .pre-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 -6px}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--brand-light);color:var(--ink);font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
+  tr:nth-child(even) td{background:#fff}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+  .toc{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:28px 0 8px}
+  .toc ol{columns:2;column-gap:36px;margin:6px 0 0;font-size:14px}
+  .toc a{text-decoration:none;color:var(--body)}
+  .toc a:hover{color:var(--brand)}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:.03em}
+  .pill.ok{background:#E7F6F0;color:var(--ok)} .pill.warn{background:#FEF3C7;color:var(--warn)} .pill.no{background:#FEE2E2;color:#B91C1C}
+  .note{border-left:4px solid var(--cta);background:#FFF6F1;padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;font-size:14px}
+  .note.blue{border-left-color:var(--brand);background:var(--brand-light)}
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;margin:18px 0}
+  .stage{flex:1 1 0;min-width:120px;background:#fff;border:1px solid var(--line);border-top:3px solid var(--brand);border-radius:10px;padding:12px 12px;margin:6px;position:relative}
+  .stage .s-n{font-size:11px;font-weight:800;color:var(--brand);letter-spacing:.06em}
+  .stage .s-t{font-weight:700;color:var(--ink);font-size:14px;margin:3px 0}
+  .stage .s-d{font-size:12px;color:var(--muted)}
+  .zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:16px 0}
+  .zone{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .zone h4{margin:0 0 4px;font-size:14px;color:var(--ink)}
+  .zone .path{font-family:ui-monospace,monospace;font-size:11.5px;color:var(--brand-dark);background:var(--brand-light);padding:3px 6px;border-radius:5px;display:inline-block;margin-bottom:6px;word-break:break-all}
+  .zone p{font-size:12.5px;color:var(--muted);margin:4px 0 0}
+  footer{margin-top:54px;padding-top:20px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+  @media print{header.hero{background:var(--brand)} .toc ol{columns:1}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">● Implementation Guideline · Proposed</p>
+    <h1>Proposed Production Ingestion: State Unclaimed-Property Data into S3</h1>
+    <p class="sub">A proposed production pipeline for the SmartCredit “Get My Money Back” feature — <strong>automatically fetching</strong> each state's unclaimed-property file into an S3 data lake, then transforming, diffing, and matching in Snowflake.</p>
+    <div class="meta">
+      <span><b>Project</b> Get My Money Back · SmartCredit</span>
+      <span><b>Audience</b> Data Engineering / Platform</span>
+      <span><b>Status</b> Design — for review</span>
+      <span><b>Version</b> 1.0 · 2026-06-03</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<div class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#purpose">Purpose &amp; scope</a></li>
+    <li><a href="#current">Pipeline at a glance</a></li>
+    <li><a href="#arch">Reference architecture</a></li>
+    <li><a href="#layout">S3 bucket &amp; prefix layout</a></li>
+    <li><a href="#pipeline">Ingestion pipeline stages</a></li>
+    <li><a href="#schema">Canonical schema &amp; mapping</a></li>
+    <li><a href="#diff">Snapshot diff (new / claimed)</a></li>
+    <li><a href="#orchestration">Orchestration &amp; scheduling</a></li>
+    <li><a href="#snowflake">Loading into Snowflake</a></li>
+    <li><a href="#security">Security &amp; compliance</a></li>
+    <li><a href="#dq">Data quality &amp; idempotency</a></li>
+    <li><a href="#cost">Cost &amp; scale</a></li>
+    <li><a href="#roadmap">Rollout roadmap</a></li>
+    <li><a href="#next">Open questions &amp; next steps</a></li>
+  </ol>
+</div>
+
+<h2 id="purpose"><span class="num">1</span>Purpose &amp; scope</h2>
+<p class="lead">This guide proposes how Consumer Direct will ingest state unclaimed-property data in production: a durable, governed <strong>S3 data lake</strong> that automatically fetches each state's source file and feeds Snowflake, where the data is transformed, diffed, and matched against member identities.</p>
+<p>The design is a deliberate <strong>ELT</strong> split. <strong>S3</strong> is the durable system of record for the raw source files — every refresh lands as an immutable, dated snapshot, giving us the provenance/audit trail compliance requires. <strong>Snowflake (via dbt)</strong> is where all transformation, the new/claimed snapshot diff, and serving happen — the warehouse Consumer Direct already operates. Acquisition is fully automatic (a scheduled conditional fetch — see §5.1), so no manual download or upload is ever required for a supported state.</p>
+<div class="note blue"><strong>Design principle.</strong> S3 holds immutable, dated <em>snapshots</em> per source. We never overwrite — every refresh is a new partition. This makes the snapshot-diff (new vs. claimed) trivial and gives us the auditable substantiation trail compliance requires (matching algorithm, accuracy, timestamps).</p>
+
+<h2 id="current"><span class="num">2</span>Pipeline at a glance</h2>
+<table>
+  <tr><th>Stage</th><th>Where</th><th>Proposed production approach</th></tr>
+  <tr><td>Fetch <span class="pill ok">automatic</span></td><td>S3</td><td>Scheduled conditional <code>GET</code> (EventBridge → Fargate) — only downloads when the source changed; lands an immutable dated snapshot in <code>raw/</code></td></tr>
+  <tr><td>Unzip</td><td>S3</td><td>Decompress <code>.zip</code> → <code>.csv.gz</code> (the only processing outside Snowflake)</td></tr>
+  <tr><td>Load</td><td>Snowflake</td><td><code>COPY</code> / Snowpipe raw CSV into a landing table</td></tr>
+  <tr><td>Transform</td><td>Snowflake · dbt</td><td>Canonical schema, name normalization, decedent suppression</td></tr>
+  <tr><td>Diff</td><td>Snowflake · dbt</td><td>dbt <code>snapshot</code> → new / claimed / active</td></tr>
+  <tr><td>Match</td><td>Snowflake</td><td>Consumer Direct's Privacy&nbsp;Master engine (same one that scans data brokers)</td></tr>
+  <tr><td>Provenance</td><td>S3 + Snowflake</td><td>Per-snapshot S3 manifests + a <code>SOURCE_REGISTRY</code> table</td></tr>
+</table>
+
+<h2 id="arch"><span class="num">3</span>Reference architecture</h2>
+<p>ELT shape: S3 lands the raw file (fetch + unzip); Snowflake (via dbt) does the transforms and the snapshot diff. Step Functions orchestrates; Snowpipe/COPY loads.</p>
+<div class="flow">
+  <div class="stage"><div class="s-n">1 · ACQUIRE</div><div class="s-t">Fetch (scheduled pull)</div><div class="s-d">Conditional GET CA bulk; TX file, NY SFTP → <code>raw/</code></div></div>
+  <div class="stage"><div class="s-n">2 · UNZIP</div><div class="s-t">Decompress</div><div class="s-d">.zip → .csv.gz in S3 (Snowflake can't COPY .zip)</div></div>
+  <div class="stage"><div class="s-n">3 · LOAD</div><div class="s-t">Raw → Snowflake</div><div class="s-d">Snowpipe / COPY raw CSV into a landing table</div></div>
+  <div class="stage"><div class="s-n">4 · TRANSFORM</div><div class="s-t">dbt in Snowflake</div><div class="s-d">Canonical schema, normalize, decedent filter</div></div>
+  <div class="stage"><div class="s-n">5 · DIFF</div><div class="s-t">dbt snapshot</div><div class="s-d">new / claimed / active vs. prior snapshot</div></div>
+  <div class="stage"><div class="s-n">6 · MATCH</div><div class="s-t">Identity match</div><div class="s-d">Privacy&nbsp;Master vs. member identity → alerts</div></div>
+</div>
+<p style="font-size:13px;color:var(--muted)">AWS building blocks: <strong>S3</strong> (lake) · <strong>Fargate</strong> (fetch + unzip) · <strong>Step Functions + EventBridge</strong> (orchestration/schedule) · <strong>Snowpipe + external stage</strong> (load) · <strong>dbt</strong> (transform + snapshot diff) · <strong>KMS</strong> (encryption) · <strong>Secrets Manager</strong> (SFTP/API creds).</p>
+
+<div class="note blue"><strong>Recommended pattern: ELT — keep transforms &amp; diffs in Snowflake.</strong> S3 is used only to <em>land raw</em> (fetch + unzip). All real work — column mapping to the canonical schema, name normalization, decedent suppression, NAUPA decoding, and the new/claimed <em>snapshot diff</em> — runs in <strong>Snowflake via dbt</strong>, the warehouse Consumer Direct already operates. This means one transform engine (SQL, version-controlled, tested) instead of a second standalone transform runtime; dbt's built-in <code>snapshot</code> is purpose-built for the new/claimed change-tracking; and Snowflake scales the 38M-row joins where the matcher already lives. The only processing that <em>cannot</em> move into Snowflake is <strong>unzip</strong> — <code>COPY</code> reads gzip/bzip2 but not <code>.zip</code> archives, and CA ships <code>.zip</code>. So the S3-side job is <em>fetch&nbsp;+&nbsp;unzip</em>, nothing more. (Revisit pushing a cheap Parquet/prune step back to S3 only if volume grows to many states × frequent refreshes.)</div>
+
+<h2 id="layout"><span class="num">4</span>S3 bucket &amp; prefix layout</h2>
+<p>One bucket per environment (e.g. <code>cd-unclaimed-property-prod</code>), zoned by prefix. Every object is partitioned by <code>source</code>, <code>state</code>, and <code>snapshot_date</code> so snapshots are immutable and prunable.</p>
+<p style="font-size:13px;color:var(--muted)">Under the ELT pattern, S3 holds only <strong>raw</strong> data (the archive and the unzipped CSVs that Snowflake loads). The canonical <code>PROPERTY</code> table and the <code>new/claimed/active</code> status are tables <strong>in Snowflake</strong>, not S3 zones.</p>
+<div class="zones">
+  <div class="zone"><h4>raw/ &nbsp;<span class="pill warn">immutable</span></h4><div class="path">raw/{source}/{state}/{snapshot_date}/</div><p>Exact bytes as received (the <code>.zip</code>) + a <code>_manifest.json</code>. Object-versioned. Never edited.</p></div>
+  <div class="zone"><h4>raw/…/csv/ &nbsp;<span class="pill ok">load source</span></h4><div class="path">raw/{source}/{state}/{snapshot_date}/csv/</div><p>Unzipped <code>.csv.gz</code> — what Snowpipe / <code>COPY</code> reads. Re-derivable from the zip.</p></div>
+  <div class="zone"><h4>quarantine/</h4><div class="path">quarantine/{state}/{snapshot_date}/</div><p>Files that failed validation, with the failure report. Manual review.</p></div>
+  <div class="zone"><h4>logs/</h4><div class="path">logs/access/ · logs/runs/</div><p>S3 access logs + per-run metadata for the audit trail.</p></div>
+  <div class="zone"><h4>Snowflake <span class="pill ok">curated</span></h4><div class="path">raw.property_landing → stg_property → PROPERTY · property_snapshot</div><p>Canonical rows + per-property status live here (dbt), beside the matcher.</p></div>
+</div>
+<div class="pre-label">Example object keys (S3 holds raw only)</div>
+<pre><code>raw/ca_sco/CA/2026-06-01/04_From_500_To_Beyond.zip
+raw/ca_sco/CA/2026-06-01/_manifest.json
+raw/ca_sco/CA/2026-06-01/csv/04_From_500_To_Beyond.csv.gz   ← Snowflake loads this
+# canonical PROPERTY + new/claimed status: tables in Snowflake (dbt), not S3</code></pre>
+<div class="note">Partitioning by <code>snapshot_date</code> (not just “latest”) preserves the history the compliance substantiation file needs and lets dbt detect the new/claimed change cheaply. Lifecycle rules transition the <code>.zip</code> in <code>raw/</code> to Glacier after 90 days; the unzipped <code>csv/</code> expires after a few days (re-derivable from the zip, and already loaded into Snowflake).</div>
+
+<h2 id="pipeline"><span class="num">5</span>Ingestion pipeline stages</h2>
+
+<h3>5.1 — Acquire (land raw)</h3>
+<p><strong>How “automatic” actually works:</strong> the State Controller does not push data or notify us, so ingestion is a <em>scheduled pull</em>. An <strong>EventBridge</strong> schedule (e.g. weekly) starts a <strong>Fargate</strong> task that issues a <strong>conditional GET</strong> against the CA bulk URL — it compares the source <code>ETag</code>/<code>Last-Modified</code> to the last landed snapshot and <em>only downloads when the file has changed</em>, streaming it into a fresh dated <code>raw/</code> snapshot and writing a manifest (etag, byte size, fetched-at). Re-runs are idempotent (it skips an already-landed snapshot). Only <strong>California</strong> publishes an open, commercial-use bulk feed, so it is the only state polled this way; TX (PI-license file) and NY (OSC SFTP) arrive via DataSync/approved drop — see §10.</p>
+<p style="font-size:13px;color:var(--muted)"><strong>Why Fargate, not Lambda:</strong> the CA tiers are ~1&nbsp;GB+ zips; Lambda's 15-min timeout and ephemeral-storage limits make it the wrong tool. A Fargate task (or AWS Batch) has no wall-clock limit and streams a multipart upload to S3.</p>
+<div class="pre-label">Acquire — CA SCO bulk → S3 (conditional GET, idempotent)</div>
+<pre><code>import boto3, hashlib, json, datetime as dt, httpx
+
+S3 = boto3.client("s3")
+BUCKET = "cd-unclaimed-property-prod"
+SNAPSHOT = dt.date.today().isoformat()
+TIERS = ["04_From_500_To_Beyond.zip", "03_From_100_To_Below_500.zip",
+         "02_From_10_To_Below_100.zip", "01_From_0_To_Below_10.zip"]
+
+def last_etag(tier: str) -> str | None:
+    # ETag of the most recently landed copy of this tier, if any.
+    r = S3.list_objects_v2(Bucket=BUCKET, Prefix=f"raw/ca_sco/CA/", Delimiter="/")
+    # (in practice: read it from the latest snapshot's _manifest.json)
+    return None
+
+def land_ca_tier(tier: str, prior_etag: str | None):
+    url = f"https://claimit.ca.gov/upd-property-records/{tier}"
+    # Conditional GET: only download if CA changed the file since last run.
+    head = httpx.head(url, follow_redirects=True, timeout=60)
+    etag = head.headers.get("etag")
+    if etag and etag == prior_etag:
+        return None                      # unchanged → nothing to ingest
+    key = f"raw/ca_sco/CA/{SNAPSHOT}/{tier}"
+    with httpx.stream("GET", url, follow_redirects=True, timeout=600) as r:
+        r.raise_for_status()
+        S3.upload_fileobj(r.iter_bytes(1 << 20), BUCKET, key,   # multipart under the hood
+                          ExtraArgs={"ServerSideEncryption": "aws:kms"})
+    return {"key": key, "etag": etag}
+
+landed = [x for t in TIERS if (x := land_ca_tier(t, last_etag(t)))]
+if landed:   # write a manifest only when something actually changed
+    S3.put_object(Bucket=BUCKET, Key=f"raw/ca_sco/CA/{SNAPSHOT}/_manifest.json",
+                  Body=json.dumps({"source":"ca_sco","state":"CA","snapshot_date":SNAPSHOT,
+                                   "files":landed,"fetched_at":dt.datetime.utcnow().isoformat()+"Z"}),
+                  ServerSideEncryption="aws:kms")</code></pre>
+
+<h3>5.2 — Validate</h3>
+<p>Before transforming, gate the raw drop: confirm expected files are present, the CSV header matches a known shape, the row count is within an expected band of the prior snapshot (a sudden 90% drop usually means a truncated download, not 90% claimed), and the checksum is stable. Failures move the snapshot to <code>quarantine/</code> and page the on-call — they are never loaded into Snowflake.</p>
+
+<h3>5.3 — Unzip (the only S3-side processing)</h3>
+<p>Snowflake's <code>COPY</code> reads gzip/bzip2/zstd but <strong>not <code>.zip</code> archives</strong>, and CA ships <code>.zip</code> files containing CSVs. So a small Fargate step decompresses each archive and writes the member CSVs back to S3 (re-compressed as <code>.csv.gz</code>, which <code>COPY</code> reads natively). That is the <em>only</em> data processing outside Snowflake — no column mapping, no normalization, no diff happens here.</p>
+<div class="pre-label">Unzip — raw .zip → .csv.gz in S3 (no transformation)</div>
+<pre><code># Fargate task: stream each CSV out of the zip, gzip it, put back to S3
+import zipfile, gzip, io, boto3
+S3 = boto3.client("s3")
+zf = zipfile.ZipFile(local_zip)
+for name in (n for n in zf.namelist() if n.lower().endswith(".csv")):
+    buf = io.BytesIO()
+    with zf.open(name) as src, gzip.GzipFile(fileobj=buf, mode="wb") as gz:
+        for chunk in iter(lambda: src.read(1 << 20), b""):
+            gz.write(chunk)
+    buf.seek(0)
+    S3.upload_fileobj(buf, BUCKET,
+        f"raw/ca_sco/CA/{SNAPSHOT}/csv/{name}.gz",
+        ExtraArgs={"ServerSideEncryption": "aws:kms"})</code></pre>
+
+<h3>5.4 — Transform in Snowflake (dbt)</h3>
+<p>Everything else is SQL. After the raw CSVs land in a Snowflake landing table (§9), a <strong>dbt staging model</strong> maps each source's columns to the canonical schema (§6), normalizes owner names for matching, parses amounts, and drops decedent/estate records (v1 compliance) — one tested, version-controlled model per source:</p>
+<div class="pre-label">models/staging/stg_property_ca.sql — runs in Snowflake</div>
+<pre><code>{{ config(materialized='incremental', unique_key=['holder_id','snapshot_date']) }}
+SELECT
+    PROPERTY_ID                                          AS holder_id,
+    HOLDER_NAME                                          AS holder_name,
+    OWNER_NAME                                           AS owner_name,
+    UPPER(TRIM(REGEXP_REPLACE(OWNER_NAME,'\\s+',' ')))   AS owner_name_normalized,
+    OWNER_STREET_1                                       AS last_known_address,
+    OWNER_CITY                                           AS last_known_city,
+    OWNER_STATE                                          AS last_known_state,
+    OWNER_ZIP                                            AS last_known_zip,
+    TRY_TO_DECIMAL(CASH_REPORTED, 14, 2)                 AS amount_min,
+    TRY_TO_DECIMAL(CURRENT_CASH_BALANCE, 14, 2)          AS amount_max,
+    PROPERTY_TYPE                                        AS property_type,
+    'CA'                                                 AS state,
+    metadata$filename                                    AS source_file,
+    TO_DATE(REGEXP_SUBSTR(metadata$filename,'\\d{4}-\\d{2}-\\d{2}')) AS snapshot_date
+FROM {{ source('raw','property_landing') }}
+WHERE NOT REGEXP_LIKE(UPPER(OWNER_NAME), '.*(ESTATE|DECEASED|EST OF).*')</code></pre>
+<p style="font-size:13px;color:var(--muted)">Header names vary by state and are undocumented; maintain a per-source header-alias map (one staging model per source) so a column rename in a future file degrades to NULL rather than breaking the load. The diff (§7) and serving (§9) are likewise pure dbt/Snowflake — each model reads only the new <code>snapshot_date</code>, so reprocessing one state never touches another.</p>
+
+<h2 id="schema"><span class="num">6</span>Canonical schema &amp; mapping</h2>
+<p>Every source is flattened to one canonical row shape, so the matcher and serving layer are source-agnostic — only the per-state staging model changes.</p>
+<table>
+  <tr><th>Canonical column</th><th>Type</th><th>CA SCO source</th><th>Notes</th></tr>
+  <tr><td><code>holder_id</code></td><td>VARCHAR</td><td>PROPERTY_ID</td><td>Unique property id — the diff key</td></tr>
+  <tr><td><code>holder_name</code></td><td>VARCHAR</td><td>HOLDER_NAME</td><td>Reporting bank/employer/insurer</td></tr>
+  <tr><td><code>owner_name</code></td><td>VARCHAR</td><td>OWNER_NAME</td><td>Stored “LAST FIRST [MIDDLE]”</td></tr>
+  <tr><td><code>owner_name_normalized</code></td><td>VARCHAR</td><td>derived</td><td>Upper + collapse whitespace; match key</td></tr>
+  <tr><td><code>last_known_address/city/state/zip</code></td><td>VARCHAR</td><td>OWNER_STREET_1 / CITY / STATE / ZIP</td><td>Used for ranking (name → zip) &amp; verification</td></tr>
+  <tr><td><code>amount_min / amount_max</code></td><td>DECIMAL(14,2)</td><td>CASH_REPORTED / CURRENT_CASH_BALANCE</td><td>Shown as a “potential” estimate</td></tr>
+  <tr><td><code>property_type</code></td><td>VARCHAR</td><td>PROPERTY_TYPE</td><td>NAUPA-ish code, decoded for display</td></tr>
+  <tr><td><code>state · snapshot_date</code></td><td>VARCHAR · DATE</td><td>partition keys</td><td>Provenance &amp; partition pruning</td></tr>
+</table>
+
+<h2 id="diff"><span class="num">7</span>Snapshot diff (new / claimed)</h2>
+<p>When a state republishes its file, a property that was <em>claimed</em> drops out and newly reported money appears. This is exactly change-data-capture across dated snapshots — so use <strong>dbt's built-in <code>snapshot</code></strong> (in Snowflake) rather than a hand-rolled S3 job. dbt tracks each <code>holder_id</code> over time; a record that stops appearing is <code>claimed</code>, a first-time one is <code>new</code>, the rest are <code>active</code>. The UI buckets <code>new</code>/<code>active</code> as claimable and <code>claimed</code> as history.</p>
+<div class="pre-label">snapshots/property_snapshot.sql — dbt snapshot (Snowflake)</div>
+<pre><code>{% snapshot property_snapshot %}
+{{ config(target_schema='snapshots', unique_key='holder_id',
+          strategy='check', check_cols=['snapshot_date']) }}
+  SELECT holder_id, owner_name_normalized, amount_max, snapshot_date
+  FROM {{ ref('stg_property_ca') }}
+{% endsnapshot %}
+
+-- derive status from the snapshot's validity window (dbt_valid_to IS NULL = current)
+SELECT holder_id,
+       CASE WHEN dbt_valid_from = (SELECT MAX(dbt_valid_from) FROM property_snapshot s2
+                                   WHERE s2.holder_id = s.holder_id)
+                 AND dbt_valid_to IS NULL THEN 'active'
+            WHEN dbt_valid_to IS NULL THEN 'active'
+            ELSE 'claimed' END AS status
+FROM property_snapshot s;</code></pre>
+<p style="font-size:13px;color:var(--muted)">Underlying logic is a <code>FULL OUTER JOIN</code> on <code>holder_id</code> between the current and prior snapshot; dbt snapshots give you that plus the history table, tests, and lineage for free. No S3 <code>diffs/</code> zone is needed — the status lives in Snowflake next to <code>PROPERTY</code>.</p>
+
+<h2 id="orchestration"><span class="num">8</span>Orchestration &amp; scheduling</h2>
+<ul>
+  <li><strong>EventBridge schedule</strong> kicks off a <strong>Step Functions</strong> state machine per source (CA monthly; others on their cadence).</li>
+  <li>State machine = Acquire (conditional GET) → Validate → (branch on pass/quarantine) → Unzip → Snowpipe/COPY raw → <code>dbt build</code> (staging → canonical → snapshot diff → tests) → notify.</li>
+  <li>Each step is idempotent and keyed by <code>{source, state, snapshot_date}</code>; a retry re-uses the already-landed raw object rather than re-downloading.</li>
+  <li><strong>dbt</strong> (Cloud or in a Fargate task) builds <code>SOURCE_REGISTRY</code>, <code>PROPERTY</code>, and <code>CLAIM_CASE</code> and runs tests; failures block promotion to the serving schema.</li>
+</ul>
+
+<h2 id="snowflake"><span class="num">9</span>Loading into Snowflake</h2>
+<p>Point an external stage at the <code>raw/…/csv/</code> prefix and <code>COPY</code> the unzipped CSVs into a Snowflake <strong>landing</strong> table (raw columns as-is). dbt (§5.4, §7) does everything after. The landing table keeps the source filename so <code>snapshot_date</code> is recoverable.</p>
+<div class="pre-label">Snowflake — external stage + COPY raw CSV → landing table</div>
+<pre><code>CREATE STORAGE INTEGRATION ucp_s3
+  TYPE=EXTERNAL_STAGE STORAGE_PROVIDER=S3 ENABLED=TRUE
+  STORAGE_AWS_ROLE_ARN='arn:aws:iam::&lt;acct&gt;:role/snowflake-ucp'
+  STORAGE_ALLOWED_LOCATIONS=('s3://cd-unclaimed-property-prod/raw/');
+
+CREATE STAGE ucp_raw
+  URL='s3://cd-unclaimed-property-prod/raw/'
+  STORAGE_INTEGRATION=ucp_s3
+  FILE_FORMAT=(TYPE=CSV SKIP_HEADER=1 FIELD_OPTIONALLY_ENCLOSED_BY='"' COMPRESSION=GZIP);
+
+-- Load raw rows verbatim (the .csv.gz from the unzip step). dbt maps them next.
+COPY INTO raw.property_landing
+  FROM @ucp_raw
+  PATTERN='.*/csv/.*[.]csv[.]gz'
+  INCLUDE_METADATA=(file_name=METADATA$FILENAME);   -- snapshot_date parsed in dbt</code></pre>
+<p style="font-size:13px;color:var(--muted)">A scheduled <code>COPY</code> (gated by the Step Functions success signal) suits a monthly bulk drop better than always-on Snowpipe — cheaper and deterministic. Snowpipe (S3 event → SQS) is the option if a source starts delivering frequent incremental files. Either way, the load is <em>raw-only</em>; transforms stay in dbt.</p>
+
+<h2 id="security"><span class="num">10</span>Security &amp; compliance</h2>
+<h3>Data protection</h3>
+<ul>
+  <li><strong>Encryption:</strong> SSE-KMS at rest (a dedicated CMK), TLS 1.2+ in transit. The bucket blocks all public access and is reached only via VPC gateway endpoints.</li>
+  <li><strong>IAM least privilege:</strong> the acquire/unzip role <code>PutObject</code>s the zip and <code>csv/</code> under <code>raw/</code>; Snowflake's storage-integration role reads <code>raw/</code> only. No human has standing write access to <code>raw/</code>, and Snowflake never writes back to S3.</li>
+  <li><strong>PII:</strong> owner names + addresses are personal data — access-logged, never replicated to non-prod unmasked, covered by the GLBA/Reg P privacy notice for the UP-matching purpose.</li>
+  <li><strong>Provenance / substantiation:</strong> immutable dated snapshots + manifests give the timestamped accuracy trail the <em>Credit Karma</em>/Pfizer-style defense requires.</li>
+</ul>
+<h3>Per-state ingestion legality <span class="pill warn">load-bearing</span></h3>
+<p>We only <em>ingest</em> where it is clearly permitted; everywhere else we deep-link the member to the state's own portal (no server-side scraping).</p>
+<table>
+  <tr><th>State(s)</th><th>Ingest posture</th><th>Mechanism</th></tr>
+  <tr><td>CA</td><td><span class="pill ok">Ingest</span> open commercial bulk feed</td><td>Auto-download (this guide)</td></tr>
+  <tr><td>TX, AZ, NC</td><td><span class="pill warn">Conditional</span> PI license required</td><td>Approved bulk file under license; no scraping</td></tr>
+  <tr><td>NY</td><td><span class="pill warn">Conditional</span> written request</td><td>OSC SFTP → DataSync → <code>raw/</code></td></tr>
+  <tr><td>PA, SC, WA, VA, MA, MI, GA</td><td><span class="pill no">Do not ingest</span> prohibited / blocked</td><td>Deep-link to state portal only</td></tr>
+</table>
+<div class="note">The acquisition layer must <strong>refuse</strong> to fetch any source not on the allow-list, even if a URL exists — the allow-list is code, not config, and changing it requires legal sign-off.</div>
+
+<h2 id="dq"><span class="num">11</span>Data quality &amp; idempotency</h2>
+<ul>
+  <li><strong>Idempotent by key.</strong> Re-running a snapshot is a no-op (head-object skip on acquire; partition overwrite on transform). Safe to retry any stage.</li>
+  <li><strong>Manifests + checksums</strong> tie every curated partition back to the exact raw bytes it came from.</li>
+  <li><strong>dbt tests:</strong> not-null on <code>holder_id</code>/<code>owner_name</code>, accepted range on amounts, row-count delta vs. prior snapshot within tolerance, no duplicate <code>(holder_id, owner_name_normalized)</code> within a snapshot.</li>
+  <li><strong>Quarantine</strong> over silent acceptance — a bad file never reaches members.</li>
+</ul>
+
+<h2 id="cost"><span class="num">12</span>Cost &amp; scale</h2>
+<ul>
+  <li>CA is ~12&nbsp;GB / ~38M rows per snapshot raw; gzip keeps the S3 copy small, and Snowflake stores the canonical table compressed (columnar) — S3 storage is pennies/GB-month either way.</li>
+  <li>S3 storage is pennies/GB-month; the real levers are transform compute (one Fargate task, minutes) and Snowflake credits on load/model — favor a scheduled monthly <code>COPY</code> over always-on Snowpipe for bulk drops.</li>
+  <li>Partition pruning (<code>state</code>, <code>snapshot_date</code>) keeps query and reprocessing cost proportional to the one snapshot that changed.</li>
+</ul>
+
+<h2 id="roadmap"><span class="num">13</span>Rollout roadmap</h2>
+<table>
+  <tr><th>Phase</th><th>Scope</th><th>Outcome</th></tr>
+  <tr><td>1</td><td>Stand up bucket/zones, IAM, KMS; port CA acquire+normalize to S3; Snowflake stage + dbt <code>PROPERTY</code></td><td>CA served from S3→Snowflake</td></tr>
+  <tr><td>2</td><td>dbt <code>snapshot</code> for new/claimed/active; wire status into the matcher &amp; UI</td><td>Match history live in prod</td></tr>
+  <tr><td>3</td><td>TX file (PI license) + NY SFTP via DataSync; per-source state machines</td><td>Multi-state ingest</td></tr>
+  <tr><td>4</td><td>Privacy&nbsp;Master matcher integration; alerting/notification rail</td><td>End-to-end member alerts</td></tr>
+  <tr><td>Ongoing</td><td>Deep-link-only handoff for prohibited states; quarterly source-allow-list legal review</td><td>Compliant national coverage</td></tr>
+</table>
+
+<h2 id="next"><span class="num">14</span>Open questions &amp; next steps</h2>
+<ul>
+  <li>Confirm Snapshot cadence per source (CA appears to refresh roughly monthly — verify).</li>
+  <li>Decide Snowpipe (continuous) vs. scheduled <code>COPY</code> (batch) — recommend batch for bulk monthly drops.</li>
+  <li>Finalize the matcher contract: does Privacy&nbsp;Master read <code>PROPERTY</code> in Snowflake directly, or a pushed-down candidate set?</li>
+  <li>Legal sign-off on the per-state allow-list (§10) before any non-CA source is wired.</li>
+  <li>Define the canonical <code>SOURCE_REGISTRY</code> / <code>CLAIM_CASE</code> DDL in dbt (mirrors the state-matrix DDL).</li>
+</ul>
+
+<footer>
+  Get My Money Back — S3 Data Ingestion Implementation Guide · v1.0 · 2026-06-03 · Internal (Consumer Direct).<br>
+  Proposed production ingestion design. Targets: S3 (raw landing + automatic fetch) + Snowflake + dbt + Consumer Direct's existing Privacy&nbsp;Master matcher.
+</footer>
+
+</div>
+</body>
+</html>

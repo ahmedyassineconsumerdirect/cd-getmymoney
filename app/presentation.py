@@ -7,6 +7,8 @@ member-facing labels with categorical icons and proper title casing.
 from __future__ import annotations
 import re
 
+from app.state_data import STATES
+
 
 # NAUPA-ish category map. Codes vary slightly by state; the prefix group
 # is always reliable. Keys are exact codes; the fallback uses the 2-char
@@ -324,7 +326,91 @@ def claim_url(state_code: str | None, property_id: str | None = None) -> str:
     links (where supported) are a follow-up.
     """
     code = (state_code or "CA").upper()
-    return _STATE_CLAIM_URLS.get(code, "https://unclaimed.org/search/")
+    info = STATES.get(code, {})
+    return info.get("portal_url") or _STATE_CLAIM_URLS.get(code, "https://unclaimed.org/search/")
+
+
+# =========================================================================
+# State coverage + filing handoff (unsupported-state UI)
+# =========================================================================
+
+# States whose data myReclaim currently indexes. Everything else gets a
+# guide-to-file handoff to the state's own official portal (compliant:
+# display-only deep link, no fee, no representation).
+SUPPORTED_STATES: set[str] = {"CA"}
+
+# Every known US state/DC code — used to whitelist the state form value so
+# only trusted, table-sourced names ever reach the handoff template.
+ALL_STATE_CODES: set[str] = set(STATES.keys())
+
+# Generic, portal-agnostic filing steps — fallback when a state has no
+# researched step list in app/state_data.py.
+_GENERIC_STEPS: list[str] = [
+    "Open your state's official unclaimed-property portal (linked below).",
+    "Search your name — include former names, middle initials, and any prior cities.",
+    "Open each result and confirm the reported owner, address, and amount look like you.",
+    "Start a claim and verify your identity (photo ID, SSN, and proof of address as prompted).",
+    "Upload any requested documents, submit, and save your claim/confirmation number.",
+    "Track your claim's status on the same portal until the state pays you directly.",
+]
+
+
+def state_info(state_code: str | None) -> dict:
+    """Everything the unsupported-state handoff panel needs for one state.
+
+    Sourced from the researched app/state_data.py table (50 states + DC), with
+    safe fallbacks for anything missing.
+    """
+    code = (state_code or "").upper()
+    s = STATES.get(code, {})
+    name = s.get("name") or _STATE_NAMES.get(code) or code
+    return {
+        "code": code,
+        "name": name,
+        "agency": s.get("agency") or f"the {name} unclaimed-property program",
+        "portal_url": s.get("portal_url") or _STATE_CLAIM_URLS.get(code) or "https://unclaimed.org/search/",
+        "steps": s.get("steps") or _GENERIC_STEPS,
+        "processing_time": s.get("processing_time") or "30–90 days",
+        "free_note": s.get("free_note") or "Claiming directly with the state is always free.",
+        "supported": code in SUPPORTED_STATES,
+    }
+
+
+# Snapshot-diff status -> member-facing badge. Sourced from property_status
+# (scripts/build_ca_snapshot.py). 'active' is the implicit default.
+# Legal: every claimable result is a "Potential match" (never definitive).
+# 'new' is the same potential match, just flagged with a small "New" badge.
+STATUS_DISPLAY: dict[str, dict] = {
+    "new": {
+        "label": "Potential match",
+        "section": "new",
+        "badge_class": "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
+        "dot": "bg-emerald-500",
+        "claimable": True,
+        "is_new": True,
+    },
+    "active": {
+        "label": "Potential match",
+        "section": "active",
+        "badge_class": "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
+        "dot": "bg-emerald-500",
+        "claimable": True,
+        "is_new": False,
+    },
+    "claimed": {
+        "label": "Already claimed",
+        "section": "claimed",
+        "badge_class": "bg-slate-100 text-slate-500 ring-1 ring-slate-200",
+        "dot": "bg-slate-400",
+        "claimable": False,
+        "is_new": False,
+    },
+}
+
+
+def status_display(status: str | None) -> dict:
+    """Decode a property_status value into a member-facing badge dict."""
+    return STATUS_DISPLAY.get((status or "active"), STATUS_DISPLAY["active"])
 
 
 def amount_display(amount_min: float | None, amount_max: float | None) -> tuple[str, bool]:

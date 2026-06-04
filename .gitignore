@@ -11,3 +11,7 @@ data/
 ~$*.pptx
 ~$*.docx
 ~$*.xlsx
+
+# session artifacts
+/*.png
+.playwright-mcp/

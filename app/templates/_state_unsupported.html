@@ -1,0 +1,70 @@
+{# Handoff panel shown when a member picks a state myReclaim doesn't index yet.
+   Compliant: display-only deep link to the state's own official portal, with
+   self-file steps. No fee, no representation, no state affiliation. #}
+<div class="bg-white rounded-card shadow-card border border-slate-100 overflow-hidden max-w-3xl mx-auto">
+  <div class="bg-brand-light px-7 py-6 border-b border-blue-100">
+    <div class="flex items-start gap-4">
+      <div class="w-12 h-12 rounded-full bg-white text-brand flex items-center justify-center shrink-0 shadow-sm">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg>
+      </div>
+      <div>
+        <p class="text-xs font-bold text-brand tracking-[0.18em] uppercase mb-1">Coverage in progress</p>
+        <h2 class="text-2xl font-extrabold text-ink-heading leading-tight">
+          We're not searching {{ state.name }} just yet
+        </h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="px-7 py-6">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div>
+        <div class="text-xs text-ink-muted uppercase tracking-wide">Official program</div>
+        <div class="text-base font-bold text-ink-heading">{{ state.agency }}</div>
+      </div>
+      <a href="{{ state.portal_url }}" target="_blank" rel="noopener noreferrer"
+         class="inline-flex items-center gap-2 bg-cta text-white font-semibold py-3 px-6 rounded-pill hover:bg-cta-dark transition shadow-sm">
+        Open the {{ state.name }} portal
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+      </a>
+    </div>
+
+    <h3 class="text-sm font-extrabold tracking-[0.14em] uppercase text-ink-heading mb-4">How to file in {{ state.name }}</h3>
+    <ol class="space-y-3 mb-6">
+      {% for step in state.steps %}
+      <li class="flex gap-3.5">
+        <span class="w-6 h-6 rounded-full bg-brand-light text-brand text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">{{ loop.index }}</span>
+        <span class="text-sm text-ink-body leading-relaxed">{{ step }}</span>
+      </li>
+      {% endfor %}
+    </ol>
+
+    <div class="flex flex-wrap gap-x-6 gap-y-2 text-xs text-ink-muted border-t border-slate-100 pt-4">
+      <span class="inline-flex items-center gap-1.5">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Typical processing: <span class="font-semibold text-ink-body">{{ state.processing_time }}</span>
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        {{ state.free_note }}
+      </span>
+    </div>
+
+    <div class="mt-5 flex flex-wrap items-center gap-3">
+      <button type="button" data-notify-state="{{ state.name }}"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-brand border border-brand/30 hover:bg-brand-light rounded-pill px-5 py-2 transition">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        Notify me when {{ state.name }} is supported
+      </button>
+      <button type="button" data-assistant-prefill="Help me file an unclaimed property claim in {{ state.name }}"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-ink-body hover:text-brand">
+        Ask the assistant for help &rarr;
+      </button>
+    </div>
+
+    <p class="text-[11px] text-ink-muted mt-5 leading-relaxed">
+      SmartCredit is not affiliated with {{ state.name }} or {{ state.agency }}. You can always search and claim
+      for free directly with the state. We never charge a finder's fee and never hold your funds.
+    </p>
+  </div>
+</div>

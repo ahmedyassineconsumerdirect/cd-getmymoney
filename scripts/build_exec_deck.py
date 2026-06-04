@@ -1,4 +1,4 @@
-"""Build the myReclaim executive PowerPoint from scratch.
+"""Build the GetMyMoney executive PowerPoint from scratch.
 
 Earlier version layered custom shapes over the corporate template's
 master placeholders, which leaked through ("Click to add text",
@@ -12,7 +12,7 @@ BlueNavy mention.
 Usage:
     python scripts/build_exec_deck.py
 Output:
-    myReclaim-Exec-Deck.pptx (project root)
+    implementation-guideline/GetMyMoney-Exec-Deck.pptx
 """
 from pathlib import Path
 
@@ -42,7 +42,7 @@ WHITE = RGBColor(0xFF, 0xFF, 0xFF)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-OUT = PROJECT_ROOT / "myReclaim-Exec-Deck.pptx"
+OUT = PROJECT_ROOT / "implementation-guideline" / "GetMyMoney-Exec-Deck.pptx"
 
 
 # =========================================================================
@@ -121,7 +121,7 @@ def add_arrow_right(slide, x, y, w, h, color):
     return arr
 
 
-def add_chrome(slide, n, total, footer_text="myReclaim · Confidential — Consumer Direct, Inc."):
+def add_chrome(slide, n, total, footer_text="GetMyMoney · Confidential — Consumer Direct, Inc."):
     """Top thin bar + brand wordmark + slide number. Same on every content slide."""
     add_rect(slide, 0, 0, 13.33, 0.06, SC_BLUE)
     # smartcredit wordmark
@@ -166,7 +166,7 @@ def slide_01_title(prs, n, total):
                 font_size=14, bold=True, color=SC_BLUE)
     # Big title
     add_textbox(s, 1.0, 2.2, 11, 1.6,
-                "myReclaim",
+                "GetMyMoney",
                 font_size=110, bold=True, color=SC_INK)
     # Tagline
     add_textbox(s, 1.0, 3.95, 11, 0.7,
@@ -231,7 +231,7 @@ def slide_03_what_it_is(prs, n, total):
                 "WHAT IT IS",
                 font_size=12, bold=True, color=SC_BLUE)
     add_textbox(s, 0.5, 1.25, 12.5, 1.2,
-                "myReclaim is a free SmartCredit feature\nthat finds unclaimed money owed to our members.",
+                "GetMyMoney is a free SmartCredit feature\nthat finds unclaimed money owed to our members.",
                 font_size=32, bold=True, color=SC_INK)
 
     # Side-by-side: User experience flow
@@ -309,11 +309,11 @@ def slide_04_why_we_win(prs, n, total):
          SC_BLUE),
         ("02",
          "PrivacyMaster® matching engine",
-         "Already in production scanning data brokers for member info. Fuzzy + phonetic name matching at scale. Same engine — myReclaim points it at a new corpus.",
+         "Already in production scanning data brokers for member info. Fuzzy + phonetic name matching at scale. Same engine — GetMyMoney points it at a new corpus.",
          SC_ORANGE),
         ("03",
          "Snowflake warehouse",
-         "Paid for, secured, audited, dbt-modeled. Adding myReclaim is a new schema — not new infrastructure or new vendor risk.",
+         "Paid for, secured, audited, dbt-modeled. Adding GetMyMoney is a new schema — not new infrastructure or new vendor risk.",
          SC_BLUE_DARK),
     ]
     y = 3.0; gap = 0.25
@@ -349,24 +349,27 @@ def slide_05_data_strategy(prs, n, total):
                 "DATA INGESTION · CUSTOMER-DRIVEN PRIORITY",
                 font_size=12, bold=True, color=SC_BLUE)
     add_textbox(s, 0.5, 1.25, 12.5, 0.9,
-                "Where our members live. What each state lets us do.",
-                font_size=26, bold=True, color=SC_INK)
+                "No data feed = no alert. To notify a member, we need the data first.",
+                font_size=22, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.1, 12.5, 0.45,
-                "Top 10 states cover ~68% of SC net actives (201,829 of 297,096). Four of the top five (FL, TX, GA, NY) need a state agreement before we can ingest at scale. CA is the only top-10 state with a clean public bulk feed — that's where the prototype starts.",
+                "Top 10 = ~68% of SC net actives. CA · TX · GA · NY · FL = 5 paths to data (CSV, SIFT, DOR file, OSC SFTP, Sunshine Law PRR) → 158,054 members (~53% of base) actively alertable. IL/NC/NJ/OH need state outreach to confirm. PA, SC, WA, AZ, MA, MI are blind spots — no feed available + scraping is blocked or unlawful.",
                 font_size=11, color=SC_INK_MUTED)
 
-    # Top-10 table from Customers_by_State.csv + matrix posture
+    # Top-10 table — verified data-feed posture (May 2026 portal/ToS survey)
+    # FEED/PRR = data acquirable → active alert possible.
+    # OUTREACH = no feed surfaced; written request to treasurer untested.
+    # BLIND = no feed AND scraping blocked/unlawful → cannot alert these members.
     rows = [
-        (1,  "FL", 48436,  "LEGAL",   SC_ORANGE,     "Atty/CPA/PI rep path (Ch. 717). Bulk caching needs written DFS approval; portal manual by default."),
-        (2,  "TX", 45670,  "REQUEST", SC_AMBER,      "Request-based dataset; enable only after written caching/redisplay approval."),
-        (3,  "CA", 31110,  "BUILD",   SC_GREEN,      "Public CSV, updated Thursdays — prototype loaded 92.4M rows across 4 tiers ✓"),
-        (4,  "GA", 18837,  "REQUEST", SC_AMBER,      "CDR registration + background checks → weekly delimited file (>1 GB)"),
-        (5,  "NY", 15001,  "REQUEST", SC_AMBER,      "Secure-FTP owner-name file, quarterly. Excludes amounts and tax IDs."),
-        (6,  "IL", 10536,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed. Assisted e-file via iCash."),
-        (7,  "NC",  9549,  "HANDOFF", SC_INK_MUTED,  "No clean bulk feed confirmed; annual public PDFs exist."),
-        (8,  "NJ",  8526,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed."),
-        (9,  "PA",  8172,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed."),
-        (10, "SC",  5992,  "HANDOFF", SC_INK_MUTED,  "No public bulk feed confirmed."),
+        (1,  "FL", 48436,  "PRR",      SC_ORANGE,     "Ch. 119 Sunshine Law PRR → owner-name list from DFS. Recurring possible."),
+        (2,  "TX", 45670,  "FEED",     SC_AMBER,      "SIFT bulk feed via PI license + written request to Comptroller."),
+        (3,  "CA", 31110,  "FEED",     SC_GREEN,      "Free public CSV updated Thursdays — already ingested (92.4M rows) ✓"),
+        (4,  "GA", 18837,  "FEED",     SC_AMBER,      "Weekly delimited file via written DOR request."),
+        (5,  "NY", 15001,  "FEED",     SC_AMBER,      "Secure-FTP quarterly TXT via OSC. PII stays internal."),
+        (6,  "IL", 10536,  "OUTREACH", SC_INK_MUTED,  "No feed surfaced. Need to ask iL Treasurer for a bulk option."),
+        (7,  "NC",  9549,  "OUTREACH", SC_INK_MUTED,  "No feed surfaced. Need to ask NC Treasurer."),
+        (8,  "NJ",  8526,  "OUTREACH", SC_INK_MUTED,  "No feed surfaced. Need to ask NJ Treasury."),
+        (9,  "PA",  8172,  "BLIND",    SC_RED,        "Anti-bot/anti-AI policy + no feed → can't acquire data. Members invisible."),
+        (10, "SC",  5992,  "BLIND",    SC_RED,        "§30-2-50 bars commercial use of owner data + no feed → can't acquire."),
     ]
 
     # Header strip
@@ -409,10 +412,10 @@ def slide_05_data_strategy(prs, n, total):
     # Bottom callout — strategic insight
     add_round_rect(s, 0.5, 6.65, 12.3, 0.55, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 6.7, 12, 0.28,
-                "Top 10 states cover ~68% of SC net actives (201,829 of 297,096).",
-                font_size=12, bold=True, color=WHITE)
+                "5 paths to data (CA · TX · GA · NY · FL) = 158K members (~53% of base) actively alertable. PA & SC are blind spots — those members never see a match.",
+                font_size=11, bold=True, color=WHITE)
     add_textbox(s, 0.7, 6.95, 12, 0.22,
-                "CA is the only top-10 state with a confirmed public bulk feed; Sprint 2 opens TX, NY, and GA pending state approval.",
+                "CA live today. TX/GA/NY unlock via written state request. FL via Ch. 119 PRR. IL/NC/NJ need treasurer outreach to confirm path.",
                 font_size=10, color=RGBColor(0xCC, 0xDD, 0xFF))
 
 
@@ -438,7 +441,7 @@ def slide_06_architecture(prs, n, total):
                         "NAUPA III canonical schema",
                         "dbt models · row lineage"],
          SC_BLUE_DARK),
-        ("myReclaim", ["Member identity → match",
+        ("GetMyMoney", ["Member identity → match",
                         "Results card list",
                         "State claim deep-link",
                         "Notification engine"],
@@ -470,12 +473,12 @@ def slide_06_architecture(prs, n, total):
                 "Why Snowflake?",
                 font_size=14, bold=True, color=SC_BLUE)
     add_textbox(s, 0.7, 6.65, 12, 0.4,
-                "We already operate it. Adding myReclaim is a schema, not new infrastructure. Encryption, audit, dbt are already there.",
+                "We already operate it. Adding GetMyMoney is a schema, not new infrastructure. Encryption, audit, dbt are already there.",
                 font_size=12, color=SC_INK_BODY)
 
 
 def slide_privacy_master(prs, n, total):
-    """Background on PrivacyMaster — the trust precedent for myReclaim."""
+    """Background on PrivacyMaster — the trust precedent for GetMyMoney."""
     s = blank_slide(prs)
     add_chrome(s, n, total)
     add_textbox(s, 0.5, 0.85, 12.5, 0.4,
@@ -502,7 +505,7 @@ def slide_privacy_master(prs, n, total):
           ("Acting on findings", "Authorized to send Remove requests on their behalf"),
           ("Value", "Equivalent standalone services charge $15–$20 / month")],
          SC_ORANGE),
-        ("WHAT myRECLAIM REUSES",
+        ("WHAT GETMYMONEY REUSES",
          [("Identity", "Same profile — no re-collection"),
           ("Auto-scan model", "Same scheduled scan, just a different corpus"),
           ("Alert pattern", "Same in-product notification UX"),
@@ -528,7 +531,7 @@ def slide_privacy_master(prs, n, total):
     # Bottom callout
     add_round_rect(s, 0.5, 6.4, 12.3, 0.65, SC_BG_CARD, line=SC_BLUE, radius=0.03)
     add_textbox(s, 0.7, 6.5, 12, 0.32,
-                "myReclaim is not a new product surface.",
+                "GetMyMoney is not a new product surface.",
                 font_size=14, bold=True, color=SC_BLUE)
     add_textbox(s, 0.7, 6.78, 12, 0.3,
                 "It's a different outcome from the same security envelope members have already opted into. Same engine, same alert pattern, new corpus, new value.",
@@ -550,7 +553,7 @@ def slide_pii_matching(prs, n, total):
                 "Same engine members already trust. New mission.",
                 font_size=28, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.15, 12.5, 0.45,
-                "SmartCredit's PII matching engine already auto-scans data brokers, businesses, and government sites for member info. Members get an alert and choose Remove or Keep. myReclaim points the same engine at state unclaimed-property records — same auto-scan, same alert, same trust envelope.",
+                "SmartCredit's PII matching engine already auto-scans data brokers, businesses, and government sites for member info. Members get an alert and choose Remove or Keep. GetMyMoney points the same engine at state unclaimed-property records — same auto-scan, same alert, same trust envelope.",
                 font_size=11, color=SC_INK_MUTED)
 
     # Two cards: today / tomorrow with arrow between
@@ -589,7 +592,7 @@ def slide_pii_matching(prs, n, total):
     add_round_rect(s, x2, y, col_w, 3.5, WHITE, line=SC_BLUE, radius=0.03)
     add_rect(s, x2, y, col_w, 0.18, SC_BLUE)
     add_textbox(s, x2 + 0.2, y + 0.32, col_w - 0.4, 0.4,
-                "TOMORROW · myReclaim",
+                "TOMORROW · GetMyMoney",
                 font_size=11, bold=True, color=SC_BLUE)
     add_textbox(s, x2 + 0.2, y + 0.78, col_w - 0.4, 0.7,
                 "Find unclaimed money owed to the member",
@@ -610,7 +613,7 @@ def slide_pii_matching(prs, n, total):
     # Bottom callout
     add_round_rect(s, 0.5, 6.65, 12.3, 0.5, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 6.72, 12, 0.36,
-                "myReclaim is not a new product surface — it's a different outcome from the same security envelope members already opted into.",
+                "GetMyMoney is not a new product surface — it's a different outcome from the same security envelope members already opted into.",
                 font_size=12, bold=True, color=WHITE)
 
 
@@ -783,21 +786,21 @@ def slide_next_steps(prs, n, total):
                 "Engage legal — unlock the top 5 states where our members live.",
                 font_size=26, bold=True, color=SC_INK)
     add_textbox(s, 0.5, 2.2, 12.5, 0.5,
-                "The prototype proves we can match at scale against CA's public feed. Scaling to FL, TX, GA, NY is a regulatory unlock — not a technical one. Legal owns the next step in each state: confirm caching/redisplay rights, file the right registration, or open a written-permission dialogue.",
+                "v1 is alert + deep-link only — we surface the match, the member files on the state's official portal. We need DATA, not filing rights. Legal's job per state: secure written caching/redisplay approval for the owner-name data, nothing more.",
                 font_size=11, color=SC_INK_MUTED)
 
     # Top-5 action cards — each with state, posture, the specific legal ask
     rows = [
-        (1, "FL", 48436, "LEGAL",   SC_ORANGE,
-         "Open dialogue with FL Dept of Financial Services on Ch. 717 registered-rep path AND written approval for bulk caching of the claimant portal data. Confirm FL atty / CPA / PI partnership model."),
+        (1, "FL", 48436, "PRR",     SC_ORANGE,
+         "File Ch. 119 Sunshine Law records request to FL DFS for owner-name list (records are public under Ch. 119). Confirm fee. No Ch. 717 atty/CPA/PI registration needed — we're not filing on behalf of anyone."),
         (2, "TX", 45670, "REQUEST", SC_AMBER,
-         "Submit dataset request via data.gov contact (name, company, mailing address, phone, TX PI license if applicable). Secure written approval for caching, matching, redisplay, and commercial use before production."),
+         "Submit bulk dataset request to up.dbrequests@cpa.texas.gov (company name, address, phone). Texas PI license may apply to the bulk-data request itself — confirm with Comptroller. Secure written approval for caching, matching, and redisplay."),
         (3, "CA", 31110, "BUILD",   SC_GREEN,
-         "Already ingestible — public CSV in production. Legal sign-off needed on commercial caching + in-product redisplay terms before launch. Lowest-friction state."),
+         "Already ingestible — free public CSV in production. Legal sign-off needed on commercial caching + in-product redisplay terms before launch. Lowest-friction state."),
         (4, "GA", 18837, "REQUEST", SC_AMBER,
-         "Begin Claimant Designated Representative registration (background checks + bond). Confirm reuse and automation rights for the weekly delimited file. CDR fee cap is 30% — we charge $0."),
+         "Request the weekly delimited owner-name file from GA DOR. No CDR registration needed under alert-only (CDR is for filing on behalf). Secure written approval for caching/redisplay."),
         (5, "NY", 15001, "REQUEST", SC_AMBER,
-         "Submit owner-name file request to OSC (secure-FTP TXT, quarterly). File excludes amounts and tax IDs. Get written caching and redisplay approval for matching against members."),
+         "Submit owner-name file request to OSC (secure-FTP TXT, quarterly). File excludes amounts and tax IDs. Get written caching/redisplay approval — member PII stays internal."),
     ]
 
     # Header strip
@@ -840,7 +843,7 @@ def slide_next_steps(prs, n, total):
     # Bottom callout — own this. timeline.
     add_round_rect(s, 0.5, 7.0, 12.3, 0.45, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 7.05, 12, 0.32,
-                "Owner: Legal · Goal: written posture per state in 30 days · Output: go/no-go decision matrix to unlock the next ingest tier.",
+                "Owner: Legal · Goal: written data-use approval per state in 30 days · Output: go/no-go matrix to unlock the next ingest tier. We need data, not filing rights.",
                 font_size=11, bold=True, color=WHITE)
 
 
@@ -1198,7 +1201,7 @@ def slide_workflow_summary(prs, n, total):
     steps = [
         ("01",
          "Exec approval & resourcing",
-         "Greenlight myReclaim. Assign 1 data engineer + 1 product engineer.",
+         "Greenlight GetMyMoney. Assign 1 data engineer + 1 product engineer.",
          "Now",
          SC_BLUE),
         ("02",
@@ -1266,7 +1269,7 @@ def slide_12_thanks(prs, n, total):
     s = blank_slide(prs)
     add_rect(s, 0, 0, 13.33, 7.5, SC_INK)
     add_textbox(s, 0.5, 2.4, 12.3, 0.4,
-                "myReclaim",
+                "GetMyMoney",
                 font_size=20, bold=True, color=SC_ORANGE,
                 align=PP_ALIGN.CENTER)
     add_textbox(s, 0.5, 2.95, 12.3, 1.6,
@@ -1283,11 +1286,122 @@ def slide_12_thanks(prs, n, total):
                 align=PP_ALIGN.CENTER)
 
 
+def slide_compliance_findings(prs, n, total):
+    """Compliance research findings — headline conclusions from the full
+    legal-team memo at docs/handoff/compliance-research-myreclaim.md.
+
+    Spans FCRA, GLBA, FTC/CFPB UDAAP, TSR §310.4(a)(3), TCPA, 19+ state
+    privacy laws, and the 50-state paid-finder patchwork. This slide
+    surfaces only the load-bearing constraints + the single open question.
+    """
+    s = blank_slide(prs)
+    add_chrome(s, n, total)
+
+    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
+                "COMPLIANCE RESEARCH",
+                font_size=12, bold=True, color=SC_BLUE)
+    add_textbox(s, 0.5, 1.25, 12.5, 0.55,
+                "v1 is a notification feature, not a recovery service.",
+                font_size=24, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 1.85, 12.5, 0.4,
+                "Three architectural decisions clear the bulk of the legal surface. The remaining constraint is data acquisition — without a feed, we can't alert a member because we don't know they have a match. Full compliance memo available from Legal.",
+                font_size=10, color=SC_INK_MUTED)
+
+    # Row 1: three non-negotiable architecture cards
+    y0 = 2.4
+    card_h = 1.65
+    cards = [
+        ("ALERT + DEEP LINK ONLY",
+         "Surface the match. Embed a deep link. The member files on the state's official portal.",
+         "Eliminates TSR §310.4(a)(3), FL Ch. 717 / GA CDR registration, false-claim and tort exposure. State paid-finder statutes mostly defanged.",
+         SC_BLUE),
+        ("BUNDLE, DON'T SURCHARGE",
+         "No %-of-recovery, no upfront fee, no affiliate or success bonus. UP alerts are free in SmartCredit.",
+         "Removes any \"fee for locating\" hook in state finder statutes. Avoids ROSCA negative-option stack.",
+         SC_GREEN),
+        ("NEVER HOLD FUNDS",
+         "State pays the consumer direct. SmartCredit is never in the money path.",
+         "Avoids 49-state money-transmitter licensure. GA §44-12-224 explicitly forbids holding funds.",
+         SC_ORANGE),
+    ]
+    col_w = 4.05
+    gap = 0.10
+    x = 0.5
+    for title, lead, why, accent in cards:
+        add_round_rect(s, x, y0, col_w, card_h, WHITE, line=SC_BORDER, radius=0.05)
+        add_rect(s, x, y0, col_w, 0.16, accent)
+        add_textbox(s, x + 0.18, y0 + 0.24, col_w - 0.36, 0.28,
+                    title, font_size=12, bold=True, color=accent)
+        add_textbox(s, x + 0.18, y0 + 0.58, col_w - 0.36, 0.50,
+                    lead, font_size=10.5, bold=True, color=SC_INK)
+        add_textbox(s, x + 0.18, y0 + 1.12, col_w - 0.36, 0.50,
+                    why, font_size=9, color=SC_INK_MUTED)
+        x += col_w + gap
+
+    # Row 2: state gates (left) + open question / top risks (right)
+    y1 = 4.20
+    state_w = 7.0
+    gates_h = 2.35
+
+    # State gates panel
+    add_round_rect(s, 0.5, y1, state_w, gates_h, WHITE, line=SC_BORDER, radius=0.05)
+    add_rect(s, 0.5, y1, state_w, 0.18, SC_INK)
+    add_textbox(s, 0.7, y1 + 0.30, state_w - 0.4, 0.28,
+                "STATE GATES", font_size=11, bold=True, color=SC_INK)
+
+    gates = [
+        ("CA · TX · GA · NY · FL", "ALERTABLE", SC_GREEN,
+         "Data feed (or Ch. 119 PRR for FL) → match → alert + deep link."),
+        ("IL · NC · NJ · OH", "UNKNOWN", SC_AMBER,
+         "No feed surfaced. Treasurer outreach needed to confirm path."),
+        ("PA", "BLIND", SC_RED,
+         "Anti-bot/anti-AI policy + no feed → can't acquire data."),
+        ("SC · WA · AZ", "BLIND", SC_RED,
+         "Statute bars commercial use of owner-name data + no feed."),
+        ("MA · MI", "BLIND", SC_RED,
+         "Cloudflare-blocked portal + no public feed → no data path."),
+    ]
+    yy = y1 + 0.55
+    row_h = 0.32
+    for state, pill, color, body in gates:
+        add_textbox(s, 0.7, yy, 2.4, row_h,
+                    state, font_size=10.5, bold=True, color=SC_INK)
+        add_pill(s, 3.15, yy + 0.03, 1.10, 0.26, pill, color, WHITE, font_size=8)
+        add_textbox(s, 4.35, yy + 0.02, state_w - 3.95, row_h,
+                    body, font_size=9, color=SC_INK_BODY)
+        yy += row_h
+
+    # Open question + top risks panel
+    x2 = 0.5 + state_w + 0.15
+    q_w = 12.83 - x2 - 0.5
+    add_round_rect(s, x2, y1, q_w, gates_h, WHITE, line=SC_BORDER, radius=0.05)
+    add_rect(s, x2, y1, q_w, 0.18, SC_ORANGE)
+    add_textbox(s, x2 + 0.20, y1 + 0.26, q_w - 0.4, 0.28,
+                "LOAD-BEARING OPEN QUESTION", font_size=11, bold=True, color=SC_ORANGE)
+    add_textbox(s, x2 + 0.20, y1 + 0.60, q_w - 0.4, 0.70,
+                "Does a flat-subscription credit-monitoring service that surfaces UP matches (with no separate UP fee) escape NY APL §1416 / CCP §1582 / equivalents?",
+                font_size=10, bold=True, color=SC_INK)
+    add_textbox(s, x2 + 0.20, y1 + 1.32, q_w - 0.4, 0.40,
+                "No case law on point. Needs focused outside-counsel opinion before launch.",
+                font_size=9, color=SC_INK_MUTED)
+
+    add_rect(s, x2 + 0.20, y1 + 1.80, q_w - 0.4, 0.01, SC_BORDER)
+    add_textbox(s, x2 + 0.20, y1 + 1.88, q_w - 0.4, 0.40,
+                "Top HIGH risks: definitive-$$$ claims (Credit Karma) · implied gov't affiliation · unsubstantiated \"you may have $X\" · TCPA on found-money SMS.",
+                font_size=8.5, color=SC_INK_BODY)
+
+    # Footer callout
+    add_round_rect(s, 0.5, 6.65, 12.3, 0.40, SC_INK, radius=0.07)
+    add_textbox(s, 0.7, 6.72, 12, 0.30,
+                "30 risk-rated findings · 18 open questions · 50-state paid-finder table · ~80 source links. Owner: Legal. Decision: ratify v1 (alert + deep-link / bundle / no-funds) + outside-counsel opinion on subscription characterization.",
+                font_size=10, bold=True, color=WHITE)
+
+
 # =========================================================================
 # Main
 # =========================================================================
 def main():
-    print("Building myReclaim exec deck (fresh, no template)...")
+    print("Building GetMyMoney exec deck (fresh, no template)...")
     prs = Presentation()
     prs.slide_width = Inches(13.33)
     prs.slide_height = Inches(7.5)
@@ -1297,7 +1411,7 @@ def main():
     #     incorporated into slide_pii_matching), slide_06_architecture,
     #     slide_08_roadmap, slide_09_compliance, slide_10_built,
     #     slide_11_ask, slide_12_thanks
-    #   - renamed PrivacyMaster ↔ myReclaim to "PII Matching Engine"
+    #   - renamed PrivacyMaster ↔ GetMyMoney to "PII Matching Engine"
     #   - revised data-strategy to "Data Ingestion"
     #   - redid claim-integration with verified state-by-state regulator facts
     #   - new closing: workflow summary
@@ -1310,6 +1424,7 @@ def main():
         slide_customer_match_results,
         slide_customer_match_with_city,
         slide_next_steps,
+        slide_compliance_findings,
     ]
     total = len(builders)
     for i, b in enumerate(builders, start=1):

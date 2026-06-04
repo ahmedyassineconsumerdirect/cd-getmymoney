@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}SmartCredit — MaxAI{% endblock %}
+{% block body_attrs %}data-no-assistant-fab{% endblock %}
+{% block nav_assistant %}text-brand border-b-2 border-brand pb-1{% endblock %}
+{% block content %}
+
+<section class="max-w-2xl mx-auto">
+  <div class="bg-white rounded-card shadow-card border border-slate-100 overflow-hidden">
+    <div class="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-brand to-brand-dark">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center text-white">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+        </div>
+        <div>
+          <div class="text-white font-bold leading-none">MaxAI</div>
+          <div class="text-blue-100 text-xs mt-1">Your Get My Money Back assistant</div>
+        </div>
+      </div>
+    </div>
+    <div class="p-4 h-[600px]">
+      <div data-assistant-root class="h-full"></div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

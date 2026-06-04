@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}SmartCredit — Funds Finder{% endblock %}</title>
+  <title>{% block title %}SmartCredit — Get My Money Back{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/htmx.org@2.0.3"></script>
   <script>
@@ -54,7 +54,7 @@
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body class="bg-surface-subtle font-sans text-ink-body antialiased min-h-screen">
+<body class="bg-surface-subtle font-sans text-ink-body antialiased min-h-screen" {% block body_attrs %}{% endblock %}>
 
   <!-- Header / nav (SmartCredit BETA style) -->
   <header class="bg-white border-b border-gray-200">
@@ -80,8 +80,7 @@
         <a href="#" class="hover:text-brand">Credit <span class="text-ink-muted">▾</span></a>
         <a href="#" class="hover:text-brand">Reports <span class="text-ink-muted">▾</span></a>
         <a href="#" class="hover:text-brand">Identity <span class="text-ink-muted">▾</span></a>
-        <a href="/" class="text-brand border-b-2 border-brand pb-1">Money</a>
-        <a href="#" class="hover:text-brand">myLO</a>
+        <a href="/" class="{% block nav_money %}hover:text-brand{% endblock %}">Money</a>
       </nav>
     </div>
   </header>
@@ -92,8 +91,18 @@
 
   <footer class="max-w-5xl mx-auto px-6 py-8 text-xs text-gray-400 border-t border-gray-200 mt-20">
     Prototype — funds data sourced from state unclaimed-property programs.
-    Claims must be filed directly with the respective state.
+    SmartCredit is not affiliated with any state, never holds your funds, and never charges a finder's fee.
+    Claims are filed for free directly with the respective state.
   </footer>
 
+  <script>
+    window.MYRECLAIM_ASSISTANT_BOOT = {
+      greeting: {{ assistant_greeting | tojson }},
+      suggestions: {{ assistant_prompts | tojson }},
+      mode: "demo"
+    };
+  </script>
+  <script src="/static/js/assistant.js" defer></script>
+  <script src="/static/js/results.js" defer></script>
 </body>
 </html>
