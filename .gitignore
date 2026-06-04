@@ -8,3 +8,10 @@ data/
 .DS_Store
 *.duckdb
 *.duckdb.wal
+~$*.pptx
+~$*.docx
+~$*.xlsx
+
+# session artifacts
+/*.png
+.playwright-mcp/

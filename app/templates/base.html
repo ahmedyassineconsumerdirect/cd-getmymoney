@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SmartCredit — Get My Money Back{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#2863C5',
+              dark: '#1f4f9e',
+              light: '#E6EFFA',
+            },
+            cta: {
+              DEFAULT: '#FC4C0B',
+              dark: '#d83e07',
+            },
+            accent: {
+              DEFAULT: '#FFB352',
+            },
+            danger: {
+              DEFAULT: '#E11D48',
+            },
+            ink: {
+              heading: '#0F172A',
+              body: '#334155',
+              muted: '#64748B',
+            },
+            surface: {
+              DEFAULT: '#FFFFFF',
+              subtle: '#F8FAFC',
+              footer: '#F1F5F9',
+            },
+          },
+          fontFamily: {
+            sans: ['"Open Sans"', 'system-ui', 'sans-serif'],
+          },
+          borderRadius: {
+            card: '12px',
+            pill: '9999px',
+          },
+          boxShadow: {
+            card: '0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
+            'card-hover': '0 4px 12px rgba(15, 23, 42, 0.08)',
+          },
+        },
+      },
+    };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-surface-subtle font-sans text-ink-body antialiased min-h-screen" {% block body_attrs %}{% endblock %}>
+
+  <!-- Header / nav (SmartCredit BETA style) -->
+  <header class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
+      <div class="flex items-center gap-6">
+        <a href="/" class="flex items-center gap-1">
+          <span class="text-2xl font-extrabold tracking-tight text-ink-heading">smartcredit</span>
+          <span class="text-base font-semibold text-brand ml-1 flex items-center gap-1">
+            BETA
+            <svg class="w-4 h-4 text-accent" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2l2 5 5 1-3.5 3.5L14 17l-4-2.5L6 17l.5-5.5L3 8l5-1z"/></svg>
+          </span>
+        </a>
+        <div class="hidden md:flex items-center gap-2 text-xs text-ink-muted border-l border-gray-200 pl-6">
+          <span>Partnered with</span>
+          <span class="font-semibold text-[#0089D6]">TransUnion</span>
+          <span class="text-gray-300">·</span>
+          <span class="font-semibold text-[#0033A0]">Experian</span>
+          <span class="text-gray-300">·</span>
+          <span class="font-semibold text-[#D7282F]">EQUIFAX</span>
+        </div>
+      </div>
+      <nav class="flex items-center gap-7 text-sm font-semibold text-ink-heading">
+        <a href="#" class="hover:text-brand">Credit <span class="text-ink-muted">▾</span></a>
+        <a href="#" class="hover:text-brand">Reports <span class="text-ink-muted">▾</span></a>
+        <a href="#" class="hover:text-brand">Identity <span class="text-ink-muted">▾</span></a>
+        <a href="/" class="{% block nav_money %}hover:text-brand{% endblock %}">Money</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 py-10">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="max-w-5xl mx-auto px-6 py-8 text-xs text-gray-400 border-t border-gray-200 mt-20">
+    Prototype — funds data sourced from state unclaimed-property programs.
+    SmartCredit is not affiliated with any state, never holds your funds, and never charges a finder's fee.
+    Claims are filed for free directly with the respective state.
+  </footer>
+
+  <script>
+    window.MYRECLAIM_ASSISTANT_BOOT = {
+      greeting: {{ assistant_greeting | tojson }},
+      suggestions: {{ assistant_prompts | tojson }},
+      mode: "demo"
+    };
+  </script>
+  <script src="/static/js/assistant.js" defer></script>
+  <script src="/static/js/results.js" defer></script>
+</body>
+</html>

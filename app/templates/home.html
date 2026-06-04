@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% block nav_money %}text-brand border-b-2 border-brand pb-1{% endblock %}
+{% block content %}
+
+<section class="mb-8">
+  <div class="relative overflow-hidden bg-white rounded-card shadow-card border border-gray-100 p-8 md:p-10">
+    <div class="absolute top-0 right-0 w-80 h-80 bg-brand-light rounded-full blur-3xl opacity-60 -mr-24 -mt-24" aria-hidden="true"></div>
+    <div class="relative grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-ink-heading leading-[1.05] tracking-tight">
+          Get My <span class="text-brand">Money Back</span>
+        </h1>
+        <p class="mt-5 text-lg text-ink-body leading-relaxed">
+          Every year, banks, employers, and insurers turn billions in forgotten money over to the
+          state — old paychecks, deposits, refunds, and account balances. We check those official
+          records for you and surface any potential matches, free.
+        </p>
+      </div>
+
+      <div class="relative">
+        <div class="bg-surface-subtle rounded-card border border-gray-100 p-6">
+          <p class="text-xs font-bold text-ink-muted uppercase tracking-widest mb-4">Commonly unclaimed</p>
+          <ul class="grid grid-cols-2 gap-4 text-sm">
+            <li class="flex items-start gap-2.5">
+              <span class="w-9 h-9 rounded-full bg-brand-light text-brand flex items-center justify-center shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+              </span>
+              <span class="text-ink-body font-medium pt-1">Forgotten bank balances</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="w-9 h-9 rounded-full bg-brand-light text-brand flex items-center justify-center shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              </span>
+              <span class="text-ink-body font-medium pt-1">Uncashed paychecks</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="w-9 h-9 rounded-full bg-brand-light text-brand flex items-center justify-center shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+              </span>
+              <span class="text-ink-body font-medium pt-1">Utility &amp; security deposits</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="w-9 h-9 rounded-full bg-brand-light text-brand flex items-center justify-center shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+              </span>
+              <span class="text-ink-body font-medium pt-1">Insurance &amp; refund payouts</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="mb-8">
+  <div class="grid md:grid-cols-3 gap-5">
+    <div class="bg-white rounded-card shadow-card border border-gray-100 p-6">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="w-9 h-9 rounded-full bg-brand-light text-brand flex items-center justify-center font-extrabold">1</span>
+        <h3 class="font-extrabold text-ink-heading">Review</h3>
+      </div>
+      <p class="text-sm text-ink-body leading-relaxed">
+        See any potential matches reported in your name, with the source, amount, and the address the state has on file.
+      </p>
+    </div>
+    <div class="bg-white rounded-card shadow-card border border-gray-100 p-6">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="w-9 h-9 rounded-full bg-brand-light text-brand flex items-center justify-center font-extrabold">2</span>
+        <h3 class="font-extrabold text-ink-heading">Claim</h3>
+      </div>
+      <p class="text-sm text-ink-body leading-relaxed">
+        We guide you to file directly with the state. Most California claims are processed in about
+        <strong>30–180 days</strong>.
+      </p>
+      <button type="button" data-assistant-prefill="How do I file my claim in California?"
+        class="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand-dark">
+        See the step-by-step filing guide
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </button>
+    </div>
+    <div class="bg-white rounded-card shadow-card border border-gray-100 p-6">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="w-9 h-9 rounded-full bg-brand-light text-brand flex items-center justify-center font-extrabold">3</span>
+        <h3 class="font-extrabold text-ink-heading">Monitor</h3>
+      </div>
+      <p class="text-sm text-ink-body leading-relaxed">
+        We keep watching. As states publish new records, we re-check your name and alert you the moment a new match appears.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Floating "Run your search" launcher (top-right, mirrors the Ask Max popout) -->
+<button id="search-fab" type="button" aria-label="Run your search"
+  class="fixed top-20 right-5 z-40 inline-flex items-center gap-2 bg-cta text-white font-semibold pl-4 pr-5 py-3 rounded-pill shadow-lg hover:bg-cta-dark hover:shadow-xl transition">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+  <span class="text-sm">Run your search</span>
+</button>
+
+<div id="search-overlay" class="fixed inset-0 bg-black/20 z-40 opacity-0 pointer-events-none transition-opacity"></div>
+
+<section id="search" class="fixed top-20 right-5 z-50 w-[370px] max-w-[92vw] bg-white rounded-2xl shadow-2xl border border-slate-200 translate-y-2 opacity-0 pointer-events-none transition-all duration-200">
+  <div class="flex items-center justify-between gap-3 px-5 py-4 bg-gradient-to-r from-brand to-brand-dark rounded-t-2xl">
+    <div>
+      <div class="text-white font-bold leading-none">Run your search</div>
+      <div class="text-blue-100 text-[11px] mt-1">Search by name; add a city to narrow it</div>
+    </div>
+    <button type="button" id="search-close" class="text-white/80 hover:text-white shrink-0" aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="p-5">
+  <form
+    hx-post="/search"
+    hx-target="#results"
+    hx-swap="innerHTML"
+    hx-indicator="#search-progress"
+    class="space-y-4"
+  >
+    <div>
+      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1.5">First name</label>
+      <input name="first_name" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent">
+    </div>
+    <div>
+      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1.5">Last name</label>
+      <input name="last_name" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent">
+    </div>
+    <div>
+      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1.5">City</label>
+      <input name="city" placeholder="e.g. Los Angeles" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent">
+    </div>
+    <div>
+      <label class="block text-xs font-bold text-ink-muted uppercase tracking-widest mb-1.5">State</label>
+      <select name="state" class="w-full border border-gray-300 rounded-md px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent bg-white">
+        <option value="">All states</option>
+        <option value="CA">California</option>
+        <option value="TX">Texas</option>
+        <option value="NY">New York</option>
+        <option value="FL">Florida</option>
+        <option value="GA">Georgia</option>
+        <option value="IL">Illinois</option>
+        <option value="OH">Ohio</option>
+        <option value="PA">Pennsylvania</option>
+        <option value="NJ">New Jersey</option>
+        <option value="AZ">Arizona</option>
+        <option value="MI">Michigan</option>
+        <option value="MA">Massachusetts</option>
+        <option value="MD">Maryland</option>
+        <option value="TN">Tennessee</option>
+        <option value="VA">Virginia</option>
+        <option value="NC">North Carolina</option>
+        <option value="SC">South Carolina</option>
+        <option value="AL">Alabama</option>
+        <option value="LA">Louisiana</option>
+        <option value="MS">Mississippi</option>
+        <option value="MO">Missouri</option>
+        <option value="WA">Washington</option>
+      </select>
+    </div>
+    <div class="pt-1">
+      <button type="submit" class="w-full bg-cta text-white font-semibold py-3 rounded-pill hover:bg-cta-dark transition shadow-sm">
+        Search records →
+      </button>
+    </div>
+    <div id="search-progress" class="search-progress hidden">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold text-brand uppercase tracking-widest">Scanning official state records</span>
+        <span class="text-xs text-ink-muted">est. 8–12 seconds</span>
+      </div>
+      <div class="progress-bar"><div class="progress-bar-fill"></div></div>
+      <div class="mt-3 text-xs text-ink-muted progress-step">
+        <span class="step active">⏵ Cross-checking against PrivacyMaster identity</span>
+        <span class="step">⏵ Querying California unclaimed property</span>
+        <span class="step">⏵ Matching tokens across owner names</span>
+        <span class="step">⏵ Ranking and decoding results</span>
+      </div>
+    </div>
+  </form>
+  </div>
+</section>
+
+<style>
+  /* Progress bar: visible only while htmx request is in flight */
+  .search-progress { display: none; }
+  .htmx-request .search-progress,
+  .htmx-request.search-progress { display: block; }
+
+  /* Indeterminate sweep bar */
+  .progress-bar {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    background: rgba(40, 99, 197, 0.10);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 35%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #2863C5 0%, #FC4C0B 100%);
+    animation: progress-sweep 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+  @keyframes progress-sweep {
+    0%   { left: -35%; width: 35%; }
+    50%  { width: 45%; }
+    100% { left: 100%; width: 35%; }
+  }
+
+  /* Cycling step labels */
+  .progress-step { display: flex; flex-direction: column; gap: 4px; }
+  .progress-step .step { opacity: 0.35; transition: opacity 0.4s ease; }
+  .progress-step .step.active { opacity: 1; color: #2863C5; font-weight: 600; }
+  .htmx-request .progress-step .step {
+    animation: step-cycle 4.8s linear infinite;
+  }
+  .htmx-request .progress-step .step:nth-child(1) { animation-delay: 0s; }
+  .htmx-request .progress-step .step:nth-child(2) { animation-delay: 1.2s; }
+  .htmx-request .progress-step .step:nth-child(3) { animation-delay: 2.4s; }
+  .htmx-request .progress-step .step:nth-child(4) { animation-delay: 3.6s; }
+  @keyframes step-cycle {
+    0%, 25% { opacity: 1; color: #2863C5; font-weight: 600; }
+    26%, 100% { opacity: 0.35; color: inherit; font-weight: 400; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .progress-bar-fill,
+    .htmx-request .progress-step .step {
+      animation: none;
+    }
+    .progress-bar-fill { left: 0; width: 100%; opacity: 0.6; }
+  }
+</style>
+
+  <section id="results">
+    <div class="bg-white/60 rounded-card border border-dashed border-slate-200 p-12 text-center">
+      <div class="w-12 h-12 rounded-full bg-brand-light text-brand flex items-center justify-center mx-auto mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </div>
+      <p class="text-sm text-ink-muted">Tap <span class="font-semibold text-ink-body">Run your search</span> (top right), enter your name, and run a search to see potential matches here.</p>
+    </div>
+  </section>
+
+<script>
+  (function () {
+    var fab = document.getElementById('search-fab'),
+        pop = document.getElementById('search'),
+        ov = document.getElementById('search-overlay'),
+        closeBtn = document.getElementById('search-close');
+    function openPop() {
+      pop.classList.remove('opacity-0', 'translate-y-2', 'pointer-events-none');
+      ov.classList.remove('opacity-0', 'pointer-events-none');
+      if (fab) fab.style.display = 'none';
+      var f = pop.querySelector('input[name=first_name]');
+      if (f) setTimeout(function () { f.focus(); }, 60);
+    }
+    function closePop() {
+      pop.classList.add('opacity-0', 'translate-y-2', 'pointer-events-none');
+      ov.classList.add('opacity-0', 'pointer-events-none');
+      if (fab) fab.style.display = '';
+    }
+    fab.addEventListener('click', openPop);
+    closeBtn.addEventListener('click', closePop);
+    ov.addEventListener('click', closePop);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePop(); });
+    // When a search completes, close the popout and reveal the results.
+    document.body.addEventListener('htmx:afterRequest', function (e) {
+      if (e.detail && e.detail.successful && e.target && e.target.closest && e.target.closest('#search')) {
+        closePop();
+        var r = document.getElementById('results');
+        if (r) r.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  })();
+</script>
+
+{% endblock %}
