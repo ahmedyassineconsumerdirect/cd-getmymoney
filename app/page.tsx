@@ -7,6 +7,7 @@ import {
   CreditCard,
   ExternalLink,
   FileText,
+  MapPin,
   RotateCcw,
   Search,
   Shield,
@@ -17,108 +18,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
-
-type ResultStatus = "new" | "active" | "claimed";
-
-type DemoRecord = {
-  id: number;
-  searchName: string;
-  propertyType: string;
-  holder: string;
-  reportedAs: string;
-  address: string;
-  source: string;
-  amount: number;
-  status: ResultStatus;
-  icon: "wallet" | "briefcase" | "card" | "refund" | "file";
-};
-
-const DEMO_RECORDS: DemoRecord[] = [
-  {
-    id: 101,
-    searchName: "christa villarosa",
-    propertyType: "Insurance payout",
-    holder: "Pacific Life Insurance Company",
-    reportedAs: "Christa Villarosa",
-    address: "Victorville, CA",
-    source: "California State Controller",
-    amount: 1284.52,
-    status: "new",
-    icon: "file",
-  },
-  {
-    id: 102,
-    searchName: "christa villarosa",
-    propertyType: "Bank balance",
-    holder: "Wells Fargo Bank",
-    reportedAs: "Christa M Villarosa",
-    address: "Victorville, CA",
-    source: "California State Controller",
-    amount: 402.18,
-    status: "active",
-    icon: "wallet",
-  },
-  {
-    id: 201,
-    searchName: "boyd gainor",
-    propertyType: "Uncashed check",
-    holder: "State Compensation Insurance Fund",
-    reportedAs: "Boyd Gainor",
-    address: "San Francisco, CA",
-    source: "California State Controller",
-    amount: 842.75,
-    status: "active",
-    icon: "briefcase",
-  },
-  {
-    id: 202,
-    searchName: "boyd gainor",
-    propertyType: "Refund",
-    holder: "City and County of San Francisco",
-    reportedAs: "Boyd L Gainor",
-    address: "San Francisco, CA",
-    source: "California State Controller",
-    amount: 118.44,
-    status: "claimed",
-    icon: "refund",
-  },
-  {
-    id: 301,
-    searchName: "meena fernandes",
-    propertyType: "Security deposit",
-    holder: "Pacific Gas and Electric Company",
-    reportedAs: "Meena Fernandes",
-    address: "Sunnyvale, CA",
-    source: "California State Controller",
-    amount: 274.9,
-    status: "new",
-    icon: "card",
-  },
-  {
-    id: 401,
-    searchName: "williams dunshea",
-    propertyType: "Bank balance",
-    holder: "Bank of America",
-    reportedAs: "Williams Dunshea",
-    address: "Bakersfield, CA",
-    source: "California State Controller",
-    amount: 1567.33,
-    status: "active",
-    icon: "wallet",
-  },
-  {
-    id: 501,
-    searchName: "david b coulter",
-    propertyType: "Payroll check",
-    holder: "California Payroll Services",
-    reportedAs: "David B Coulter",
-    address: "California",
-    source: "California State Controller",
-    amount: 319.8,
-    status: "active",
-    icon: "briefcase",
-  },
-];
+import {
+  DEMO_RECORDS,
+  STATE_OPTIONS,
+  UNSUPPORTED_STATES,
+  USER_NAMES,
+  type DemoRecord,
+  type StateHandoff,
+} from "./sites-data";
 
 const claimUrl = "https://claimit.ca.gov/";
 
@@ -137,8 +44,9 @@ function ResultIcon({ name }: { name: DemoRecord["icon"] }) {
   const props = { size: 20, strokeWidth: 1.8 };
   if (name === "wallet") return <Wallet {...props} />;
   if (name === "briefcase") return <Briefcase {...props} />;
-  if (name === "card") return <CreditCard {...props} />;
-  if (name === "refund") return <RotateCcw {...props} />;
+  if (name === "credit-card") return <CreditCard {...props} />;
+  if (name === "rotate-ccw") return <RotateCcw {...props} />;
+  if (name === "shield") return <Shield {...props} />;
   return <FileText {...props} />;
 }
 
@@ -146,7 +54,7 @@ export default function Home() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [city, setCity] = useState("");
-  const [state, setState] = useState("CA");
+  const [state, setState] = useState("");
   const [searched, setSearched] = useState(false);
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
@@ -161,10 +69,11 @@ export default function Home() {
     if (state && state !== "CA") return [];
 
     return DEMO_RECORDS.filter((record) => {
-      const name = normalize(record.searchName);
+      const searchText = normalize(record.searchText);
       const address = normalize(record.address);
       const nameMatches =
-        tokens.length === 0 || tokens.every((token) => name.includes(token));
+        tokens.length === 0 ||
+        tokens.every((token) => searchText.includes(token));
       const cityMatches = !cityQuery || address.includes(cityQuery);
       return nameMatches && cityMatches;
     }).sort((a, b) => {
@@ -193,6 +102,9 @@ export default function Home() {
       });
     }, 80);
   }
+
+  const unsupportedState =
+    searched && state && state !== "CA" ? UNSUPPORTED_STATES[state] : null;
 
   return (
     <div className="page-shell">
@@ -312,7 +224,9 @@ export default function Home() {
         </section>
 
         <section id="results" className="results-section">
-          {searched && matches.length > 0 ? (
+          {unsupportedState ? (
+            <UnsupportedStateCard state={unsupportedState} />
+          ) : searched && matches.length > 0 ? (
             <Results
               claimableTotal={claimableTotal}
               potentialMatches={potentialMatches}
@@ -326,9 +240,9 @@ export default function Home() {
               <p className="mini-label">No matches yet</p>
               <h2>Nothing found in the hosted demo data.</h2>
               <p>
-                Try Christa Villarosa, Boyd Gainor, Meena Fernandes, Williams
-                Dunshea, or David B Coulter. The full California dataset still
-                runs in the local Python prototype.
+                Try an exported ConsumerDirect user name. This hosted bundle
+                includes {USER_NAMES.length} users and {DEMO_RECORDS.length}
+                compact California match rows from the local prototype.
               </p>
             </div>
           ) : (
@@ -419,28 +333,82 @@ export default function Home() {
               value={state}
               onChange={(event) => setState(event.target.value)}
             >
-              <option value="">All states</option>
-              <option value="CA">California</option>
-              <option value="TX">Texas</option>
-              <option value="NY">New York</option>
-              <option value="FL">Florida</option>
-              <option value="GA">Georgia</option>
-              <option value="IL">Illinois</option>
-              <option value="OH">Ohio</option>
-              <option value="PA">Pennsylvania</option>
-              <option value="NJ">New Jersey</option>
-              <option value="AZ">Arizona</option>
+              {STATE_OPTIONS.map((option) => (
+                <option key={option.code || "ALL"} value={option.code}>
+                  {option.name}
+                </option>
+              ))}
             </select>
           </div>
           <button className="submit-search" type="submit">
             Search records <ArrowRight size={17} />
           </button>
           <p className="demo-note">
-            Hosted demo data includes the curated California names from the
-            prototype README.
+            Hosted demo data includes {USER_NAMES.length} users from the export
+            and compact California matches from the local prototype.
           </p>
         </form>
       </aside>
+    </div>
+  );
+}
+
+function UnsupportedStateCard({ state }: { state: StateHandoff }) {
+  return (
+    <div className="unsupported-card">
+      <div className="unsupported-head">
+        <div className="unsupported-head-inner">
+          <div className="unsupported-icon">
+            <MapPin size={28} />
+          </div>
+          <div>
+            <p className="mini-label">Coverage in progress</p>
+            <h2>We&apos;re not searching {state.name} just yet</h2>
+          </div>
+        </div>
+      </div>
+
+      <div className="unsupported-body">
+        <div className="program-row">
+          <div>
+            <p>Official program</p>
+            <strong>{state.agency}</strong>
+          </div>
+          <a href={state.portalUrl} target="_blank" rel="noreferrer">
+            Open the {state.name} portal <ExternalLink size={18} />
+          </a>
+        </div>
+
+        <h3>How to file in {state.name}</h3>
+        <ol>
+          {state.steps.map((step, index) => (
+            <li key={step}>
+              <span>{index + 1}</span>
+              {step}
+            </li>
+          ))}
+        </ol>
+
+        <div className="unsupported-meta">
+          <span>
+            Typical processing: <strong>{state.processingTime}</strong>
+          </span>
+          <span>{state.freeNote}</span>
+        </div>
+
+        <div className="unsupported-actions">
+          <button type="button">Notify me when {state.name} is supported</button>
+          <a href="#search">
+            Ask the assistant for help <ArrowRight size={14} />
+          </a>
+        </div>
+
+        <p className="unsupported-disclaimer">
+          SmartCredit is not affiliated with {state.name} or {state.agency}. You
+          can always search and claim for free directly with the state. We never
+          charge a finder&apos;s fee and never hold your funds.
+        </p>
+      </div>
     </div>
   );
 }
