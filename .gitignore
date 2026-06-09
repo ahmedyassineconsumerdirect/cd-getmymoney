@@ -6,6 +6,10 @@ __pycache__/
 data/
 .pytest_cache/
 .DS_Store
+node_modules/
+dist/
+.next/
+.wrangler/
 *.duckdb
 *.duckdb.wal
 ~$*.pptx
