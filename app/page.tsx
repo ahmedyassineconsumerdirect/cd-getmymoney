@@ -242,7 +242,7 @@ export default function Home() {
               <p>
                 Try an exported ConsumerDirect user name. This hosted bundle
                 includes {USER_NAMES.length} users and {DEMO_RECORDS.length}
-                compact California match rows from the local prototype.
+                {" "}compact California match rows from the local prototype.
               </p>
             </div>
           ) : (

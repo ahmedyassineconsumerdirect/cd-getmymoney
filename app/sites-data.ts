@@ -25,6 +25,8 @@ export type StateHandoff = {
 };
 
 export const USER_NAMES = [
+  "Yassine Ahmed",
+  "Ahmed Yassine",
   "Gary Lu",
   "Ian Dunlop",
   "Jason Chalarca",
@@ -160,6 +162,97 @@ export const USER_NAMES = [
 ] as const;
 
 export const DEMO_RECORDS: DemoRecord[] = [
+  {
+    "id": 21734688,
+    "userName": "Ahmed Yassine",
+    "searchText": "ahmed yassine yassine ahmed al shekhly alshekhly citibank n a yassine ahmed irvine",
+    "propertyType": "Credit Balance",
+    "holder": "Citibank N A",
+    "reportedAs": "Yassine Ahmed",
+    "address": "5208 Esperanza, Irvine CA 92618",
+    "source": "California State Records",
+    "amount": 83.19,
+    "status": "active",
+    "icon": "credit-card"
+  },
+  {
+    "id": 14893720,
+    "userName": "Ahmed Yassine",
+    "searchText": "ahmed yassine yassine ahmed al shekhly alshekhly chipotle mexican grill inc al shekhly yassine ahmed pacific grove",
+    "propertyType": "Unpaid Wages",
+    "holder": "Chipotle Mexican Grill, Inc.",
+    "reportedAs": "Al Shekhly Yassine Ahmed",
+    "address": "210 Grove Acre Ave., Pacific Grove CA 93950",
+    "source": "California State Records",
+    "amount": 43.25,
+    "status": "active",
+    "icon": "briefcase"
+  },
+  {
+    "id": 22278752,
+    "userName": "Ahmed Yassine",
+    "searchText": "ahmed yassine yassine ahmed al shekhly alshekhly southern california gas company yassine ahmed irvine",
+    "propertyType": "Utility Refund",
+    "holder": "Southern California Gas Company",
+    "reportedAs": "Yassine Ahmed",
+    "address": "5051 Chateau Cir, Irvine CA 92604",
+    "source": "California State Records",
+    "amount": 10.97,
+    "status": "active",
+    "icon": "rotate-ccw"
+  },
+  {
+    "id": 47811441,
+    "userName": "Ahmed Yassine",
+    "searchText": "ahmed yassine yassine ahmed al shekhly alshekhly orange county's credit union yassine ahmed irvine",
+    "propertyType": "Checking Account",
+    "holder": "Orange County's Credit Union",
+    "reportedAs": "Yassine Ahmed",
+    "address": "29 Willowrun, Irvine CA 92604",
+    "source": "California State Records",
+    "amount": 7.28,
+    "status": "active",
+    "icon": "wallet"
+  },
+  {
+    "id": 47811636,
+    "userName": "Ahmed Yassine",
+    "searchText": "ahmed yassine yassine ahmed al shekhly alshekhly orange county's credit union yassine ahmed irvine",
+    "propertyType": "Savings Account",
+    "holder": "Orange County's Credit Union",
+    "reportedAs": "Yassine Ahmed",
+    "address": "29 Willowrun, Irvine CA 92604",
+    "source": "California State Records",
+    "amount": 5.0,
+    "status": "new",
+    "icon": "wallet"
+  },
+  {
+    "id": 53197598,
+    "userName": "Ahmed Yassine",
+    "searchText": "ahmed yassine yassine ahmed al shekhly alshekhly citibank n a yassine ahmed irvine",
+    "propertyType": "Credit Balance",
+    "holder": "Citibank N A",
+    "reportedAs": "Yassine Ahmed",
+    "address": "5208 Esperanza, Irvine CA 92618",
+    "source": "California State Records",
+    "amount": 4.32,
+    "status": "new",
+    "icon": "credit-card"
+  },
+  {
+    "id": 42967216,
+    "userName": "Ahmed Yassine",
+    "searchText": "ahmed yassine yassine ahmed al shekhly alshekhly jpmorgan chase bank n.a (300056) yassine ahmed pomona",
+    "propertyType": "Credit Balance",
+    "holder": "Jpmorgan Chase Bank, N.A.",
+    "reportedAs": "Yassine Ahmed",
+    "address": "200 Drake St Apt 148, Pomona CA 91767",
+    "source": "California State Records",
+    "amount": 0.21,
+    "status": "claimed",
+    "icon": "credit-card"
+  },
   {
     "id": 2719556,
     "userName": "Aileen  Mallari",
