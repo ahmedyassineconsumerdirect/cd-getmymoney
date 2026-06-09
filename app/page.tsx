@@ -28,6 +28,7 @@ import {
 } from "./sites-data";
 
 const claimUrl = "https://claimit.ca.gov/";
+const dataVersion = "Data version: Ahmed Yassine fix";
 
 function normalize(value: string) {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
@@ -244,6 +245,7 @@ export default function Home() {
                 includes {USER_NAMES.length} users and {DEMO_RECORDS.length}
                 {" "}compact California match rows from the local prototype.
               </p>
+              <p className="data-version">{dataVersion}</p>
             </div>
           ) : (
             <div className="empty-card">
@@ -345,8 +347,20 @@ export default function Home() {
           </button>
           <p className="demo-note">
             Hosted demo data includes {USER_NAMES.length} users from the export
-            and compact California matches from the local prototype.
+            and {DEMO_RECORDS.length} compact California matches from the local
+            prototype. {dataVersion}.
           </p>
+          <button
+            className="suggestion-button"
+            type="button"
+            onClick={() => {
+              setFirstName("ahmed");
+              setLastName("yassine");
+              setState("CA");
+            }}
+          >
+            Try Ahmed Yassine
+          </button>
         </form>
       </aside>
     </div>

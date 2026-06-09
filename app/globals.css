@@ -501,6 +501,24 @@ select:focus {
   margin: 0;
 }
 
+.data-version {
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+.suggestion-button {
+  background: var(--brand-light);
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 700;
+  justify-self: start;
+  padding: 8px 14px;
+}
+
 .results-summary {
   margin-bottom: 28px;
 }
