@@ -5,6 +5,7 @@ ALL-CAPS holder strings ("CITIBANK N A"). This module decodes those into
 member-facing labels with categorical icons and proper title casing.
 """
 from __future__ import annotations
+import os
 import re
 
 from app.state_data import STATES
@@ -338,6 +339,16 @@ def claim_url(state_code: str | None, property_id: str | None = None) -> str:
 # guide-to-file handoff to the state's own official portal (compliant:
 # display-only deep link, no fee, no representation).
 SUPPORTED_STATES: set[str] = {"CA"}
+
+# Per-state kill switch (compliance requirement #17): DISABLED_STATES="CA,TX"
+# turns a state's search off at runtime — it falls back to the guide-to-file
+# handoff — without a deploy, if a regulatory issue arises in that state.
+_DISABLED_STATES = {
+    s.strip().upper()
+    for s in os.environ.get("DISABLED_STATES", "").split(",")
+    if s.strip()
+}
+SUPPORTED_STATES -= _DISABLED_STATES
 
 # Every known US state/DC code — used to whitelist the state form value so
 # only trusted, table-sourced names ever reach the handoff template.

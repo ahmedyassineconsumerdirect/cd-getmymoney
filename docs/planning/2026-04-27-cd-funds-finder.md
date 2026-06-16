@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.11+, FastAPI, Uvicorn, DuckDB, Jinja2, htmx, Tailwind CSS (Play CDN), reveal.js (CDN), httpx, pytest
 
-**Reference:** [`docs/superpowers/specs/2026-04-27-cd-funds-finder-design.md`](../specs/2026-04-27-cd-funds-finder-design.md)
+**Reference:** [`docs/planning/2026-04-27-cd-funds-finder-design.md`](./2026-04-27-cd-funds-finder-design.md)
 
 ---
 
@@ -161,7 +161,7 @@ python -m app.main            # serves at http://127.0.0.1:8000
 
 ## Design
 
-See [`docs/superpowers/specs/2026-04-27-cd-funds-finder-design.md`](docs/superpowers/specs/2026-04-27-cd-funds-finder-design.md).
+See [`docs/planning/2026-04-27-cd-funds-finder-design.md`](docs/planning/2026-04-27-cd-funds-finder-design.md).
 ```
 
 - [ ] **Step 7: Commit**
@@ -1460,7 +1460,7 @@ python scripts/refresh_data.py
 
 ## Design
 
-[`docs/superpowers/specs/2026-04-27-cd-funds-finder-design.md`](docs/superpowers/specs/2026-04-27-cd-funds-finder-design.md)
+[`docs/planning/2026-04-27-cd-funds-finder-design.md`](docs/planning/2026-04-27-cd-funds-finder-design.md)
 
 ## Tests
 

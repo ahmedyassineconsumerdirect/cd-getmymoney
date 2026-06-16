@@ -31,20 +31,29 @@
       <div>
         <h2 class="text-3xl md:text-4xl font-extrabold text-ink-heading leading-tight">
           {% if claimable_count %}
-            You may be owed about <span style="color:#D85A30">${{ "{:,.2f}".format(claimable_total) }}</span>
+            {{ claimable_count }} potential match{{ "es" if claimable_count != 1 else "" }} —
+            about <span style="color:#D85A30">${{ "{:,.2f}".format(claimable_total) }}</span> reported
           {% else %}
             Match history for your name
           {% endif %}
         </h2>
         <p class="mt-1 text-sm text-ink-muted max-w-2xl">
           {% if claimable_count %}
-            across {{ claimable_count }} claimable record{{ "s" if claimable_count != 1 else "" }} reported in your name.
+            {{ claimable_count }} claimable record{{ "s" if claimable_count != 1 else "" }} that may match your name.
+            The state determines eligibility and ownership when you file.
           {% endif %}
           {% if claimed_matches %}
-            {{ claimed_matches|length }} record{{ "s" if claimed_matches|length != 1 else "" }} previously in your name {{ "have" if claimed_matches|length != 1 else "has" }} since been claimed — shown below for your records.
+            {{ claimed_matches|length }} record{{ "s" if claimed_matches|length != 1 else "" }} that previously matched {{ "have" if claimed_matches|length != 1 else "has" }} since been claimed — shown below for your records.
           {% endif %}
           Amounts are state-reported estimates and may differ from the actual payout.
         </p>
+        {% if claimable_count >= 20 %}
+        <p class="mt-3 max-w-2xl text-[13px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3.5 py-2.5">
+          A common name can match records that belong to other people with the same name.
+          Check the reported owner and address on each record before claiming — or mark it
+          <span class="font-semibold">Not me</span>.
+        </p>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -61,8 +70,10 @@
 
   <p class="text-xs text-ink-muted mt-2 max-w-3xl">
     Click <span class="font-semibold text-ink-body">Claim</span> to be guided to the state's official portal — at no cost.
-    SmartCredit is not affiliated with any state, never holds your funds, and never charges a finder's fee.
-    You can always claim free directly with the state.
+    SmartCredit is not affiliated with or endorsed by any government agency, never holds your funds, and never
+    charges a finder's fee. You can always claim free directly with the state, which determines eligibility —
+    approval is not guaranteed.
+    {% if data_refreshed %}Data last refreshed {{ data_refreshed }}; the state's portal is authoritative.{% endif %}
   </p>
 
 {% elif has_input %}
