@@ -33,6 +33,12 @@ PORT=8088 python -m app.main
 - Admin:  http://127.0.0.1:8088/admin
 - Deck:   http://127.0.0.1:8088/deck/
 
+Optional env:
+- `DISABLED_STATES=CA,…` — per-state kill switch (compliance req #17): the state
+  falls back to the guide-to-file handoff, and its records stop surfacing.
+- `ADMIN_TOKEN=…` — gates `/admin` (`?token=` or `X-Admin-Token`) on shared
+  deployments; unset = open, as before.
+
 ## How it works (member flow)
 
 1. **Run your search** — a top-right popout: enter a name (a city narrows it).
@@ -102,7 +108,7 @@ Any name works (e.g. `David B Coulter` shows closest-match-then-ZIP ordering).
 - **Match:** `app/match.py` — `DemoFuzzyMatcher` behind a `MatchService` interface;
   full-recall contains scan ranked by name closeness (`relevance_score`), ZIP as
   tiebreak. Production swaps in Consumer Direct's Privacy Master engine.
-- **Production target:** see `implementation-guideline/s3-data-ingestion.html`
+- **Production target:** see `docs/guides/s3-data-ingestion.html`
   for the proposed S3 + Snowflake (dbt) ingestion design.
 
 ## Refresh data
@@ -118,12 +124,17 @@ the write lock.
 ## Repo layout
 
 ```
-app/                    FastAPI app (routes, matcher, presentation, MaxAI)
-scripts/                ingest, snapshot diff, exec deck, MaxAI login
-implementation-guideline/  S3 ingestion guide (HTML) + GetMyMoney exec deck
-deck/                   reveal.js live demo deck
-docs/                   spec, plan, compliance handoff
-tests/                  pytest suite
+app/        FastAPI prototype (routes, matcher, presentation, MaxAI, templates, static)
+web/        Cloudflare-deployed hosted-UI mirror (Next.js / vinext) — separate from the prototype
+scripts/    ingest, snapshot diff, exec deck, MaxAI login
+tests/      pytest suite
+data/       DuckDB dataset (gitignored)
+docs/       all documentation & decks:
+  decks/      GetMyMoney exec deck (.pptx) + reveal.js demo (reveal/, served at /deck)
+  guides/     S3 ingestion guide, audit notes
+  compliance/ compliance checks & legal verification
+  handoff/    handoff notes + screenshots
+  planning/   spec & implementation plan
 ```
 
 ## Tests

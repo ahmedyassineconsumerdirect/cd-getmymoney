@@ -1,5 +1,7 @@
+import os
+import threading
 from pathlib import Path
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -32,26 +34,45 @@ templates.env.globals["assistant_prompts"] = [
 app = FastAPI(title="CD Funds Finder")
 app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
 
-DECK_DIR = BASE.parent / "deck"
+DECK_DIR = BASE.parent / "docs" / "decks" / "reveal"
 app.mount("/deck", StaticFiles(directory=str(DECK_DIR), html=True), name="deck")
 
 
 _conn = None
+_conn_lock = threading.Lock()
 def _get_match_service():
     global _conn
     if _conn is None:
-        # The app only reads; a read-only connection allows concurrent readers
-        # and lets refresh/snapshot scripts hold the write lock independently.
-        # The production DB already carries the schema (see scripts/).
-        _conn = get_connection(read_only=True)
+        with _conn_lock:
+            if _conn is None:
+                # The app only reads; a read-only connection allows concurrent
+                # readers and lets refresh/snapshot scripts hold the write lock
+                # independently. The production DB already carries the schema
+                # (see scripts/).
+                _conn = get_connection(read_only=True)
     return DemoExactMatcher(_conn)
+
+
+def _data_refreshed() -> str | None:
+    """Member-facing 'data last refreshed' stamp (compliance: staleness cue —
+    the state portal stays authoritative). Tiny table; cheap per search."""
+    try:
+        row = (
+            _get_match_service()
+            .conn.execute(
+                "SELECT MAX(completed_at) FROM ingest_runs WHERE status = 'completed'"
+            )
+            .fetchone()
+        )
+        return row[0].strftime("%B %-d, %Y") if row and row[0] else None
+    except Exception:
+        return None
 
 
 @app.on_event("startup")
 def _warm_cache():
     """Page the owner-name column into OS cache in the background so the first
     real search isn't a cold ~30s full scan. Non-blocking; own connection."""
-    import threading
 
     def _warm():
         try:
@@ -105,13 +126,18 @@ def search(
             {"request": request, "state": presentation.state_info(state_code)},
         )
 
-    matcher = _get_match_service()
-    matches = matcher.find_matches(
-        first_name=first_name,
-        last_name=last_name,
-        city=city.strip() or None,
-        state=state_code if known_state else None,
-    )
+    # Kill switch: the local corpus is CA — if CA is disabled (DISABLED_STATES)
+    # an all-states search must not surface CA records either.
+    if "CA" in presentation.SUPPORTED_STATES:
+        matcher = _get_match_service()
+        matches = matcher.find_matches(
+            first_name=first_name,
+            last_name=last_name,
+            city=city.strip() or None,
+            state=state_code if known_state else None,
+        )
+    else:
+        matches = []
 
     # Bucket by snapshot-diff status into the three result sections. Totals are
     # derived from the buckets so the headline can never disagree with what is
@@ -132,6 +158,7 @@ def search(
             "claimable_total": claimable_total,
             "claimable_count": len(potential_matches),
             "has_input": has_input,
+            "data_refreshed": _data_refreshed() if matches else None,
         },
     )
 
@@ -206,6 +233,13 @@ def _fmt_dt(dt) -> str | None:
 
 @app.get("/admin", response_class=HTMLResponse)
 def admin(request: Request):
+    # Opt-in gate for shared/hosted deployments: set ADMIN_TOKEN and pass it as
+    # ?token= or an X-Admin-Token header. Unset (local demo) = open as before.
+    expected = os.environ.get("ADMIN_TOKEN")
+    if expected:
+        supplied = request.query_params.get("token") or request.headers.get("x-admin-token")
+        if supplied != expected:
+            raise HTTPException(status_code=404)
     conn = get_connection(read_only=True)
     try:
         total_rows = conn.execute("SELECT COUNT(*) FROM ca_unclaimed").fetchone()[0]

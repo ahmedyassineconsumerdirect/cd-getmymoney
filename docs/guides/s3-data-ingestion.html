@@ -304,9 +304,12 @@ COPY INTO raw.property_landing
 <table>
   <tr><th>State(s)</th><th>Ingest posture</th><th>Mechanism</th></tr>
   <tr><td>CA</td><td><span class="pill ok">Ingest</span> open commercial bulk feed</td><td>Auto-download (this guide)</td></tr>
-  <tr><td>TX, AZ, NC</td><td><span class="pill warn">Conditional</span> PI license required</td><td>Approved bulk file under license; no scraping</td></tr>
+  <tr><td>TX, NC</td><td><span class="pill warn">Conditional</span> PI license required</td><td>Approved bulk file under license; no scraping</td></tr>
+  <tr><td>GA</td><td><span class="pill warn">Conditional</span> CDR-gated weekly file</td><td>Weekly delimited DOR file is provided to registered Claimant Designated Representatives; counsel to confirm whether alert-only use requires CDR registration before any ingest</td></tr>
   <tr><td>NY</td><td><span class="pill warn">Conditional</span> written request</td><td>OSC SFTP → DataSync → <code>raw/</code></td></tr>
-  <tr><td>PA, SC, WA, VA, MA, MI, GA</td><td><span class="pill no">Do not ingest</span> prohibited / blocked</td><td>Deep-link to state portal only</td></tr>
+  <tr><td>FL</td><td><span class="pill warn">Conditional</span> public-records request</td><td>Ch. 119 Sunshine Law PRR to DFS for the owner-name list; confirm fee and recurrence</td></tr>
+  <tr><td>AZ</td><td><span class="pill no">Do not ingest</span> no feed</td><td>No bulk feed; state directs searches to MissingMoney — no scraping. Deep-link only unless AZ/Kelmar grant written permission</td></tr>
+  <tr><td>PA, SC, WA, VA, MA, MI</td><td><span class="pill no">Do not ingest</span> prohibited / blocked</td><td>Deep-link to state portal only</td></tr>
 </table>
 <div class="note">The acquisition layer must <strong>refuse</strong> to fetch any source not on the allow-list, even if a URL exists — the allow-list is code, not config, and changing it requires legal sign-off.</div>
 

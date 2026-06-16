@@ -47,10 +47,16 @@ _CODE_FILE = Path(__file__).resolve().parent.parent / "data" / "internal" / "max
 _DEFAULT_CODE = "6643"
 
 
+def _write_private(path: Path, text: str) -> None:
+    """Persist a credential file owner-readable only (0600)."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text)
+    path.chmod(0o600)
+
+
 def save_confirmation_code(code: str) -> None:
     try:
-        _CODE_FILE.parent.mkdir(parents=True, exist_ok=True)
-        _CODE_FILE.write_text((code or "").strip())
+        _write_private(_CODE_FILE, (code or "").strip())
     except Exception:
         log.warning("MaxAI: could not persist confirmation code to %s", _CODE_FILE)
 
@@ -83,8 +89,7 @@ _PENDING_FILE = _CODE_FILE.parent / "maxai_pine_pending.json"
 
 def save_tokens(access_token: str, user_id: str, email: str | None = None) -> None:
     try:
-        _TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
-        _TOKEN_FILE.write_text(_json.dumps(
+        _write_private(_TOKEN_FILE, _json.dumps(
             {"access_token": access_token, "user_id": user_id, "email": email}))
     except Exception:
         log.warning("MaxAI: could not persist Pine token to %s", _TOKEN_FILE)
@@ -102,8 +107,7 @@ def load_tokens() -> dict | None:
 
 
 def save_pending(email: str, request_token: str) -> None:
-    _PENDING_FILE.parent.mkdir(parents=True, exist_ok=True)
-    _PENDING_FILE.write_text(_json.dumps({"email": email, "request_token": request_token}))
+    _write_private(_PENDING_FILE, _json.dumps({"email": email, "request_token": request_token}))
 
 
 def load_pending() -> dict | None:
