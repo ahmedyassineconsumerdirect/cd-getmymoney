@@ -121,10 +121,10 @@
     }
     (s.matches || []).forEach(function (m) {
       var amount = m.claimable
-        ? '<span class="text-sm font-bold" style="color:#D85A30">' + esc(m.amount) + '</span>'
+        ? '<span class="text-sm font-bold" style="color:#499F7C">' + esc(m.amount) + '</span>'
         : '<span class="text-sm font-semibold text-slate-400 line-through">' + esc(m.amount) + '</span>';
       var action = m.claimable
-        ? '<a href="' + esc(m.claim_url) + '" target="_blank" rel="noopener" class="text-xs font-semibold text-white px-3 py-1 rounded-full" style="background:#D85A30">Claim</a>'
+        ? '<a href="' + esc(m.claim_url) + '" target="_blank" rel="noopener" class="text-xs font-semibold text-white px-3 py-1 rounded-full" style="background:#2863C5">Claim</a>'
         : '<span class="text-xs font-semibold text-slate-500 bg-slate-100 ring-1 ring-slate-200 px-3 py-1 rounded-full">Claimed</span>';
       var card = el(
         '<div class="bg-white border border-slate-200 rounded-xl p-3">' +
@@ -260,7 +260,7 @@
   function buildFab() {
     var fab = el(
       '<button id="assistant-fab" aria-label="Open MaxAI assistant" ' +
-      'class="fixed bottom-5 right-5 z-40 flex items-center gap-2 bg-cta text-white font-semibold pl-4 pr-5 py-3 rounded-pill shadow-lg hover:bg-cta-dark hover:shadow-xl transition">' +
+      'class="fixed bottom-5 right-5 z-40 flex items-center gap-2 bg-brand text-white font-semibold pl-4 pr-5 py-3 rounded-pill shadow-lg hover:bg-brand-dark hover:shadow-xl transition">' +
         '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>' +
         '<span class="text-sm">Ask Max</span>' +
       '</button>'
