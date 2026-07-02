@@ -1,19 +1,18 @@
-{# Results partial — three snapshot-diff sections:
-   New (just appeared) · Potential (still claimable) · Already claimed (history).
-   Row partial is _match_row.html. #}
+{# Results partial — sticky summary bar + two snapshot-diff sections:
+   Potential (still claimable) · Claimed history. Row partial is _match_row.html.
+   Client JS (results.js) adds pagination, sort/filter, detail modal, announcements. #}
 
-{% macro section(title, sub, rows, accent, dot, page_size=10) %}
+{% macro section(title, sub, rows, key, demoted=false, page_size=10) %}
   {% if rows %}
-  <section class="mb-8"{% if rows|length > page_size %} data-paginate="{{ page_size }}"{% endif %}>
+  <section class="mb-10 {{ 'opacity-80' if demoted else '' }}" data-section="{{ key }}"{% if rows|length > page_size %} data-paginate="{{ page_size }}"{% endif %}>
     <div class="flex items-center gap-2.5 mb-3">
-      <span class="w-2 h-2 rounded-full {{ dot }}"></span>
-      <h3 class="text-sm font-extrabold tracking-[0.14em] uppercase {{ accent }}">{{ title }}</h3>
-      <span class="text-xs font-semibold text-ink-muted bg-slate-100 rounded-full px-2 py-0.5">{{ rows|length }}</span>
+      <h3 class="text-[15px] font-bold {{ 'text-ink-muted' if demoted else 'text-ink-heading' }}">{{ title }}</h3>
+      <span class="text-xs font-bold {{ 'text-ink-muted bg-slate-100' if demoted else 'text-brand bg-brand-light' }} rounded-pill px-2.5 py-0.5" data-section-count>{{ rows|length }}</span>
     </div>
-    {% if sub %}<p class="text-sm text-ink-muted mb-4 max-w-2xl -mt-1">{{ sub }}</p>{% endif %}
+    {% if sub %}<p class="text-[13px] text-ink-muted mb-4 max-w-2xl -mt-1">{{ sub }}</p>{% endif %}
     <ul class="space-y-3" role="list" data-pagelist>
       {% for m in rows %}
-        <li>{% include "_match_row.html" %}</li>
+        <li data-amount="{{ '%.2f' | format(m.amount_max or 0) }}" data-rank="{{ loop.index }}">{% include "_match_row.html" %}</li>
       {% endfor %}
     </ul>
     {% if rows|length > page_size %}
@@ -24,72 +23,110 @@
 {% endmacro %}
 
 {% if matches %}
-  {# Header summary — claimable money only; claimed is history #}
-  <div class="mb-7">
-    <p class="text-xs font-bold text-brand tracking-[0.2em] uppercase mb-3">Your results</p>
-    <div class="flex items-end justify-between flex-wrap gap-4">
+<div data-announce="{{ claimable_count }} potential match{{ 'es' if claimable_count != 1 else '' }} found{% if claimed_matches %}, plus {{ claimed_matches|length }} in claimed history{% endif %}.">
+
+  {# Sticky summary bar #}
+  <div class="sticky top-[60px] z-20 -mx-6 px-6 py-3.5 bg-white/95 backdrop-blur border-b border-gray-200 mb-7">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
       <div>
-        <h2 class="text-3xl md:text-4xl font-extrabold text-ink-heading leading-tight">
-          {% if claimable_count %}
-            {{ claimable_count }} potential match{{ "es" if claimable_count != 1 else "" }} —
-            about <span style="color:#D85A30">${{ "{:,.2f}".format(claimable_total) }}</span> reported
-          {% else %}
-            Match history for your name
-          {% endif %}
-        </h2>
-        <p class="mt-1 text-sm text-ink-muted max-w-2xl">
-          {% if claimable_count %}
-            {{ claimable_count }} claimable record{{ "s" if claimable_count != 1 else "" }} that may match your name.
-            The state determines eligibility and ownership when you file.
-          {% endif %}
-          {% if claimed_matches %}
-            {{ claimed_matches|length }} record{{ "s" if claimed_matches|length != 1 else "" }} that previously matched {{ "have" if claimed_matches|length != 1 else "has" }} since been claimed — shown below for your records.
-          {% endif %}
-          Amounts are state-reported estimates and may differ from the actual payout.
+        <p class="text-[11px] font-bold text-ink-muted tracking-[0.16em] uppercase leading-none">
+          {% if claimable_count %}Potential matches found{% else %}Match history{% endif %}
         </p>
-        {% if claimable_count >= 20 %}
-        <p class="mt-3 max-w-2xl text-[13px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3.5 py-2.5">
-          A common name can match records that belong to other people with the same name.
-          Check the reported owner and address on each record before claiming — or mark it
-          <span class="font-semibold">Not me</span>.
-        </p>
+        {% if claimable_count %}
+        <p class="text-[26px] font-extrabold text-money leading-tight mt-0.5">${{ "{:,.2f}".format(claimable_total) }}</p>
+        {% else %}
+        <p class="text-[20px] font-bold text-ink-heading leading-tight mt-0.5">Previously matched records</p>
         {% endif %}
+      </div>
+      <div class="text-right">
+        {% if claimable_count %}
+        <p class="text-sm font-semibold text-ink-heading">{{ claimable_count }} potential match{{ "es" if claimable_count != 1 else "" }}</p>
+        {% endif %}
+        <p class="text-xs text-ink-muted mt-0.5">100% free to claim directly with the state</p>
       </div>
     </div>
   </div>
 
-  {{ section(
-      "Potential matches",
-      "",
-      potential_matches, "text-emerald-700", "bg-emerald-500") }}
+  <div class="mb-6">
+    <p class="text-sm text-ink-muted max-w-2xl">
+      {% if claimable_count %}
+        These state records may match your name — the state determines eligibility and ownership when you file.
+        Amounts are state-reported estimates and may differ from the actual payout.
+      {% endif %}
+      {% if claimed_matches %}
+        {{ claimed_matches|length }} record{{ "s" if claimed_matches|length != 1 else "" }} that previously matched {{ "have" if claimed_matches|length != 1 else "has" }} since been claimed — kept below for your records.
+      {% endif %}
+    </p>
+    {% if claimable_count >= 20 %}
+    <p class="mt-3 max-w-2xl text-[13px] text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-2.5">
+      A common name can match records that belong to other people with the same name.
+      Check the reported owner and address on each record before claiming — or mark it
+      <span class="font-semibold">Not me</span>.
+    </p>
+    {% endif %}
+
+    {% if claimable_count %}
+    <div class="mt-4 flex items-center gap-3 flex-wrap text-[13px]">
+      <label for="sort-matches" class="font-semibold text-ink-muted">Sort</label>
+      <select id="sort-matches" data-sort-control class="sc-input text-[13px] font-semibold text-ink-heading border border-gray-300 rounded-pill pl-3 pr-8 py-1.5 bg-white">
+        <option value="best">Best match</option>
+        <option value="amount">Highest amount</option>
+      </select>
+      <label for="filter-matches" class="font-semibold text-ink-muted ml-2">Show</label>
+      <select id="filter-matches" data-filter-control class="sc-input text-[13px] font-semibold text-ink-heading border border-gray-300 rounded-pill pl-3 pr-8 py-1.5 bg-white">
+        <option value="0">All amounts</option>
+        <option value="100">$100 and up</option>
+        <option value="500">$500 and up</option>
+      </select>
+    </div>
+    {% endif %}
+  </div>
+
+  {{ section("Potential matches", "", potential_matches, "potential") }}
+
+  {# Why is this here? — educational trust card #}
+  {% if claimable_count %}
+  <aside class="bg-brand-light/60 rounded-card px-6 py-5 mb-10 flex gap-4 items-start">
+    <span class="w-9 h-9 rounded-full bg-white text-brand flex items-center justify-center shrink-0 shadow-sm" aria-hidden="true">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+    </span>
+    <div class="text-[13px] text-ink-body leading-relaxed">
+      <p class="font-bold text-ink-heading mb-1">Why is this here?</p>
+      Property becomes "unclaimed" when a company loses track of its owner — an old bank balance,
+      a final paycheck, a deposit refund. State law makes the company hand it to the state, where it
+      waits in the owner's name until someone claims it. We check those official records for names like yours.
+    </div>
+  </aside>
+  {% endif %}
 
   {{ section(
-      "Claimed history",
+      "History & resolved items",
       "Previously reported in your name but no longer in the state's file — typically already claimed. Shown for your records.",
-      claimed_matches, "text-slate-500", "bg-slate-400") }}
+      claimed_matches, "claimed", demoted=true) }}
 
   <p class="text-xs text-ink-muted mt-2 max-w-3xl">
-    Click <span class="font-semibold text-ink-body">Claim</span> to be guided to the state's official portal — at no cost.
+    Click <span class="font-semibold text-ink-body">Claim with the state</span> to be guided to the state's official portal — at no cost.
     SmartCredit is not affiliated with or endorsed by any government agency, never holds your funds, and never
     charges a finder's fee. You can always claim free directly with the state, which determines eligibility —
     approval is not guaranteed.
     {% if data_refreshed %}Data last refreshed {{ data_refreshed }}; the state's portal is authoritative.{% endif %}
   </p>
+</div>
 
 {% elif has_input %}
-  <div class="bg-white rounded-card border border-slate-100 p-12 text-center max-w-2xl mx-auto shadow-card">
+  <div data-announce="No matches found." class="bg-white rounded-card shadow-card p-12 text-center max-w-2xl mx-auto">
     <div class="w-16 h-16 rounded-full bg-brand-light text-brand flex items-center justify-center mx-auto mb-5">
       <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     </div>
     <p class="text-xs font-bold text-brand tracking-[0.2em] uppercase mb-2">No matches yet</p>
-    <h2 class="text-2xl font-extrabold text-ink-heading">Nothing reported in your name today.</h2>
+    <h2 class="text-2xl font-bold text-ink-heading">Nothing reported in your name today.</h2>
     <p class="mt-3 text-ink-body max-w-md mx-auto leading-relaxed">
       Try fewer fields or a name variant. Coverage expands every week — we'll notify you the moment a future record appears.
     </p>
   </div>
 
 {% else %}
-  <div class="bg-white/60 rounded-card border border-dashed border-slate-200 p-10 text-center">
-    <p class="text-sm text-ink-muted">Enter at least one detail above to start your search.</p>
+  <div class="bg-surface-footer/70 rounded-card border border-dashed border-slate-200 p-10 text-center">
+    <p class="text-sm text-ink-muted">Enter at least your name above to start your search.</p>
   </div>
 {% endif %}
