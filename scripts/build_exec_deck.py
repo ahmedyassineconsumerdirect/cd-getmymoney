@@ -24,25 +24,29 @@ from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 
 
 # Brand palette
-SC_BLUE = RGBColor(0x28, 0x63, 0xC5)
-SC_BLUE_DARK = RGBColor(0x1F, 0x4F, 0x9E)
-SC_BLUE_LIGHT = RGBColor(0xE6, 0xEF, 0xFA)
-SC_ORANGE = RGBColor(0xFC, 0x4C, 0x0B)
-SC_ORANGE_DARK = RGBColor(0xD8, 0x3E, 0x07)
-SC_AMBER = RGBColor(0xFF, 0xB3, 0x52)
-SC_INK = RGBColor(0x0F, 0x17, 0x2A)
-SC_INK_BODY = RGBColor(0x33, 0x41, 0x55)
-SC_INK_MUTED = RGBColor(0x64, 0x74, 0x8B)
-SC_BG_SUBTLE = RGBColor(0xF8, 0xFA, 0xFC)
+# Consumer Direct (CD) approved template palette — theme "CD" (Template 2023).
+# SC_* names kept so all existing slide code recolors automatically.
+SC_BLUE = RGBColor(0x30, 0x58, 0xA3)        # CD accent1 blue (accents, bars)
+SC_BLUE_DARK = RGBColor(0x24, 0x46, 0x7F)   # darker blue
+SC_BLUE_LIGHT = RGBColor(0xE4, 0xEC, 0xF7)  # light blue tint
+SC_ORANGE = RGBColor(0xEF, 0x5E, 0x33)      # CD accent4 orange (CTA)
+SC_ORANGE_DARK = RGBColor(0xC9, 0x4E, 0x27)
+SC_AMBER = RGBColor(0xFC, 0xC0, 0x62)       # CD accent3 gold
+SC_INK = RGBColor(0x49, 0x33, 0x56)         # CD dk1 PLUM (titles + dark bars)
+SC_INK_BODY = RGBColor(0x41, 0x41, 0x41)    # CD dk2 gray (body)
+SC_INK_MUTED = RGBColor(0x8A, 0x8A, 0x8A)   # CD accent6 gray (muted/labels)
+SC_BG_SUBTLE = RGBColor(0xF5, 0xF4, 0xF7)   # light plum-gray surface
 SC_BG_CARD = RGBColor(0xFF, 0xFF, 0xFF)
-SC_BORDER = RGBColor(0xE2, 0xE8, 0xF0)
-SC_RED = RGBColor(0xE1, 0x1D, 0x48)
-SC_GREEN = RGBColor(0x05, 0x96, 0x69)
+SC_BORDER = RGBColor(0xE2, 0xE2, 0xE6)
+SC_RED = RGBColor(0xE1, 0x1D, 0x48)         # semantic NO (functional, not brand)
+SC_GREEN = RGBColor(0x05, 0x96, 0x69)       # semantic YES (functional, not brand)
+SC_CYAN = RGBColor(0x52, 0xCC, 0xF3)        # CD accent2 cyan
 WHITE = RGBColor(0xFF, 0xFF, 0xFF)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 OUT = PROJECT_ROOT / "docs" / "decks" / "GetMyMoney-Exec-Deck.pptx"
+TEMPLATE = PROJECT_ROOT / "docs" / "decks" / "CD-Template Guide.pptx"
 
 
 # =========================================================================
@@ -64,7 +68,7 @@ def add_textbox(slide, x, y, w, h, text, font_size=18, bold=False,
     run.font.size = Pt(font_size)
     run.font.bold = bold
     run.font.color.rgb = color
-    run.font.name = "Open Sans"
+    run.font.name = "Calibri"
     return box
 
 
@@ -108,7 +112,7 @@ def add_pill(slide, x, y, w, h, text, fill, text_color, font_size=10):
     p = tf.paragraphs[0]; p.alignment = PP_ALIGN.CENTER
     run = p.add_run(); run.text = text
     run.font.size = Pt(font_size); run.font.bold = True
-    run.font.color.rgb = text_color; run.font.name = "Open Sans"
+    run.font.color.rgb = text_color; run.font.name = "Calibri"
     return shp
 
 
@@ -122,27 +126,22 @@ def add_arrow_right(slide, x, y, w, h, color):
 
 
 def add_chrome(slide, n, total, footer_text="GetMyMoney · Confidential — Consumer Direct, Inc."):
-    """Top thin bar + brand wordmark + slide number. Same on every content slide."""
+    """Top thin CD-blue bar + wordmark + slide number + footer."""
     add_rect(slide, 0, 0, 13.33, 0.06, SC_BLUE)
-    # smartcredit wordmark
     add_textbox(slide, 0.5, 0.18, 2.5, 0.36,
                 "smartcredit", font_size=16, bold=True, color=SC_INK)
-    # Slide number bottom-right
     add_textbox(slide, 12.4, 7.05, 0.8, 0.3,
                 f"{n} / {total}", font_size=9, color=SC_INK_MUTED, align=PP_ALIGN.RIGHT)
     add_textbox(slide, 0.5, 7.05, 8.0, 0.3,
                 footer_text, font_size=9, color=SC_INK_MUTED)
 
 
-def blank_slide(prs):
-    """Return a blank slide. Use the simplest layout and strip its placeholders."""
-    layout = prs.slide_layouts[6] if len(prs.slide_layouts) > 6 else prs.slide_layouts[-1]
-    slide = prs.slides.add_slide(layout)
-    # Remove any inherited placeholder shapes for a truly blank canvas
+def blank_slide(prs, layout=None):
+    """Blank canvas: simplest layout, placeholders stripped, light CD-tint bg."""
+    layout_obj = prs.slide_layouts[6] if len(prs.slide_layouts) > 6 else prs.slide_layouts[-1]
+    slide = prs.slides.add_slide(layout_obj)
     for ph in list(slide.placeholders):
-        sp = ph._element
-        sp.getparent().remove(sp)
-    # Background fill
+        ph._element.getparent().remove(ph._element)
     add_rect(slide, 0, 0, 13.33, 7.5, SC_BG_SUBTLE)
     return slide
 
@@ -170,7 +169,7 @@ def slide_01_title(prs, n, total):
                 font_size=110, bold=True, color=SC_INK)
     # Tagline
     add_textbox(s, 1.0, 3.95, 11, 0.7,
-                "Find money the state owes our members.\nAutomatically. Free.",
+                "Money the state owes our members — found automatically.\nWe monitor; they claim directly with the state. Free.",
                 font_size=28, color=SC_INK_BODY)
     # Bottom band with author
     add_rect(s, 0, 6.7, 13.33, 0.8, SC_INK)
@@ -183,13 +182,13 @@ def slide_02_hook(prs, n, total):
     s = blank_slide(prs)
     add_chrome(s, n, total)
     # Eyebrow
-    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "WHAT IS UNCLAIMED PROPERTY?",
-                font_size=12, bold=True, color=SC_BLUE)
+    add_textbox(s, 0.5, 0.82, 12.5, 0.55,
+                "What Is Unclaimed Property?",
+                font_size=28, bold=True, color=SC_INK)
     # Plain-English definition (the hero of the slide)
-    add_textbox(s, 0.5, 1.3, 12.5, 1.2,
+    add_textbox(s, 0.5, 1.48, 12.5, 0.5,
                 "Money owed to you that the company holding it lost track of.",
-                font_size=34, bold=True, color=SC_INK)
+                font_size=16, bold=False, color=SC_INK_BODY)
     # Sub-explanation
     add_textbox(s, 0.5, 2.6, 12.5, 1.1,
                 "When a bank, employer, insurer, or utility can't reach the owner of an account or balance for a "
@@ -220,19 +219,19 @@ def slide_02_hook(prs, n, total):
     # Scale anchor — keep the $ context, but as a footnote not the hero
     add_round_rect(s, 0.5, 6.0, 12.3, 0.55, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 6.07, 12, 0.4,
-                "Nationwide: $70B+ sitting with state treasurers · ~33M Americans have property waiting (NAUPA, FY2024)",
+                "Nationwide: ~$70B sitting with state treasurers · ~33M Americans have property waiting (NAUPA, FY2024)",
                 font_size=12, bold=True, color=WHITE)
 
 
 def slide_03_what_it_is(prs, n, total):
     s = blank_slide(prs)
     add_chrome(s, n, total)
-    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "WHAT IT IS",
-                font_size=12, bold=True, color=SC_BLUE)
-    add_textbox(s, 0.5, 1.25, 12.5, 1.2,
-                "GetMyMoney is a free SmartCredit feature\nthat finds unclaimed money owed to our members.",
-                font_size=32, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 0.82, 12.5, 0.6,
+                "SmartCredit Feature",
+                font_size=30, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 1.55, 12.5, 0.6,
+                "Finds unclaimed money the state owes our members.",
+                font_size=16, bold=False, color=SC_INK_BODY)
 
     # Side-by-side: User experience flow
     # Left: What the member sees
@@ -244,10 +243,10 @@ def slide_03_what_it_is(prs, n, total):
     steps = [
         ("1", "We notify them inside SmartCredit",
          "\"Possible match found. The state may be holding property in your name.\""),
-        ("2", "They review the possible matches",
-         "Holder, type, amount range — laid out as cards. The state determines eligibility."),
-        ("3", "We hand them off to the state",
-         "Deep-link to the official state claim portal with step-by-step instructions for filing."),
+        ("2", "We monitor for future matches",
+         "We keep watching state records and alert them whenever new property appears in their name."),
+        ("3", "We lift SmartCredit retention",
+         "Surfacing real money members can claim deepens trust and keeps them subscribed — the return for SmartCredit."),
     ]
     yy = y + 0.55
     for num, title, body in steps:
@@ -358,7 +357,7 @@ def slide_04_why_we_win(prs, n, total):
 def slide_05_data_strategy(prs, n, total):
     """Data ingestion priority — driven by SmartCredit customer concentration.
 
-    Top 10 states cover ~68% of net actives (201,829 of 297,096). Pairs
+    Top 10 states cover ~68% of net actives (201,829 of 296,558). Pairs
     each state's net-actives count with its ingest posture. Sourced from
     SC Net Actives by State.csv (Apr 2026) + state matrix research.
     """
@@ -561,81 +560,60 @@ def slide_privacy_master(prs, n, total):
 
 
 def slide_pii_matching(prs, n, total):
-    """The PII matching engine — same engine, same UX, different mission.
-
-    Combines key trust-precedent points from the previous PrivacyMaster
-    slide so this slide stands alone.
+    """Implementation overview — the three-stage flow: retrieve public state
+    data, match with the PrivacyMaster PII engine, surface in the
+    PrivacyMaster look and feel. Only the data source is new.
     """
     s = blank_slide(prs)
     add_chrome(s, n, total)
-    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "THE PII MATCHING ENGINE",
-                font_size=12, bold=True, color=SC_BLUE)
-    add_textbox(s, 0.5, 1.25, 12.5, 0.75,
-                "Same engine members already trust. New mission.",
+    add_textbox(s, 0.5, 0.82, 12.5, 0.55,
+                "Implementation Overview",
                 font_size=28, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 1.48, 12.5, 0.5,
+                "Three pieces — and we already run two of them.",
+                font_size=16, bold=False, color=SC_INK_BODY)
     add_textbox(s, 0.5, 2.15, 12.5, 0.45,
-                "SmartCredit's PII matching engine already auto-scans data brokers, businesses, and government sites for member info. Members get an alert and choose Remove or Keep. GetMyMoney points the same engine at state unclaimed-property records — same auto-scan, same alert, same trust envelope.",
+                "Retrieve the unclaimed-property data each state makes public, match it with the same PII engine that powers PrivacyMaster, and surface it in the same look and feel members already know. Only the data source is new.",
                 font_size=11, color=SC_INK_MUTED)
 
-    # Two cards: today / tomorrow with arrow between
-    y = 2.95; col_w = 5.6; gap = 0.7
-
-    # TODAY card
-    add_round_rect(s, 0.5, y, col_w, 3.5, WHITE, line=SC_BORDER, radius=0.03)
-    add_rect(s, 0.5, y, col_w, 0.18, SC_INK_MUTED)
-    add_textbox(s, 0.7, y + 0.32, col_w - 0.4, 0.4,
-                "TODAY · DATA-BROKER SCRUB",
-                font_size=11, bold=True, color=SC_INK_MUTED)
-    add_textbox(s, 0.7, y + 0.78, col_w - 0.4, 0.7,
-                "Find data brokers exposing the member",
-                font_size=17, bold=True, color=SC_INK)
-    rows_today = [
-        ("Input",         "SmartCredit member identity"),
-        ("Engine",        "Fuzzy + phonetic name match (PII)"),
-        ("Corpus",        "Hundreds of broker, business, gov sources"),
-        ("Pattern",       "Auto-scan → alert → member chooses"),
-        ("Member action", "Remove  /  Keep"),
+    stages = [
+        ("1", "RETRIEVE DATA", SC_BLUE,
+         "Pull each state's publicly available unclaimed-property records",
+         ["Public data only — e.g. CA's free weekly CSV",
+          "No scraping behind logins or CAPTCHAs",
+          "Refreshed on each state's published cadence"]),
+        ("2", "MATCH · PRIVACYMASTER", SC_ORANGE,
+         "Run the same PII matching engine we already operate",
+         ["Fuzzy + phonetic name matching",
+          "Same member identity — no re-collection",
+          "No new engine to build"]),
+        ("3", "SURFACE IN-PRODUCT", SC_BLUE_DARK,
+         "Show matches in the PrivacyMaster look and feel",
+         ["Same alert + review pattern members trust",
+          "Potential match → deep-link to the state",
+          "Familiar UI, new outcome"]),
     ]
-    yy = y + 1.55
-    for label, body in rows_today:
-        add_textbox(s, 0.7, yy, 1.4, 0.3, label, font_size=10, bold=True, color=SC_BLUE)
-        add_textbox(s, 2.15, yy, col_w - 1.7, 0.3, body, font_size=10.5, color=SC_INK_BODY)
-        yy += 0.36
+    y = 2.95
+    box_w = 3.75
+    gap = (12.3 - 3 * box_w) / 2
+    for i, (num, title, color, lead, items) in enumerate(stages):
+        x = 0.5 + i * (box_w + gap)
+        add_round_rect(s, x, y, box_w, 3.3, WHITE, line=SC_BORDER, radius=0.04)
+        add_rect(s, x, y, box_w, 0.18, color)
+        add_pill(s, x + 0.2, y + 0.34, 0.45, 0.45, num, color, WHITE, font_size=14)
+        add_textbox(s, x + 0.75, y + 0.37, box_w - 0.8, 0.4,
+                    title, font_size=13, bold=True, color=color)
+        add_textbox(s, x + 0.22, y + 0.98, box_w - 0.44, 0.6,
+                    lead, font_size=12, bold=True, color=SC_INK)
+        body = "\n".join("•  " + it for it in items)
+        add_textbox(s, x + 0.22, y + 1.75, box_w - 0.44, 1.45,
+                    body, font_size=10, color=SC_INK_BODY)
+        if i < 2:
+            add_arrow_right(s, x + box_w + 0.06, y + 1.4, gap - 0.12, 0.5, SC_INK_MUTED)
 
-    # Arrow
-    add_arrow_right(s, 0.5 + col_w + 0.15, y + 1.5, gap - 0.3, 0.6, SC_ORANGE)
-    add_textbox(s, 0.5 + col_w + 0.05, y + 2.15, gap, 0.3,
-                "same engine", font_size=9, bold=True, color=SC_ORANGE,
-                align=PP_ALIGN.CENTER)
-
-    # TOMORROW card
-    x2 = 0.5 + col_w + gap
-    add_round_rect(s, x2, y, col_w, 3.5, WHITE, line=SC_BLUE, radius=0.03)
-    add_rect(s, x2, y, col_w, 0.18, SC_BLUE)
-    add_textbox(s, x2 + 0.2, y + 0.32, col_w - 0.4, 0.4,
-                "TOMORROW · GetMyMoney",
-                font_size=11, bold=True, color=SC_BLUE)
-    add_textbox(s, x2 + 0.2, y + 0.78, col_w - 0.4, 0.7,
-                "Find unclaimed money owed to the member",
-                font_size=17, bold=True, color=SC_INK)
-    rows_tomorrow = [
-        ("Input",         "Same SmartCredit member identity"),
-        ("Engine",        "Same PII matcher — no rebuild"),
-        ("Corpus",        "State unclaimed-property records"),
-        ("Pattern",       "Auto-scan → alert → member chooses"),
-        ("Member action", "Claim  /  Not me"),
-    ]
-    yy = y + 1.55
-    for label, body in rows_tomorrow:
-        add_textbox(s, x2 + 0.2, yy, 1.4, 0.3, label, font_size=10, bold=True, color=SC_BLUE)
-        add_textbox(s, x2 + 1.65, yy, col_w - 1.7, 0.3, body, font_size=10.5, color=SC_INK_BODY)
-        yy += 0.36
-
-    # Bottom callout
     add_round_rect(s, 0.5, 6.65, 12.3, 0.5, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 6.72, 12, 0.36,
-                "GetMyMoney is not a new product surface — it's a different outcome from the same security envelope members already opted into.",
+                "Only the data source is new — the matching engine and the member experience are PrivacyMaster, already in production.",
                 font_size=12, bold=True, color=WHITE)
 
 
@@ -1320,11 +1298,11 @@ def slide_compliance_findings(prs, n, total):
     add_chrome(s, n, total)
 
     add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "COMPLIANCE RESEARCH",
-                font_size=12, bold=True, color=SC_BLUE)
-    add_textbox(s, 0.5, 1.25, 12.5, 0.55,
-                "v1 is a notification feature, not a recovery service.",
-                font_size=24, bold=True, color=SC_INK)
+                "Go-To-Market: Compliance Review",
+                font_size=28, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 1.48, 12.5, 0.5,
+                "Compliance check — a notification feature, not a recovery service.",
+                font_size=16, bold=False, color=SC_INK_BODY)
     add_textbox(s, 0.5, 1.85, 12.5, 0.4,
                 "Three architectural decisions clear the bulk of the legal surface. The remaining constraint is data acquisition — without a feed, we can't alert a member because we don't know they have a match. Full compliance memo available from Legal.",
                 font_size=10, color=SC_INK_MUTED)
@@ -1374,11 +1352,11 @@ def slide_compliance_findings(prs, n, total):
     gates = [
         ("CA", "LIVE", SC_GREEN,
          "Ingested today — 92.4M records, refreshed every Thursday."),
-        ("FL·TX·NY·GA·NC·NJ +15", "YES", SC_GREEN,
-         "Bulk obtainable via request / fee / registration — 22 states = 74% of members."),
+        ("FL·TX·NY·GA·NC·NJ +16", "YES", SC_GREEN,
+         "Data obtainable via request / fee / registration — 23 states = 76% of members."),
         ("WA · VA · AL · TN · UT", "BARRED", SC_RED,
          "Statute bars commercial release of owner lists (e.g. RCW 42.56.070(8))."),
-        ("IL·PA·SC·MS·MA·AZ·PR +", "NO PATH", SC_RED,
+        ("IL·PA·MS·MA·AZ·PR +", "NO PATH", SC_RED,
          "No program — FOIA-exempt DBs, anti-bot policies, or search-only portals."),
     ]
     yy = y1 + 0.55
@@ -1411,9 +1389,9 @@ def slide_compliance_findings(prs, n, total):
                 font_size=8.5, color=SC_INK_BODY)
 
     # Footer callout
-    add_round_rect(s, 0.5, 6.6, 12.3, 0.40, SC_INK, radius=0.07)
+    add_round_rect(s, 0.5, 6.6, 12.3, 0.40, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 6.66, 12, 0.30,
-                "30 risk-rated findings · 18 open questions · 50-state paid-finder table · ~80 source links. Owner: Legal. Decision: ratify v1 (alert + deep-link / bundle / no-funds) + outside-counsel opinion on subscription characterization.",
+                "30 risk-rated findings · 18 open questions · 50-state paid-finder table · ~80 source links. Owner: Legal. Decision: ratify the alert + deep-link / bundle / no-funds model + outside-counsel opinion on subscription characterization.",
                 font_size=10, bold=True, color=WHITE)
 
 
@@ -1423,27 +1401,27 @@ def slide_serviceable_base(prs, n, total):
 
     Member distribution: Untitled 7_2026-06-10-1048.csv (Jun 2026).
     Bulk postures: primary-source verification 2026-06-09/10 — all 50
-    states + DC + territories swept (docs/compliance/). 22 YES states =
-    74.3% of members; 34 NO jurisdictions = 25.7%.
+    states + DC + territories swept (docs/compliance/). 23 YES states =
+    76.3% of members; 33 NO jurisdictions = 23.7%.
     """
     s = blank_slide(prs)
     add_chrome(s, n, total)
-    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "SERVICEABLE MEMBER BASE · BULK-DATA COVERAGE",
-                font_size=12, bold=True, color=SC_BLUE)
-    add_textbox(s, 0.5, 1.25, 12.5, 0.55,
-                "We can service ~74% of our member base — bulk owner data is obtainable in 22 states.",
-                font_size=22, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 0.82, 12.5, 0.55,
+                "Data Availability: All States",
+                font_size=28, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 1.48, 12.5, 0.5,
+                "Owner data available in 23 states — about 76% of our member base.",
+                font_size=16, bold=False, color=SC_INK_BODY)
     add_textbox(s, 0.5, 1.95, 12.5, 0.4,
                 "Tile size = % of total members. Every jurisdiction verified against primary sources (Jun 2026). CA is live today; some YES states are fee- or registration-gated (GA CDR; NV ≥$5k; MI ≥$10k records only).",
                 font_size=10.5, color=SC_INK_MUTED)
 
     YES = [("FL", 16.19), ("TX", 15.56), ("CA", 10.57), ("GA", 6.29), ("NY", 5.06),
-           ("NC", 3.22), ("NJ", 2.89), ("LA", 2.02), ("MD", 1.91), ("OH", 1.81),
-           ("MI", 1.69), ("NV", 1.32), ("MO", 1.23), ("IN", 0.92), ("CO", 0.90),
-           ("CT", 0.76), ("WI", 0.73), ("AR", 0.62), ("OR", 0.35), ("WV", 0.12),
-           ("ND", 0.08), ("WY", 0.04)]
-    NO = [("IL", 3.60), ("PA", 2.74), ("SC", 2.02), ("AZ", 1.98), ("VA", 1.86),
+           ("NC", 3.22), ("NJ", 2.89), ("LA", 2.02), ("SC", 2.02), ("MD", 1.91),
+           ("OH", 1.81), ("MI", 1.69), ("NV", 1.32), ("MO", 1.23), ("IN", 0.92),
+           ("CO", 0.90), ("CT", 0.76), ("WI", 0.73), ("AR", 0.62), ("OR", 0.35),
+           ("WV", 0.12), ("ND", 0.08), ("WY", 0.04)]
+    NO = [("IL", 3.60), ("PA", 2.74), ("AZ", 1.98), ("VA", 1.86),
           ("PR", 1.81), ("AL", 1.68), ("TN", 1.55), ("MS", 1.33), ("MA", 1.29),
           ("WA", 0.99), ("OK", 0.62), ("UT", 0.60), ("KY", 0.51), ("MN", 0.49),
           ("KS", 0.33), ("NM", 0.32), ("DE", 0.32), ("RI", 0.26), ("DC", 0.24),
@@ -1547,12 +1525,12 @@ def slide_serviceable_base(prs, n, total):
 
     # Two regions, widths proportional to the member split (74.3 / 25.7)
     cy0, chh = 2.78, 3.68
-    yes_w = 12.3 * 0.743
+    yes_w = 12.3 * 0.763
     add_textbox(s, 0.5, 2.42, yes_w, 0.3,
-                "YES — bulk data obtainable · 22 states · 74.3% of members",
+                "YES — bulk data obtainable · 23 states · 76.3% of members",
                 font_size=11.5, bold=True, color=SC_GREEN)
     add_textbox(s, 0.5 + yes_w + 0.12, 2.42, 12.3 - yes_w - 0.12, 0.3,
-                "NO — 34 jurisdictions · 25.7%",
+                "NO — 33 jurisdictions · 23.7%",
                 font_size=11.5, bold=True, color=SC_INK_MUTED)
     for x, y, w, h, lbl, v in _squarify(yes_items, 0.5, cy0, yes_w, chh):
         _tile(x, y, w, h, SC_GREEN, lbl, v)
@@ -1562,53 +1540,54 @@ def slide_serviceable_base(prs, n, total):
 
     add_round_rect(s, 0.5, 6.62, 12.3, 0.4, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 6.68, 12, 0.28,
-                "The 26% in no-bulk states still get the guide-to-file handoff on day one — no member ever sees a blank state.",
+                "The 24% in no-bulk states still get the guide-to-file handoff on day one — no member ever sees a blank state.",
                 font_size=10.5, bold=True, color=WHITE)
 
 
 def slide_data_and_legal(prs, n, total):
     """Merged slide — data ingestion priority × legal action (former 5 + 8).
 
-    One row per top-10 state: bulk-data verdict, refresh cadence, and the
-    data-path + counsel ask in a single line. Net actives shown with % of
-    the 297,096 total. Verified 2026-06-09/10 against primary sources.
+    One row per top-10 state: data-available verdict, the data path (how we
+    obtain the records), and the legal action (counsel ask) in separate
+    columns. Net actives shown with % of the 296,558 total. Verified
+    2026-06-09/10 against primary sources.
     """
     s = blank_slide(prs)
     add_chrome(s, n, total)
-    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "DATA INGESTION × LEGAL · ONE PASS PER STATE",
-                font_size=12, bold=True, color=SC_BLUE)
-    add_textbox(s, 0.5, 1.25, 12.5, 0.55,
-                "No data feed = no alert. Bulk data is possible in 7 of our top 10 states.",
-                font_size=22, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 0.82, 12.5, 0.55,
+                "Data Availability: Top 10 States",
+                font_size=28, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 1.48, 12.5, 0.5,
+                "Our top 10 states by net actives — data available in 8 of 10.",
+                font_size=16, bold=False, color=SC_INK_BODY)
     add_textbox(s, 0.5, 1.95, 12.5, 0.5,
-                "Top 10 = ~68% of 297,096 net actives. CA · TX · NY · FL · GA · NC · NJ → 177,129 members (~60% of base); the full 50-state sweep reaches 22 states = ~74%. Precedent: Credit Karma obtained bulk files from 14 states in 2017 — states mailed CDs/DVDs. v1 needs DATA, not filing rights.",
+                "Top 10 = ~68% of 296,558 net actives. CA · TX · NY · FL · GA · NC · NJ · SC → 183,121 members (~62% of base); the full 50-state sweep reaches 23 states = ~76%. Precedent: Credit Karma launched proactive monitoring in 7 states in 2017 and was later reported searchable in 14. We need the DATA, not filing rights.",
                 font_size=10.5, color=SC_INK_MUTED)
 
-    # (rank, state, net actives, % of total, bulk verdict, pill color,
-    #  cadence, data path + legal action in one line)
+    # (rank, state, net actives, % of total, data-available verdict, pill
+    #  color, DATA PATH = how we obtain the records, LEGAL ACTION = counsel ask)
     rows = [
-        (1,  "FL", 48436, "16.2", "YES",   SC_ORANGE, "Per request",  "PRR → names, no $ amounts; pull after May 1 wave. Counsel: §717.1322(1)(j) bundle posture."),
-        (2,  "TX", 45670, "15.6", "YES",   SC_AMBER,  "Monthly",      "Email request → SIFT delivery; monthly refresh. Counsel: §1702.324(b)(5) exemption w/ Texas DPS."),
-        (3,  "CA", 31110, "10.6", "YES",   SC_GREEN,  "Weekly (Thu)", "Free CSV, Thursdays — already live (92.4M rows) ✓ Counsel: caching/redisplay sign-off. Lowest friction."),
-        (4,  "GA", 18837, "6.3",  "GATED", SC_RED,    "Weekly",       "Weekly file but CDR-gated ($1,200/4 yr, SB 103). Counsel: register-or-deep-link decision."),
-        (5,  "NY", 15001, "5.1",  "YES",   SC_AMBER,  "On demand",    "OSC secure FTP, re-pull anytime (cadence TBC); no amounts. Counsel: APL §1416 'service for a fee'."),
-        (6,  "IL", 10536, "3.6",  "NO",    SC_RED,    "—",            "No bulk path — DB is FOIA-exempt (765 ILCS 1026/15-1401). Deep-link only."),
-        (7,  "NC",  9549, "3.2",  "YES",   SC_AMBER,  "Annual (Jul)", "Statutory public name list each July (G.S. 116B-62) — names only, non-cumulative."),
-        (8,  "NJ",  8526, "2.9",  "YES",   SC_AMBER,  "On demand",    "OPRA request → name + address; commercial-purpose certification + fee (2024 rev)."),
-        (9,  "PA",  8172, "2.7",  "NO",    SC_RED,    "—",            "Anti-bot/anti-AI policy + no feed. Deep-link only."),
-        (10, "SC",  5992, "2.0",  "NO",    SC_RED,    "—",            "§30-2-50 commercial-solicitation bar + no feed. Deep-link only."),
+        (1,  "FL", 48436, "16.3", "YES",   SC_GREEN, "Records request → names only, no $ (after May 1 wave)", "Counsel: §717.1322(1)(j) bundle posture"),
+        (2,  "TX", 45670, "15.4", "YES",   SC_GREEN, "Email Comptroller → SIFT delivery (2019 stmt — reconfirm)", "Counsel: §1702.324(b)(5) exemption, TX DPS"),
+        (3,  "CA", 31110, "10.5", "YES",   SC_GREEN, "Free public CSV, weekly — already live (92.4M rows) ✓", "Counsel: caching / redisplay sign-off"),
+        (4,  "GA", 18837, "6.4",  "YES",   SC_GREEN, "Owner data file via CDR registration ($1,200/4 yr, SB 103)", "Counsel: register as CDR; clear use restriction"),
+        (5,  "NY", 15001, "5.1",  "YES",   SC_GREEN, "OSC secure FTP, re-pull anytime; no $ amounts", "Counsel: APL §1416 'service for a fee'"),
+        (6,  "IL", 10536, "3.6",  "NO",    SC_RED,   "None — database is FOIA-exempt (765 ILCS 1026/15-1401)", "Deep-link only *"),
+        (7,  "NC",  9549, "3.2",  "YES",   SC_GREEN, "Annual public list (G.S. 116B-62): names + addresses + holders", "Counsel: confirm reuse terms"),
+        (8,  "NJ",  8526, "2.9",  "YES",   SC_GREEN, "OPRA request → name + address", "Commercial cert + fee (2024 rev)"),
+        (9,  "PA",  8172, "2.8",  "NO",    SC_RED,   "No verified bulk feed; portal needs reCAPTCHA (no bots)", "Deep-link only *"),
+        (10, "SC",  5992, "2.0",  "YES",   SC_GREEN, "Annual FOIA report (flash drive, $10; >24-mo, value bands)", "§30-2-50 bars commercial solicitation — counsel"),
     ]
 
     y0 = 2.55
     add_rect(s, 0.5, y0, 12.3, 0.3, SC_INK)
     headers = [
-        ("#",            0.6,  0.4),
-        ("STATE",        1.05, 0.8),
-        ("NET ACTIVES",  1.95, 1.8),
-        ("BULK?",        3.8,  1.05),
-        ("UPDATES",      4.95, 1.1),
-        ("DATA PATH + LEGAL ACTION", 6.15, 6.65),
+        ("#",               0.6,  0.4),
+        ("STATE",           1.05, 0.75),
+        ("NET ACTIVES",     1.85, 1.5),
+        ("DATA AVAILABLE?", 3.4,  1.4),
+        ("DATA PATH",       4.9,  3.6),
+        ("LEGAL ACTION",    8.6,  4.15),
     ]
     for label, x, w in headers:
         add_textbox(s, x, y0 + 0.05, w, 0.22,
@@ -1616,29 +1595,29 @@ def slide_data_and_legal(prs, n, total):
 
     y = y0 + 0.3
     row_h = 0.37
-    for i, (rank, state, customers, pct, verdict, color, cadence, action) in enumerate(rows):
+    for i, (rank, state, customers, pct, verdict, color, data_path, legal) in enumerate(rows):
         bg = SC_BG_SUBTLE if i % 2 == 0 else SC_BG_CARD
         add_rect(s, 0.5, y, 12.3, row_h, bg)
         add_textbox(s, 0.6, y + 0.08, 0.4, 0.22,
                     f"{rank}", font_size=10, bold=True, color=SC_INK_MUTED)
-        add_textbox(s, 1.05, y + 0.06, 0.8, 0.24,
+        add_textbox(s, 1.05, y + 0.06, 0.75, 0.24,
                     state, font_size=13, bold=True, color=SC_INK)
-        add_textbox(s, 1.95, y + 0.08, 1.8, 0.22,
-                    f"{customers:,} · {pct}%", font_size=10.5, bold=True, color=SC_INK)
-        add_pill(s, 3.8, y + 0.07, 1.0, 0.23,
+        add_textbox(s, 1.85, y + 0.08, 1.5, 0.22,
+                    f"{customers:,} · {pct}%", font_size=10, bold=True, color=SC_INK)
+        add_pill(s, 3.45, y + 0.07, 1.0, 0.23,
                  verdict, color, WHITE, font_size=8)
-        add_textbox(s, 4.95, y + 0.09, 1.1, 0.22,
-                    cadence, font_size=9, bold=True, color=SC_INK)
-        add_textbox(s, 6.15, y + 0.09, 6.65, 0.22,
-                    action, font_size=9.5, color=SC_INK_BODY)
+        add_textbox(s, 4.9, y + 0.075, 3.6, 0.30,
+                    data_path, font_size=8.5, color=SC_INK_BODY)
+        add_textbox(s, 8.6, y + 0.075, 4.15, 0.30,
+                    legal, font_size=8.5, color=SC_INK_BODY)
         y += row_h
 
     add_round_rect(s, 0.5, 6.6, 12.3, 0.42, SC_BLUE, radius=0.07)
-    add_textbox(s, 0.7, 6.63, 12, 0.2,
+    add_textbox(s, 0.7, 6.64, 12, 0.2,
                 "Owner: Legal — written data-use approval per state in 30 days. Output: go/no-go matrix for the next ingest tier.",
                 font_size=10, bold=True, color=WHITE)
-    add_textbox(s, 0.7, 6.82, 12, 0.18,
-                "One shared counsel question across FL · NY · GA · OH: is a free alert inside a paid subscription 'compensation for notifying'? CA/TX don't pose it.",
+    add_textbox(s, 0.7, 6.84, 12, 0.18,
+                "* Deep-link only = we can't get this state's data, so we send the member to the state's official search page to look up and claim it themselves.",
                 font_size=8.5, color=RGBColor(0xCC, 0xDD, 0xFF))
 
 
@@ -1650,12 +1629,12 @@ def slide_match_results_combined(prs, n, total):
     """
     s = blank_slide(prs)
     add_chrome(s, n, total)
-    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "WHAT WE'D FIND TODAY · CA MATCH RESULTS",
-                font_size=12, bold=True, color=SC_BLUE)
-    add_textbox(s, 0.5, 1.25, 12.5, 0.5,
-                "We matched 31,110 CA net actives against all four CA unclaimed tiers (92.4M records).",
-                font_size=20, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 0.82, 12.5, 0.55,
+                "Data Availability: Current Matches in CA",
+                font_size=28, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 1.48, 12.5, 0.5,
+                "Our net actives in California — 31,110 matched against 92.4M records.",
+                font_size=16, bold=False, color=SC_INK_BODY)
     add_textbox(s, 0.5, 1.83, 12.5, 0.4,
                 "Left: name only — the upper bound, inflated by common names. Right: adding city — the defensible floor before production PII (DOB, SSN-last-4, full address).",
                 font_size=10.5, color=SC_INK_MUTED)
@@ -1736,12 +1715,12 @@ def slide_unsupported_state_ui(prs, n, total):
     """
     s = blank_slide(prs)
     add_chrome(s, n, total)
-    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "COVERAGE-GAP UX · GUIDE-TO-FILE HANDOFF",
-                font_size=12, bold=True, color=SC_BLUE)
-    add_textbox(s, 0.5, 1.25, 12.5, 0.5,
-                "No state left blank — unsupported states get a guided handoff, day one.",
-                font_size=22, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 0.82, 12.5, 0.55,
+                "Data Availability: Guided Filing For States That Don't Offer Data",
+                font_size=28, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 1.48, 12.5, 0.5,
+                "23.7% of our base live in states that don't offer data ingestion.",
+                font_size=16, bold=False, color=SC_INK_BODY)
     add_textbox(s, 0.5, 1.85, 12.5, 0.35,
                 "Built in the prototype today: pick any state we don't index yet and the app returns its official portal + researched filing steps — all 50 states + DC, display-only, no fee, no affiliation.",
                 font_size=10.5, color=SC_INK_MUTED)
@@ -1802,7 +1781,7 @@ def slide_unsupported_state_ui(prs, n, total):
         ("Demand signal for rollout", SC_ORANGE,
          "\"Notify me\" builds a per-state waitlist — members tell us which data integration to unlock next."),
         ("Cross-state matching still runs", SC_AMBER,
-         "Unclaimed money follows past addresses — members in guided states still get auto-matches from all 22 monitored states."),
+         "Unclaimed money follows past addresses — members in guided states still get auto-matches from all 23 data-available states."),
     ]
     ry = 2.75
     for title, accent, body in reasons:
@@ -1814,88 +1793,74 @@ def slide_unsupported_state_ui(prs, n, total):
                     body, font_size=9.5, color=SC_INK_BODY)
         ry += 0.98
 
-    add_round_rect(s, 0.5, 6.62, 12.3, 0.4, SC_INK, radius=0.07)
+    add_round_rect(s, 0.5, 6.62, 12.3, 0.4, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 6.68, 12, 0.28,
                 "50 of 51 jurisdictions render this handoff today; each converts to the full match experience the moment its data lands (see the state-by-state plan).",
                 font_size=10.5, bold=True, color=WHITE)
 
 
 def slide_two_tier_optin(prs, n, total):
-    """Two-tier product framing — Auto-Monitored vs Guided Filing — plus the
-    signup opt-in. The state filter itself is the honest coverage map."""
+    """Rollout to all members — one opt-in that splits into two paths:
+    states where data is available (matches + monitoring + deep link +
+    guided filing) and states where it isn't (guided filing + explainer)."""
     s = blank_slide(prs)
     add_chrome(s, n, total)
-    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "PRODUCT FRAMING · TWO TIERS, ONE PROMISE",
-                font_size=12, bold=True, color=SC_BLUE)
-    add_textbox(s, 0.5, 1.25, 12.5, 0.55,
-                "Auto-Monitored where we have data. Guided Filing everywhere. One opt-in.",
-                font_size=22, bold=True, color=SC_INK)
-    add_textbox(s, 0.5, 1.9, 12.5, 0.35,
-                "Members never see a blank state — and the UI itself is the coverage map, so marketing never has to over-claim.",
-                font_size=10.5, color=SC_INK_MUTED)
+    add_textbox(s, 0.5, 0.82, 12.5, 0.55,
+                "Go-To-Market: Rollout",
+                font_size=28, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 1.48, 12.5, 0.5,
+                "One opt-in — value for every member, with or without their state's data available.",
+                font_size=16, bold=False, color=SC_INK_BODY)
 
-    # ---- Left: opt-in at signup ----
-    lx, lw = 0.5, 5.95
-    add_textbox(s, lx, 2.35, lw, 0.3,
-                "OPT-IN AT SIGNUP", font_size=11, bold=True, color=SC_INK_MUTED)
-    add_round_rect(s, lx, 2.7, lw, 1.45, WHITE, line=SC_BORDER, radius=0.05)
-    add_pill(s, lx + 0.2, 2.9, 0.34, 0.34, "✓", SC_GREEN, WHITE, font_size=12)
-    add_textbox(s, lx + 0.7, 2.85, lw - 0.95, 0.28,
-                "Search unclaimed money in my name",
-                font_size=12, bold=True, color=SC_INK)
-    add_textbox(s, lx + 0.7, 3.16, lw - 0.95, 0.85,
-                "SmartCredit checks official state unclaimed-property records for potential matches — free, no finder's fee, no claim filing. You decide what to do with any match. You can turn this off anytime.",
+    # ---- One shared opt-in (centered) ----
+    ox, ow = 3.0, 7.3
+    add_round_rect(s, ox, 1.95, ow, 0.95, SC_BLUE_LIGHT, radius=0.07)
+    add_pill(s, ox + 0.25, 2.24, 0.36, 0.36, "✓", SC_GREEN, WHITE, font_size=12)
+    add_textbox(s, ox + 0.75, 2.06, ow - 1.0, 0.3,
+                "Opt in: “Search unclaimed money in my name”",
+                font_size=13, bold=True, color=SC_INK)
+    add_textbox(s, ox + 0.75, 2.42, ow - 1.0, 0.42,
+                "Default off · no finder's fee · you decide on any match · turn off anytime.",
                 font_size=9.5, color=SC_INK_BODY)
 
-    # State-aware confirmation microcopy (the only line that varies)
-    variants = [
-        ("MONITORED STATE (e.g. CA)", SC_GREEN,
-         "\"We'll monitor California's records automatically and alert you to new potential matches.\""),
-        ("GUIDED STATE (e.g. PA)", SC_AMBER,
-         "\"We'll watch the 22 covered states for your name — including past addresses — and show you exactly how to file in Pennsylvania.\""),
-    ]
-    vy = 4.3
-    for label, accent, body in variants:
-        add_round_rect(s, lx, vy, lw, 0.78, WHITE, line=SC_BORDER, radius=0.05)
-        add_rect(s, lx, vy, 0.07, 0.78, accent)
-        add_textbox(s, lx + 0.2, vy + 0.07, lw - 0.4, 0.22,
-                    label, font_size=8, bold=True, color=accent)
-        add_textbox(s, lx + 0.2, vy + 0.3, lw - 0.4, 0.44,
-                    body, font_size=9.5, color=SC_INK_BODY)
-        vy += 0.88
-    add_textbox(s, lx, vy + 0.02, lw, 0.4,
-                "Default off · never a condition of signup · alert SMS/email is a separate per-channel consent (TCPA).",
-                font_size=8.5, color=SC_INK_MUTED)
+    # ---- Two down arrows splitting to the two paths ----
+    for ax in (3.35, 9.6):
+        a = s.shapes.add_shape(MSO_SHAPE.DOWN_ARROW,
+                               Inches(ax), Inches(3.02), Inches(0.5), Inches(0.45))
+        a.fill.solid(); a.fill.fore_color.rgb = SC_INK_MUTED
+        a.line.fill.background(); a.shadow.inherit = False
 
-    # ---- Right: the state filter as coverage map ----
-    rx, rw = 6.85, 5.95
-    add_textbox(s, rx, 2.35, rw, 0.3,
-                "THE STATE FILTER IS THE COVERAGE MAP", font_size=11, bold=True, color=SC_INK_MUTED)
-    add_round_rect(s, rx, 2.7, rw, 2.45, WHITE, line=SC_BORDER, radius=0.05)
-    add_rect(s, rx, 2.7, rw, 0.34, SC_BG_SUBTLE)
-    add_textbox(s, rx + 0.2, 2.75, rw - 0.4, 0.24,
-                "State ▾", font_size=11, bold=True, color=SC_INK)
-    add_textbox(s, rx + 0.2, 3.12, rw - 0.4, 0.22,
-                "AUTO-MONITORED (22)", font_size=8.5, bold=True, color=SC_GREEN)
-    for i, st in enumerate(["● California", "● Texas", "● Florida", "● New York  ·  +18 more"]):
-        add_textbox(s, rx + 0.4, 3.34 + i * 0.24, rw - 0.6, 0.22,
-                    st, font_size=9.5, color=SC_INK_BODY)
-    add_textbox(s, rx + 0.2, 4.32, rw - 0.4, 0.22,
-                "GUIDED FILING (29)", font_size=8.5, bold=True, color=SC_INK_MUTED)
-    for i, st in enumerate(["○ Pennsylvania", "○ Illinois  ·  +27 more"]):
-        add_textbox(s, rx + 0.4, 4.54 + i * 0.24, rw - 0.6, 0.22,
-                    st, font_size=9.5, color=SC_INK_MUTED)
-    add_textbox(s, rx, 5.3, rw, 0.3,
-                "Monitored state → live match results.  Guided state → filing steps + waitlist.",
-                font_size=9.5, bold=True, color=SC_INK)
-    add_textbox(s, rx, 5.62, rw, 0.75,
-                "The guided screen is never empty: 1) official portal + researched steps  2) \"Notify me\" waitlist  3) cross-state auto-matches from all monitored states (past addresses) shown below.",
-                font_size=9, color=SC_INK_BODY)
+    # ---- Two path cards ----
+    paths = [
+        (0.5, "STATE DATA AVAILABLE", SC_GREEN, "23 states · ~76% of members",
+         [("Potential matches", "We surface possible matches from the state's own records"),
+          ("Monitoring", "We keep watching and alert on new matches over time"),
+          ("Deep link to claim", "One tap to the official state claim portal"),
+          ("Guided filing", "State-specific steps to file directly — always free")]),
+        (6.83, "DATA NOT AVAILABLE", SC_AMBER, "33 jurisdictions · ~24% of members",
+         [("Guided filing", "Official portal + researched filing steps — all 50 states + DC"),
+          ("Video explainer", "What unclaimed money is, and how to claim it directly")]),
+    ]
+    for px, title, accent, sub, items in paths:
+        pw = 6.0
+        add_round_rect(s, px, 3.6, pw, 2.85, WHITE, line=SC_BORDER, radius=0.04)
+        add_rect(s, px, 3.6, pw, 0.16, accent)
+        add_textbox(s, px + 0.22, 3.82, pw - 0.44, 0.3,
+                    title, font_size=13, bold=True, color=accent)
+        add_textbox(s, px + 0.22, 4.13, pw - 0.44, 0.26,
+                    sub, font_size=9.5, bold=True, color=SC_INK_MUTED)
+        iy = 4.55
+        for label, body in items:
+            add_pill(s, px + 0.22, iy + 0.02, 0.26, 0.26, "✓", accent, WHITE, font_size=8)
+            add_textbox(s, px + 0.6, iy - 0.02, pw - 0.82, 0.26,
+                        label, font_size=11, bold=True, color=SC_INK)
+            add_textbox(s, px + 0.6, iy + 0.23, pw - 0.82, 0.26,
+                        body, font_size=9, color=SC_INK_BODY)
+            iy += 0.55
 
     add_round_rect(s, 0.5, 6.62, 12.3, 0.4, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 6.68, 12, 0.28,
-                "Expectations set at signup, 'automatic' never claimed where it isn't, and every gap converts into waitlist demand for the next state.",
+                "No member ever sees a blank state — everyone gets either live matches or a guided path to claim.",
                 font_size=10.5, bold=True, color=WHITE)
 
 
@@ -1946,7 +1911,7 @@ def slide_go_to_market(prs, n, total):
             ly += 0.64
         x += col_w + 0.16
 
-    add_round_rect(s, 0.5, 6.62, 12.3, 0.4, SC_INK, radius=0.07)
+    add_round_rect(s, 0.5, 6.62, 12.3, 0.4, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 6.68, 12, 0.28,
                 "Every claim maps to a verified capability — coverage statements gated by state, alerts only to opted-in members, possible-match framing everywhere.",
                 font_size=10.5, bold=True, color=WHITE)
@@ -1959,15 +1924,12 @@ def slide_landing_ad(prs, n, total):
     three-benefit columns + results-vary disclaimer pattern."""
     s = blank_slide(prs)
     add_chrome(s, n, total)
-    add_textbox(s, 0.5, 0.85, 12.5, 0.4,
-                "GO-TO-MARKET · EXAMPLE LANDING PAGE",
-                font_size=12, bold=True, color=SC_BLUE)
-    add_textbox(s, 0.5, 1.25, 12.5, 0.4,
-                "Drop-in for the existing smartcredit.com funnel — same hero formula, same trust patterns.",
-                font_size=19, bold=True, color=SC_INK)
-    add_textbox(s, 0.5, 1.68, 12.5, 0.26,
-                "Launch: members first (real matches → testimonials) · every new state unlock = a waitlist email + press moment · waitlist counts pick the next state.",
-                font_size=9.5, color=SC_INK_MUTED)
+    add_textbox(s, 0.5, 0.82, 12.5, 0.55,
+                "Go-To-Market: Landing Page",
+                font_size=28, bold=True, color=SC_INK)
+    add_textbox(s, 0.5, 1.48, 12.5, 0.5,
+                "Example consumer page mirroring the smartcredit.com funnel.",
+                font_size=16, bold=False, color=SC_INK_BODY)
 
     # Browser frame
     add_round_rect(s, 0.5, 1.95, 12.3, 4.55, WHITE, line=SC_BORDER, radius=0.04)
@@ -1977,19 +1939,19 @@ def slide_landing_ad(prs, n, total):
 
     # --- Hero: left copy block (smartcredit.com headline formula) ---
     add_textbox(s, 1.0, 2.5, 6.4, 0.42,
-                "The fastest way to check for", font_size=23, bold=True, color=SC_INK)
+                "Unclaimed money the state", font_size=23, bold=True, color=SC_INK)
     add_textbox(s, 1.0, 2.92, 6.4, 0.42,
-                "unclaimed money in your name", font_size=23, bold=True, color=SC_BLUE)
+                "may be holding in your name", font_size=23, bold=True, color=SC_BLUE)
     add_textbox(s, 1.0, 3.42, 6.2, 0.28,
-                "More than $70 billion is sitting with state treasurers. Is any of it yours?",
+                "Nearly $70 billion is sitting with state treasurers. Is any of it yours?",
                 font_size=11.5, bold=True, color=SC_INK)
     add_textbox(s, 1.0, 3.72, 6.2, 0.45,
-                "SmartCredit automatically checks official state records and alerts you to potential matches. Free for members — no finder's fee, ever. The state pays you directly.",
+                "SmartCredit automatically checks official state records and alerts you to potential matches — included in your membership. No finder's fee, ever; the state pays you directly.",
                 font_size=10, color=SC_INK_BODY)
-    add_pill(s, 1.0, 4.18, 2.15, 0.42,
-             "Run my free check →", SC_ORANGE, WHITE, font_size=11.5)
-    add_textbox(s, 3.35, 4.27, 3.6, 0.26,
-                "Included with your membership", font_size=9, color=SC_INK_MUTED)
+    add_pill(s, 1.0, 4.18, 2.75, 0.42,
+             "See Potential Matches →", SC_ORANGE, WHITE, font_size=11)
+    add_textbox(s, 3.9, 4.27, 3.3, 0.26,
+                "Included with your SmartCredit membership", font_size=9, color=SC_INK_MUTED)
     # Trust chips row
     chips = ["✓ 50 states covered", "✓ Auto-monitoring in 22", "✓ You decide"]
     cxx = 1.0
@@ -2018,7 +1980,7 @@ def slide_landing_ad(prs, n, total):
     cols = [
         ("1", "We watch", "Official state records, checked automatically — including past addresses."),
         ("2", "You review", "Potential matches only — mark \"Not me\" on anything that isn't yours."),
-        ("3", "You claim, free", "Deep link to the state's own portal. The state pays you directly."),
+        ("3", "You claim directly", "Deep-link to the state's own portal — claiming with the state is always free."),
     ]
     bx = 1.0
     for num, t, b in cols:
@@ -2032,7 +1994,7 @@ def slide_landing_ad(prs, n, total):
                 "Potential matches are estimates from official state records; results vary and are not guaranteed. SmartCredit is not affiliated with or endorsed by any government agency. Claiming directly with your state is always free.",
                 font_size=7.5, color=SC_INK_MUTED)
 
-    add_round_rect(s, 0.5, 6.62, 12.3, 0.4, SC_INK, radius=0.07)
+    add_round_rect(s, 0.5, 6.62, 12.3, 0.4, SC_BLUE, radius=0.07)
     add_textbox(s, 0.7, 6.68, 12, 0.28,
                 "smartcredit.com's visual system + Credit Karma's proven hook (\"Is any of it yours?\") — but where CK's page now just links out to state sites, ours runs the search.",
                 font_size=10, bold=True, color=WHITE)
@@ -2042,7 +2004,7 @@ def slide_landing_ad(prs, n, total):
 # Main
 # =========================================================================
 def main():
-    print("Building GetMyMoney exec deck (fresh, no template)...")
+    print("Building GetMyMoney exec deck (CD palette, fresh canvas)...")
     prs = Presentation()
     prs.slide_width = Inches(13.33)
     prs.slide_height = Inches(7.5)
